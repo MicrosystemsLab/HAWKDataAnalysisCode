@@ -1,3 +1,7 @@
+% This script analyzes the data retrieved from the PID calibration done
+% on HAWK
+
+% Get destination of files from user:
 DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
 [ files, directory ] = uigetfile('*.yaml', 'MultiSelect', 'on', 'Choose the folder where the data if located',DestinationFolder);
 

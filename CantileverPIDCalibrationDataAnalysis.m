@@ -7,13 +7,13 @@ if (ispc)
     DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
     addpath(genpath('/Users/emazzochette/Desktop/WormTrackerDataAnalysis/YAMLMatlab_0.4.3'));
 elseif (ismac)
-    DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/PIDControlAnalysis';
-    addpath(genpath('/Users/emazzochette/Desktop/WormTrackerDataAnalysis/YAMLMatlab_0.4.3'));
+    DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/PIDControlAnalysisData';
+    addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode'));
 end
 [ files, directory ] = uigetfile('*.yaml', 'MultiSelect', 'on', 'Choose the folder where the data if located',DestinationFolder);
 
 %% Get data from file
-numFiles = length(files);
+numFiles = min(size(files));
 
 
 
@@ -21,7 +21,11 @@ numFiles = length(files);
 for fileCount = 1:numFiles
     % Get Tracking Data:
     %file to parse name (must be structured correctly)
-    file = fullfile(directory, files{fileCount});
+    if numFiles == 1
+        file = fullfile(directory, files);
+    else 
+        file = fullfile(directory, files{fileCount});
+    end
     %If necessary, remove the first line of the yaml file.
     fid = fopen(file);
     firstLine = fgetl(fid);
@@ -55,12 +59,14 @@ timeInterval = 0.001;
 for fileCount = 1:numFiles
     time = 0:length(Data(fileCount).PiezoSignal)-1;
     time = time.*timeInterval;
-    subplot(numFiles,1,fileCount)
-    plot(time,Data(fileCount).PiezoSignal);
-    hold on
-    plot(time, Data(fileCount).DriveSignal);
-    title(RawData(fileCount).Cantilever); 
-    axis([2.6 4 -3 4]);
+    figureTitle = RawData(fileCount).Cantilever;
+    createFigureForPIDCalibrationAnalysis([time;time]', [Data(fileCount).PiezoSignal;Data(fileCount).DriveSignal]', figureTitle)
+%     subplot(numFiles,1,fileCount)
+%     plot(time,Data(fileCount).PiezoSignal,'r');
+%     hold on
+%     plot(time, Data(fileCount).DriveSignal,'b');
+%     title(RawData(fileCount).Cantilever); 
+%     axis([2.6 4 -3 4]);
 %     data = iddata(Data(fileCount).PiezoSignal(1:5000)',Data(fileCount).DriveSignal(1:5000)', timeInterval);
 %     sys = tfest(data,2,0);
 %     numerators(fileCount,:) = sys.num;

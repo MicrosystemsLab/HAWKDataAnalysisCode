@@ -1,17 +1,29 @@
-DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
-[ files, directory ] = uigetfile('*.yaml', 'MultiSelect', 'on', 'Choose the folder where the data if located',DestinationFolder);
+clear all
+if (ispc)
+    DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
+    addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
+elseif (ismac)
+    DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/PIDControlAnalysisData';
+    addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode'));
+end
+[ files, directory ] = uigetfile('*.yaml', 'MultiSelect', 'on', 'Choose the folder where the data is located',DestinationFolder);
 
 %% Extra Data
-numFiles = length(files);
+if iscell(files) == 0
+    numFiles = 1;
+else
+    numFiles = length(files);
+end
 
-
-%path to Matlab YAML folder
-addpath(genpath('YAMLMatlab_0.4.3'));
 
 for fileCount = 1:numFiles
     % Get Tracking Data:
     %file to parse name (must be structured correctly)
-    file = fullfile(directory, files{fileCount});
+     if numFiles == 1
+        file = fullfile(directory, files);
+    else 
+        file = fullfile(directory, files{fileCount});
+    end
     %If necessary, remove the first line of the yaml file.
     fid = fopen(file);
     firstLine = fgetl(fid);

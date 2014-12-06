@@ -7,7 +7,7 @@
 clear all
 if (ispc)
     DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
-    addpath(genpath('/Users/emazzochette/Desktop/WormTrackerDataAnalysis/YAMLMatlab_0.4.3'));
+    addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
 elseif (ismac)
     DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/PIDControlAnalysisData';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode'));
@@ -65,7 +65,11 @@ for fileCount = 1:numFiles
     time = 0:length(Data(fileCount).PiezoSignal)-1;
     time = time.*timeInterval;
     figureTitle = RawData(fileCount).Cantilever;
+<<<<<<< HEAD
     figureTitle = 'Force Clamp back on Optical Breadboard, no stage mounted';
+=======
+    figureTitle = 'Signal with revised FPGA Code to Reset PID Parameters';
+>>>>>>> FETCH_HEAD
     createFigureForPIDCalibrationAnalysis([time;time]', [Data(fileCount).PiezoSignal;Data(fileCount).DriveSignal]', figureTitle)
 %     subplot(numFiles,1,fileCount)
 %     plot(time,Data(fileCount).PiezoSignal,'r');

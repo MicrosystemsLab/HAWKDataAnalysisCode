@@ -3,6 +3,8 @@
 
 % Get destination of files from user:
 % Also add path to Matlab YAML folder
+
+clear all
 if (ispc)
     DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
     addpath(genpath('/Users/emazzochette/Desktop/WormTrackerDataAnalysis/YAMLMatlab_0.4.3'));
@@ -10,11 +12,14 @@ elseif (ismac)
     DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/PIDControlAnalysisData';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode'));
 end
-[ files, directory ] = uigetfile('*.yaml', 'MultiSelect', 'on', 'Choose the folder where the data if located',DestinationFolder);
+[ files, directory ] = uigetfile('*.yaml', 'MultiSelect', 'on', 'Choose the folder where the data is located',DestinationFolder);
 
 %% Get data from file
-numFiles = min(size(files));
-
+if iscell(files) == 0
+    numFiles = 1;
+else
+    numFiles = length(files);
+end
 
 
 
@@ -60,6 +65,7 @@ for fileCount = 1:numFiles
     time = 0:length(Data(fileCount).PiezoSignal)-1;
     time = time.*timeInterval;
     figureTitle = RawData(fileCount).Cantilever;
+    figureTitle = 'Force Clamp back on Optical Breadboard, no stage mounted';
     createFigureForPIDCalibrationAnalysis([time;time]', [Data(fileCount).PiezoSignal;Data(fileCount).DriveSignal]', figureTitle)
 %     subplot(numFiles,1,fileCount)
 %     plot(time,Data(fileCount).PiezoSignal,'r');

@@ -9,10 +9,20 @@
 clear all;
 
 %% Get Folder where all the files are:
-DestinationFolder = '/Users/emazzochette/Desktop/WormTrackerDataAnalysis';
+clear all
+if (ispc) %if on PC workstation in MERL 223
+    DestinationFolder = 'C:\Users\HAWK\Documents\HAWKData';
+    addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
+elseif (ismac) % if on Eileen's personal computer
+    DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Data';
+    addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
+    excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
+    addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
+end
+%asks user for the directory where all the files are:
 directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 
-
+%determine experiment title based on file name:
 for index = length(directory):-1:1
     if directory(index) == '/'
         startTitleIndex = index+1;
@@ -21,160 +31,207 @@ for index = length(directory):-1:1
 end
 experimentTitle = directory(startTitleIndex:length(directory));
 
+%extracts file name for each of the data files created during the
+%experiment:
 trackingDataFilename = strcat(experimentTitle, '_tracking.yaml');
 fpgaDataFilename = strcat(experimentTitle, '_FPGAdata.yaml');
 stimulusDataFilename = strcat(experimentTitle, '_stimulus.yaml');
 
 
-%path to Matlab YAML folder
-addpath(genpath('YAMLMatlab_0.4.3'));
 
 % Get Tracking Data:
-%file to parse name (must be structured correctly)
-tracking_file = fullfile(directory, trackingDataFilename);
-%If necessary, remove the first line of the yaml file.
-fid = fopen(tracking_file);
-firstLine = fgetl(fid);
-if (firstLine(1:9) == '%YAML:1.0')
-    buffer = fread(fid, Inf);
-    fclose(fid);
-    delete(tracking_file)
-    fid = fopen(tracking_file, 'w')  ;   % Open destination file.
-    fwrite(fid, buffer) ;                         % Save to file.
-    fclose(fid) ;
-else
-    fclose(fid);
-end
-%parse
-TrackingData = ReadYaml(tracking_file);
-%write file to .mat
 mat_file = fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat'));
-save(mat_file, 'TrackingData');
-
+%if the data has already been read from the .yaml file, just load the mat
+%file created last time:
+if (exist(mat_file, 'file')==2)
+    load(mat_file);
+else %otherwise, parse through .yaml file:
+    %file to parse name (must be structured correctly)
+    tracking_file = fullfile(directory, trackingDataFilename);
+    %If necessary, remove the first line of the yaml file.
+    fid = fopen(tracking_file);
+    firstLine = fgetl(fid);
+    if (firstLine(1:9) == '%YAML:1.0')
+        buffer = fread(fid, Inf);
+        fclose(fid);
+        delete(tracking_file)
+        fid = fopen(tracking_file, 'w')  ;   % Open destination file.
+        fwrite(fid, buffer) ;                         % Save to file.
+        fclose(fid) ;
+    else
+        fclose(fid);
+    end
+    %parse
+    TrackingData = ReadYaml(tracking_file);
+    %write file to .mat
+    mat_file = fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat'));
+    save(mat_file, 'TrackingData');
+end
 
 % Get FPGA Data:
-%file to parse name (must be structured correctly)
-fpga_file = fullfile(directory, fpgaDataFilename);
-%If necessary, remove the first line of the yaml file.
-fid = fopen(fpga_file);
-firstLine = fgetl(fid);
-if (firstLine(1:9) == '%YAML:1.0')
-    buffer = fread(fid, Inf);
-    fclose(fid);
-    delete(fpga_file)
-    fid = fopen(fpga_file, 'w')  ;   % Open destination file.
-    fwrite(fid, buffer) ;                         % Save to file.
-    fclose(fid) ;
-else
-    fclose(fid);
-end
-%parse
-FPGAData = ReadYaml(fpga_file);
-%write file to .mat
 mat_file = fullfile(directory,strcat(experimentTitle,'_FPGAdata_parsedData.mat'));
-save(mat_file, 'FPGAData');
-% Get Stimulus Data:
-
-%file to parse name (must be structured correctly)
-stimulus_file = fullfile(directory, stimulusDataFilename);
-%If necessary, remove the first line of the yaml file.
-fid = fopen(stimulus_file);
-firstLine = fgetl(fid);
-if (firstLine(1:9) == '%YAML:1.0')
-    buffer = fread(fid, Inf);
-    fclose(fid);
-    delete(stimulus_file)
-    fid = fopen(stimulus_file, 'w')  ;   % Open destination file.
-    fwrite(fid, buffer) ;                         % Save to file.
-    fclose(fid) ;
-else
-    fclose(fid);
+%if the data has already been read from the .yaml file, just load the mat
+%file created last time:
+if (exist(mat_file, 'file')==2)
+    load(mat_file);
+else %otherwise, parse through .yaml file:
+    %file to parse name (must be structured correctly)
+    fpga_file = fullfile(directory, fpgaDataFilename);
+    %If necessary, remove the first line of the yaml file.
+    fid = fopen(fpga_file);
+    firstLine = fgetl(fid);
+    if (firstLine(1:9) == '%YAML:1.0')
+        buffer = fread(fid, Inf);
+        fclose(fid);
+        delete(fpga_file)
+        fid = fopen(fpga_file, 'w')  ;   % Open destination file.
+        fwrite(fid, buffer) ;                         % Save to file.
+        fclose(fid) ;
+    else
+        fclose(fid);
+    end
+    %parse
+    FPGAData = ReadYaml(fpga_file);
+    %write file to .mat
+    save(mat_file, 'FPGAData');
 end
-%parse
-StimulusData = ReadYaml(fpga_file);
-%write file to .mat
+
+
+% Get Stimulus Data:
 mat_file = fullfile(directory,strcat(experimentTitle,'_stimulus_parsedData.mat'));
-save(mat_file, 'StimulusData');
-
+%if the data has already been read from the .yaml file, just load the mat
+%file created last time:
+if (exist(mat_file, 'file')==2)
+    load(mat_file);
+else %otherwise, parse through .yaml file:
+    %file to parse name (must be structured correctly)
+    stimulus_file = fullfile(directory, stimulusDataFilename);
+    %If necessary, remove the first line of the yaml file.
+    fid = fopen(stimulus_file);
+    firstLine = fgetl(fid);
+    if (firstLine(1:9) == '%YAML:1.0')
+        buffer = fread(fid, Inf);
+        fclose(fid);
+        delete(stimulus_file)
+        fid = fopen(stimulus_file, 'w')  ;   % Open destination file.
+        fwrite(fid, buffer) ;                         % Save to file.
+        fclose(fid) ;
+    else
+        fclose(fid);
+    end
+    %parse yaml file:
+    StimulusData = ReadYaml(fpga_file);
+    %write file to .mat file
+    save(mat_file, 'StimulusData');
+end
 %% Constants
-UM_PER_MICROSTEP = 0.15625 ;
+% properties of the Zaber controller:
+UM_PER_MICROSTEP = 0.15625 ; 
 MICROSTEP_PER_UM = 1/UM_PER_MICROSTEP;
-
+%properties of the camera and optics:
 PIXEL_PER_UM = 0.567369167;
 UM_PER_PIXEL = 1/PIXEL_PER_UM;
-
 IMAGE_WIDTH_PIXELS = 1024;
 IMAGE_HEIGHT_PIXELS = 768;
-
 PIXEL_SCALE = 1;
 
 %% Extract General Properties:
 
-fields = fieldnames(TrackingData);
-k = strfind(fields,'WormInfo');
+mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
 
-frameCount = 1;
-frameCountInsideStim = 1;
-stimCount = 1;
-for fieldsParser = 1:length(fields)
-   
-   if  k{fieldsParser} == 1;
-        if stimCount ~= TrackingData.(['WormInfo',num2str(frameCount)]).StimulusNumber
-            stimCount = stimCount+1;
-            frameCountInsideStim = 1;
-        end
-        Stimulus(stimCount).ProcessedFrameNumber(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).ProcessedFrameNumber;
-        Stimulus(stimCount).timeData(frameCountInsideStim,1:6) = datevec(TrackingData.(['WormInfo',num2str(frameCount)]).Time);
-        Stimulus(stimCount).head.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.x/PIXEL_SCALE;
-        Stimulus(stimCount).head.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.y/PIXEL_SCALE;
-        Stimulus(stimCount).tail.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.x/PIXEL_SCALE;
-        Stimulus(stimCount).tail.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.y/PIXEL_SCALE; 
-        Stimulus(stimCount).stageMovement.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.x0x2Daxis; %*UM_PER_MICROSTEP;
-        Stimulus(stimCount).stageMovement.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.y0x2Daxis; %*UM_PER_MICROSTEP;
-        Stimulus(stimCount).StimulusActivity(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StimulusActive;
-        Stimulus(stimCount).headTailToggle(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Toggled;
-        
-        for skeletonParser = 0:length(fieldnames(TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton))-1
-           Stimulus(stimCount).Skeleton(frameCountInsideStim).x(skeletonParser+1) = TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton.(['Point' num2str(skeletonParser)]).x/PIXEL_SCALE;
-           Stimulus(stimCount).Skeleton(frameCountInsideStim).y(skeletonParser+1) = TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton.(['Point' num2str(skeletonParser)]).y/PIXEL_SCALE;
-            
-        end
-        
-        Stimulus(stimCount).centroid.x(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).x(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x)/2));
-        Stimulus(stimCount).centroid.y(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).y(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).y)/2));
-        
-        frameCount = frameCount + 1;
-        frameCountInsideStim = frameCountInsideStim + 1;
-   end
-   
-end
-frameCount = frameCount-1;
-numStims = length(Stimulus);
+if (exist(mat_file, 'file')==2)
+    load(mat_file);
+    numStims = length(Stimulus);
+else
+    fields = fieldnames(TrackingData);
+    k = strfind(fields,'WormInfo');
 
-for stim = 1:numStims
-   for i = 0:size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1
-       Stimulus(stim).PiezoSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes.(['Point', num2str(i)]);
-       Stimulus(stim).ActuatorPosition(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorPositionMagnitudes.(['Point', num2str(i)]);
-       Stimulus(stim).ActuatorCommand(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorCommandMagnitudes.(['Point', num2str(i)]);
-       Stimulus(stim).DesiredSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).DesiredSignalMagnitudes.(['Point', num2str(i)]);
-       
+    frameCount = 1;
+    frameCountInsideStim = 1;
+    stimCount = 1;
+    for fieldsParser = 1:length(fields)
+
+       if  k{fieldsParser} == 1;
+            if stimCount ~= TrackingData.(['WormInfo',num2str(frameCount)]).StimulusNumber
+                stimCount = stimCount+1;
+                frameCountInsideStim = 1;
+            end
+            Stimulus(stimCount).ProcessedFrameNumber(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).ProcessedFrameNumber;
+            Stimulus(stimCount).timeData(frameCountInsideStim,1:6) = datevec(TrackingData.(['WormInfo',num2str(frameCount)]).Time);
+            Stimulus(stimCount).head.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.x/PIXEL_SCALE;
+            Stimulus(stimCount).head.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.y/PIXEL_SCALE;
+            Stimulus(stimCount).tail.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.x/PIXEL_SCALE;
+            Stimulus(stimCount).tail.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.y/PIXEL_SCALE; 
+            Stimulus(stimCount).stageMovement.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.x0x2Daxis; %*UM_PER_MICROSTEP;
+            Stimulus(stimCount).stageMovement.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.y0x2Daxis; %*UM_PER_MICROSTEP;
+            Stimulus(stimCount).StimulusActivity(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StimulusActive;
+            Stimulus(stimCount).headTailToggle(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Toggled;
+
+            for skeletonParser = 0:length(fieldnames(TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton))-1
+               Stimulus(stimCount).Skeleton(frameCountInsideStim).x(skeletonParser+1) = TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton.(['Point' num2str(skeletonParser)]).x/PIXEL_SCALE;
+               Stimulus(stimCount).Skeleton(frameCountInsideStim).y(skeletonParser+1) = TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton.(['Point' num2str(skeletonParser)]).y/PIXEL_SCALE;
+
+            end
+
+            Stimulus(stimCount).centroid.x(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).x(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x)/2));
+            Stimulus(stimCount).centroid.y(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).y(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).y)/2));
+
+            frameCount = frameCount + 1;
+            frameCountInsideStim = frameCountInsideStim + 1;
+       end
+
     end
+    frameCount = frameCount-1;
+    numStims = length(Stimulus);
+
+    for stim = 1:numStims
+       for i = 0:size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1
+           Stimulus(stim).PiezoSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes.(['Point', num2str(i)]);
+           Stimulus(stim).ActuatorPosition(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorPositionMagnitudes.(['Point', num2str(i)]);
+           Stimulus(stim).ActuatorCommand(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorCommandMagnitudes.(['Point', num2str(i)]);
+           Stimulus(stim).DesiredSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).DesiredSignalMagnitudes.(['Point', num2str(i)]);
+
+        end
+    end
+
+    % calculate more timing data
+    %clean up, calculate more timing data:
+    for stim=1:numStims
+        % seventh column of timing data is the seconds + minutes. 
+        Stimulus(stim).timeData(:,7) =  Stimulus(stim).timeData(:,4).*60.*60+ Stimulus(stim).timeData(:,5).*60+ Stimulus(stim).timeData(:,6);
+        % eighth column of timing data is the elapsed time from first frame in
+        % seconds
+         Stimulus(stim).timeData(:,8) =  Stimulus(stim).timeData(:,7) -  Stimulus(stim).timeData(1,7);
+        %ninth column of timing data is the time since the last frame.
+         Stimulus(stim).timeData(:,9) = [0; diff( Stimulus(stim).timeData(:,7))];
+    end
+    
+    %Save stimulus to mat file
+    save(mat_file, 'Stimulus');
 end
+%% Populate Experiment Log Spreadsheet:
 
-
-
-
-% calculate more timing data
-%clean up, calculate more timing data:
-for stim=1:numStims
-    % seventh column of timing data is the seconds + minutes. 
-    Stimulus(stim).timeData(:,7) =  Stimulus(stim).timeData(:,4).*60.*60+ Stimulus(stim).timeData(:,5).*60+ Stimulus(stim).timeData(:,6);
-    % eighth column of timing data is the elapsed time from first frame in
-    % seconds
-     Stimulus(stim).timeData(:,8) =  Stimulus(stim).timeData(:,7) -  Stimulus(stim).timeData(1,7);
-    %ninth column of timing data is the time since the last frame.
-     Stimulus(stim).timeData(:,9) = [0; diff( Stimulus(stim).timeData(:,7))];
+[NUM,TXT,RAW]=xlsread(excelFile,'Experiment Log');
+[rowCount columnCount] = size(RAW);
+spreadsheetTitles = TXT(1,:);
+%check if it's already been populated:
+if(strmatch(experimentTitle,TXT(:,strmatch('Experiment Name',TXT(1,:),'exact')),'exact')>0)
+    experimentRow = strmatch(experimentTitle,TXT(:,2));
+else
+    experimentRow = rowCount+1;
+    
 end
+newRow = populateExperimentParameters( experimentTitle, TrackingData, titles);
+
+% Initialisation of POI Libs
+% Add Java POI Libs to matlab javapath
+javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/poi-3.8-20120326.jar');
+javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/poi-ooxml-3.8-20120326.jar');
+javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/poi-ooxml-schemas-3.8-20120326.jar');
+javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/xmlbeans-2.3.0.jar');
+javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/dom4j-1.6.1.jar');
+javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/stax-api-1.0.1.jar');
+xlwrite(excelFile, newRow, 'Experiment Log', strcat('A',num2str(experimentRow)));
 
 %% Measure body length
 averageBodyLength = 0;
@@ -506,7 +563,7 @@ for stim = 1:numStims
     
     
    %plot omega turns
-    if (length(Stimulus(stim).omegaTurnFrames)>1)
+    if (isfield(Stimulus(stim),'omegaTurnFrames'))
         for i = 1:length(Stimulus(stim).omegaTurnFrames)
             plot([Stimulus(stim).omegaTurnFrames(i) Stimulus(stim).omegaTurnFrames(i)], [stim stim+0.5], markers{5},'LineWidth', 2);
         end

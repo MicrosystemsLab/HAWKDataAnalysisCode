@@ -591,3 +591,8 @@ end
  xlabel('Frame Number','FontSize', 20);
  ylabel('Stimulus','FontSize', 20);
 
+%% Write per stimulus data to excel spread sheet
+[data, firstColumn] = populatePerStimulusData( Stimulus, spreadsheetTitles, numStims);
+xlwrite(excelFile, data, 'Experiment Log', strcat('A'+firstColumn-1,num2str(experimentRow+1)));
+
+

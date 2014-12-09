@@ -14,7 +14,7 @@ if (ispc) %if on PC workstation in MERL 223
     DestinationFolder = 'C:\Users\HAWK\Documents\HAWKData';
     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
     excelFile = 'C:\Users\HAWK\Dropbox\HAWK\HAWKExperimentLog.xls';
-    addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
+    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');
 elseif (ismac) % if on Eileen's personal computer
     DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Data';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));

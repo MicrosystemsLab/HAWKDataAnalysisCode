@@ -7,7 +7,7 @@
 %
 %%%%%
 clear all;
-
+close all;
 %% Get Folder where all the files are:
 clear all
 if (ispc) %if on PC workstation in MERL 223
@@ -133,10 +133,25 @@ else %otherwise, parse through .yaml file:
         fclose(fid);
     end
     %parse yaml file:
-    StimulusData = ReadYaml(fpga_file);
+    StimulusData = ReadYaml(stimulus_file);
     %write file to .mat file
     save(mat_file, 'StimulusData');
 end
+%% Populate Experiment Log Spreadsheet:
+
+[NUM,TXT,RAW]=xlsread(excelFile,'Experiment Log');
+[rowCount columnCount] = size(RAW);
+spreadsheetTitles = TXT(1,:);
+%check if it's already been populated:
+if(strmatch(experimentTitle,TXT(:,strmatch('Experiment Name',TXT(1,:),'exact')),'exact')>0)
+    experimentRow = strmatch(experimentTitle,TXT(:,2));
+else
+    experimentRow = rowCount+1;
+    
+end
+newRow = populateExperimentParameters( experimentTitle, TrackingData, spreadsheetTitles);
+
+xlwrite(excelFile, newRow, 'Experiment Log', strcat('A',num2str(experimentRow)));
 %% Constants
 % properties of the Zaber controller:
 UM_PER_MICROSTEP = 0.15625 ; 
@@ -148,14 +163,20 @@ IMAGE_WIDTH_PIXELS = 1024;
 IMAGE_HEIGHT_PIXELS = 768;
 PIXEL_SCALE = 1;
 
+%% Stop here if no stimulus
+if (TrackingData.NumberOfStimulus <= 1) % fix this once corrected in HAWK software
+    break;
+end
+
 %% Extract General Properties:
 % mat file name for the per stimulus data structure.
 mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
+numStims = TrackingData.NumberOfStimulus-1;
 %if the data has already been read from the .yaml file, just load the mat
 %file created last time:
 if (exist(mat_file, 'file')==2)
     load(mat_file);
-    numStims = length(Stimulus);
+%     numStims = length(Stimulus);
 else %otherwise, create the Stimulus data structure.
     %Start by moving through all the tracking data to get position data of
     %worm per frame, per stim count.
@@ -198,7 +219,8 @@ else %otherwise, create the Stimulus data structure.
 
     end
     frameCount = frameCount-1;
-    numStims = length(Stimulus);
+    %numStims = length(Stimulus);
+    
     
     %Extract the stimulus application data from the FPGA to align with the
     %tracking data:
@@ -227,21 +249,7 @@ else %otherwise, create the Stimulus data structure.
     %Save stimulus to mat file
     save(mat_file, 'Stimulus');
 end
-%% Populate Experiment Log Spreadsheet:
 
-[NUM,TXT,RAW]=xlsread(excelFile,'Experiment Log');
-[rowCount columnCount] = size(RAW);
-spreadsheetTitles = TXT(1,:);
-%check if it's already been populated:
-if(strmatch(experimentTitle,TXT(:,strmatch('Experiment Name',TXT(1,:),'exact')),'exact')>0)
-    experimentRow = strmatch(experimentTitle,TXT(:,2));
-else
-    experimentRow = rowCount+1;
-    
-end
-newRow = populateExperimentParameters( experimentTitle, TrackingData, spreadsheetTitles);
-
-xlwrite(excelFile, newRow, 'Experiment Log', strcat('A',num2str(experimentRow)));
 
 %% Measure body length
 averageBodyLength = 0;

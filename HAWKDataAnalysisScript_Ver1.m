@@ -164,14 +164,14 @@ IMAGE_HEIGHT_PIXELS = 768;
 PIXEL_SCALE = 1;
 
 %% Stop here if no stimulus
-if (TrackingData.NumberOfStimulus <= 1) % fix this once corrected in HAWK software
+if (TrackingData.NumberOfStimulus < 1) % fix this once corrected in HAWK software
     break;
 end
 
 %% Extract General Properties:
 % mat file name for the per stimulus data structure.
 mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
-numStims = TrackingData.NumberOfStimulus-1;
+numStims = TrackingData.NumberOfStimulus;
 %if the data has already been read from the .yaml file, just load the mat
 %file created last time:
 if (exist(mat_file, 'file')==2)

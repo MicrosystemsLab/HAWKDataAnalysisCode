@@ -12,7 +12,7 @@ function Row = populateExperimentParameters( experimentTitle, TrackingData, titl
     Row(1, strmatch('Pre Stim Recording Time (s)', titles, 'exact')) = {TrackingData.Pre0x2DStimulusRecordTime};
     Row(1, strmatch('Post Stim Recording Time (s)', titles, 'exact')) = {TrackingData.Post0x2DStimulusRecordTime};
     Row(1, strmatch('Target Location (%)', titles, 'exact')) = {TrackingData.TargetLocation};
-    Row(1, strmatch('Stimulus Number', titles, 'exact')) = {TrackingData.NumberOfStimulus-1};%fix this!
+    Row(1, strmatch('Stimulus Number', titles, 'exact')) = {TrackingData.NumberOfStimulus};
     %Worm info:
     Row(1, strmatch('Strain',titles,'exact')) = {TrackingData.WormProperties.WormStrain};
     Row(1, strmatch('Treatments',titles,'exact')) = {TrackingData.WormProperties.WormTreatments};

@@ -365,53 +365,53 @@ averageBodyLength = averageBodyLength/numStims;
 
 %% Plot Stimulus
  
-if (TrackingData.ExperimentMode ~= 'Behavior Mode')
-    numDataFields = 3;
-    acquisitionInterval = 0.001;
+ if (TrackingData.ExperimentMode ~= 'Behavior Mode')
+numDataFields = 3;
+acquisitionInterval = 0.001;
 
 
 
-    for stim = 1:numStims
-        time = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
-        time = time*acquisitionInterval;
-
-        stimOnIndex = find(Stimulus(stim).DesiredSignal>0,1,'first');
-        timeOnIndex = time(stimOnIndex);
-
-        ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
-        Stimulus(stim).stimStartTime = Stimulus(stim).timeData(ind,8);
-        ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
-        Stimulus(stim).stimEndTime = Stimulus(stim).timeData(ind,8);
-
-
-        adjustedTime = time+Stimulus(stim).stimStartTime;
-        figure;
-
-        subplot(numDataFields+2,1,1), plot(Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity, 'LineWidth', 2);
-        title('Stimulus Activity', 'FontSize', 18);
-        xlabel('Time(s)', 'FontSize', 16);
-        ylabel('On/Off', 'FontSize', 16);
-        axis([0 25 0 1.5]);
-        subplot(numDataFields+2,1,2), plot(adjustedTime,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
-        title('Desired Stimulus', 'FontSize', 18);
-        xlabel('Time (s)', 'FontSize', 16);
-        ylabel('Voltage (V)', 'FontSize', 16); 
-    %     axis([11 13.5 0 1.5]);
-        subplot(numDataFields+2,1,3), plot(adjustedTime,Stimulus(stim).PiezoSignal, 'LineWidth', 2);
-        title('Piezo resistor signal', 'FontSize', 18);
-        xlabel('Time (s)', 'FontSize', 16);
-        ylabel('Voltage (V)', 'FontSize', 16);
-        subplot(numDataFields+2,1,4), plot(adjustedTime,Stimulus(stim).ActuatorPosition, 'LineWidth', 2);
-        title('Actuator Position Signal', 'FontSize', 18);
-        xlabel('Time (s)', 'FontSize', 16);
-        ylabel('Voltage (V)', 'FontSize', 16);
-        subplot(numDataFields+2,1,5), plot(adjustedTime,Stimulus(stim).ActuatorCommand, 'LineWidth', 2);
-        title('Actuator Command Signal', 'FontSize', 18);
-        xlabel('Time (s)', 'FontSize', 16);
-        ylabel('Voltage (V)', 'FontSize', 16);
-
-    end
+for stim = 1:numStims
+    time = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
+    time = time*acquisitionInterval;
+    
+    stimOnIndex = find(Stimulus(stim).DesiredSignal>0,1,'first');
+    timeOnIndex = time(stimOnIndex);
+    
+    ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
+    Stimulus(stim).stimStartTime = Stimulus(stim).timeData(ind,8);
+    ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
+    Stimulus(stim).stimEndTime = Stimulus(stim).timeData(ind,8);
+    
+    
+    adjustedTime = time+Stimulus(stim).stimStartTime;
+    figure;
+    
+    subplot(numDataFields+2,1,1), plot(Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity, 'LineWidth', 2);
+    title('Stimulus Activity', 'FontSize', 18);
+    xlabel('Time(s)', 'FontSize', 16);
+    ylabel('On/Off', 'FontSize', 16);
+    axis([0 25 0 1.5]);
+    subplot(numDataFields+2,1,2), plot(adjustedTime,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
+    title('Desired Stimulus', 'FontSize', 18);
+    xlabel('Time (s)', 'FontSize', 16);
+    ylabel('Voltage (V)', 'FontSize', 16); 
+%     axis([11 13.5 0 1.5]);
+    subplot(numDataFields+2,1,3), plot(adjustedTime,Stimulus(stim).PiezoSignal, 'LineWidth', 2);
+    title('Piezo resistor signal', 'FontSize', 18);
+    xlabel('Time (s)', 'FontSize', 16);
+    ylabel('Voltage (V)', 'FontSize', 16);
+    subplot(numDataFields+2,1,4), plot(adjustedTime,Stimulus(stim).ActuatorPosition, 'LineWidth', 2);
+    title('Actuator Position Signal', 'FontSize', 18);
+    xlabel('Time (s)', 'FontSize', 16);
+    ylabel('Voltage (V)', 'FontSize', 16);
+    subplot(numDataFields+2,1,5), plot(adjustedTime,Stimulus(stim).ActuatorCommand, 'LineWidth', 2);
+    title('Actuator Command Signal', 'FontSize', 18);
+    xlabel('Time (s)', 'FontSize', 16);
+    ylabel('Voltage (V)', 'FontSize', 16);
+ 
 end
+ end
 
 %% Sort Frames based on Stimulus
 

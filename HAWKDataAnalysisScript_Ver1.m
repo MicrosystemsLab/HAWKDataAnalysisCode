@@ -231,7 +231,7 @@ else %otherwise, create the Stimulus data structure.
     frameCount = frameCount-1;
     %numStims = length(Stimulus);
     
-    if (TrackingData.ExperimentMode ~= 'Behavior Mode')
+    if (~strcmp(TrackingData.ExperimentMode,'Behavior Mode'))
     %Extract the stimulus application data from the FPGA to align with the
     %tracking data:
         for stim = 1:numStims
@@ -380,7 +380,7 @@ averageBodyLength = averageBodyLength/numStims;
 
 
         
-        if (TrackingData.ExperimentMode ~= 'Behavior Mode')
+        if (~strcmp(TrackingData.ExperimentMode,'Behavior Mode'))
             time = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
             time = time*acquisitionInterval;
 

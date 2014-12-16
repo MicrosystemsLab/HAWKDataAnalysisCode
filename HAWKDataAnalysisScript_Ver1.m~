@@ -147,7 +147,7 @@ else %otherwise, parse through .yaml file:
     %write file to .mat file
     save(mat_file, 'StimulusData');
 end
-%% Populate Experiment Log Spreadsheet:
+% Populate Experiment Log Spreadsheet:
 
 [NUM,TXT,RAW]=xlsread(excelFile,'Experiment Log');
 [rowCount columnCount] = size(RAW);
@@ -372,23 +372,21 @@ averageBodyLength = averageBodyLength/numStims;
 
 
     for stim = 1:numStims
-        
+        time = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
+        time = time*acquisitionInterval;
+
+        stimOnIndex = find(Stimulus(stim).DesiredSignal>0,1,'first');
+        timeOnIndex = time(stimOnIndex);
+
         ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
         Stimulus(stim).stimStartTime = Stimulus(stim).timeData(ind,8);
         ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
         Stimulus(stim).stimEndTime = Stimulus(stim).timeData(ind,8);
 
 
+        adjustedTime = time+Stimulus(stim).stimStartTime;
         
         if (TrackingData.ExperimentMode ~= 'Behavior Mode')
-            time = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
-            time = time*acquisitionInterval;
-
-            stimOnIndex = find(Stimulus(stim).DesiredSignal>0,1,'first');
-            timeOnIndex = time(stimOnIndex);
-
-            adjustedTime = time+Stimulus(stim).stimStartTime;
-        
             figure;
 
             subplot(numDataFields+2,1,1), plot(Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity, 'LineWidth', 2);
@@ -415,10 +413,11 @@ averageBodyLength = averageBodyLength/numStims;
             ylabel('Voltage (V)', 'FontSize', 16);
         end
     end
-
+end
 
 %% Sort Frames based on Stimulus
  
+%if (TrackingData.ExperimentMode ~= 'Behavior Mode')
     for stim=1:numStims
         numGoodFrames = length(Stimulus(stim).goodFrames);
         preCount = 1;
@@ -439,7 +438,7 @@ averageBodyLength = averageBodyLength/numStims;
         end
 
     end
-
+%end
 %% Plot Head, Centroid position, direction vector
 
 for stim = 1:numStims

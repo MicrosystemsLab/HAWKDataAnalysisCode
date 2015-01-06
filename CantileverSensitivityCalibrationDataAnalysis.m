@@ -1,3 +1,11 @@
+%% Cantilever Sensitivity Calibration Data Analysis
+% This script analyzes user selected data to extract the santivity of the
+% cantilever in volts per meter.
+
+% Written by: Eileen Mazzochette
+% Created: November 2014
+
+
 clear all
 if (ispc)
     DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';

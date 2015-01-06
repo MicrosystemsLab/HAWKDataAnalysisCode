@@ -65,11 +65,6 @@ for fileCount = 1:numFiles
     time = 0:length(Data(fileCount).PiezoSignal)-1;
     time = time.*timeInterval;
     figureTitle = RawData(fileCount).Cantilever;
-<<<<<<< HEAD
-    figureTitle = 'Force Clamp back on Optical Breadboard, no stage mounted';
-=======
-    figureTitle = 'Signal with revised FPGA Code to Reset PID Parameters';
->>>>>>> FETCH_HEAD
     createFigureForPIDCalibrationAnalysis([time;time]', [Data(fileCount).PiezoSignal;Data(fileCount).DriveSignal]', figureTitle)
 %     subplot(numFiles,1,fileCount)
 %     plot(time,Data(fileCount).PiezoSignal,'r');

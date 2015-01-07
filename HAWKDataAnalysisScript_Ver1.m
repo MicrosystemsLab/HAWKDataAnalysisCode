@@ -26,7 +26,7 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Data';
+    DestinationFolder = '/Volumes/home/HAWK Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
     excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
@@ -41,6 +41,10 @@ elseif (ismac) % if on Eileen's personal computer
     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/stax-api-1.0.1.jar');
 end
+
+%Choice of how to export plots, either individual plots (false), or grouped in a
+%single window by stimulus (true)
+plotByStim = true; 
 
 %asks user for the directory where all the files are:
 directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
@@ -241,7 +245,11 @@ else %otherwise, create the Stimulus data structure.
                Stimulus(stim).ActuatorCommand(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorCommandMagnitudes.(['Point', num2str(i)]);
                Stimulus(stim).DesiredSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).DesiredSignalMagnitudes.(['Point', num2str(i)]);
 
-            end
+           end
+            
+           for i = 0:size(fieldnames(StimulusData.Voltages))-1
+               Stimulus(stim).VoltagesSentToFPGA(i+1) = StimulusData.Voltages.(['Point', num2str(i) ]);
+           end
         end
     end
     % calculate more timing data
@@ -273,17 +281,18 @@ averageBodyLength = 0;
     Stimulus(stim).averageBodyLength = mean(Stimulus(stim).bodyLength);%.*UM_PER_PIXEL;
     Stimulus(stim).stdBodyLength = std(Stimulus(stim).bodyLength);%.*UM_PER_PIXEL;
 
-    figure;
-    plot(Stimulus(stim).ProcessedFrameNumber,Stimulus(stim).bodyLength,'r.',...
-        [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength, Stimulus(stim).averageBodyLength], 'r:',...
-        [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength, Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength], 'k:',...
-        [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength/2, Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength/2], 'b:', 'LineWidth', 3);
-    title(['Body Length per Frame, Stimulus ', num2str(stim)], 'FontSize', 18);
-    xlabel('Frame', 'FontSize', 16);
-    ylabel('Body Length (um)', 'FontSize', 16);
-    legend('Body Length','Average Body Length', 'STD','STD/2','Location','South')
-    axis([Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser), 150, 1000])
-    
+    if (~plotByStim)
+        figure;
+        plot(Stimulus(stim).ProcessedFrameNumber,Stimulus(stim).bodyLength,'r.',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength, Stimulus(stim).averageBodyLength], 'r:',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength, Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength], 'k:',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength/2, Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength/2], 'b:', 'LineWidth', 3);
+        title(['Body Length per Frame, Stimulus ', num2str(stim)], 'FontSize', 18);
+        xlabel('Frame', 'FontSize', 16);
+        ylabel('Body Length (um)', 'FontSize', 16);
+        legend('Body Length','Average Body Length', 'STD','STD/2','Location','South')
+        axis([Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser), 150, 1000])
+    end
     
     %Figure out dropped frames:
     droppedFrameCounter = 1;
@@ -339,25 +348,25 @@ averageBodyLength = 0;
     clear omegaTurnIndices;
     clear dimensions;
 
-   % subplot(numStims,1,stim); 
-   figure;
-    plot(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).goodFrames),Stimulus(stim).bodyLength(Stimulus(stim).goodFrames),'r.',...
-        Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).droppedFrames),Stimulus(stim).bodyLength(Stimulus(stim).droppedFrames),'b.',...
-        [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames, Stimulus(stim).averageBodyLengthGoodFrames], 'r:',...
-        [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames+Stimulus(stim).stdBodyLengthGoodFrames/2, Stimulus(stim).averageBodyLengthGoodFrames+Stimulus(stim).stdBodyLengthGoodFrames/2], 'k:',...
-        [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames-Stimulus(stim).stdBodyLengthGoodFrames/2, Stimulus(stim).averageBodyLengthGoodFrames-Stimulus(stim).stdBodyLengthGoodFrames/2], 'b:','LineWidth',3);%,...
-       % Stimulus(stim).ProcessedFrameNumber, Stimulus(stim).headTailToggle*(Stimulus(stim).averageBodyLengthGoodFrames/2), 'b-');
-    if (any(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges)))
-        hold on 
-        plot(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges(:,1)),Stimulus(stim).bodyLength(Stimulus(stim).omegaTurnRanges(:,1)),'g+',...
-        Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges(:,2)),Stimulus(stim).bodyLength(Stimulus(stim).omegaTurnRanges(:,2)),'g+','LineWidth',5);
-    end
-    title(['Body Length per Frame, Stimulus ', num2str(stim)], 'FontSize', 18);
-    xlabel('Frame', 'FontSize', 16);
-    ylabel('Body Length (um)', 'FontSize', 16);
-    legend('Body Length Good Frames','Body Length Dropped Frames','Average Body Length', 'STD/2','STD/2','Beginning, End Omega Turn','Location','South')
-    axis([Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser), 150, 1000])
-    
+   if (~plotByStim)
+       figure;
+        plot(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).goodFrames),Stimulus(stim).bodyLength(Stimulus(stim).goodFrames),'r.',...
+            Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).droppedFrames),Stimulus(stim).bodyLength(Stimulus(stim).droppedFrames),'b.',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames, Stimulus(stim).averageBodyLengthGoodFrames], 'r:',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames+Stimulus(stim).stdBodyLengthGoodFrames/2, Stimulus(stim).averageBodyLengthGoodFrames+Stimulus(stim).stdBodyLengthGoodFrames/2], 'k:',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames-Stimulus(stim).stdBodyLengthGoodFrames/2, Stimulus(stim).averageBodyLengthGoodFrames-Stimulus(stim).stdBodyLengthGoodFrames/2], 'b:','LineWidth',3);%,...
+           % Stimulus(stim).ProcessedFrameNumber, Stimulus(stim).headTailToggle*(Stimulus(stim).averageBodyLengthGoodFrames/2), 'b-');
+        if (any(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges)))
+            hold on 
+            plot(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges(:,1)),Stimulus(stim).bodyLength(Stimulus(stim).omegaTurnRanges(:,1)),'g+',...
+            Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges(:,2)),Stimulus(stim).bodyLength(Stimulus(stim).omegaTurnRanges(:,2)),'g+','LineWidth',5);
+        end
+        title(['Body Length per Frame, Stimulus ', num2str(stim)], 'FontSize', 18);
+        xlabel('Frame', 'FontSize', 16);
+        ylabel('Body Length (um)', 'FontSize', 16);
+        legend('Body Length Good Frames','Body Length Dropped Frames','Average Body Length', 'STD/2','STD/2','Beginning, End Omega Turn','Location','South')
+        axis([Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser), 150, 1000])
+   end
 end
 averageBodyLength = averageBodyLength/numStims;
 
@@ -366,55 +375,70 @@ averageBodyLength = averageBodyLength/numStims;
 %% Plot Stimulus
  
 
-    numDataFields = 3;
-    acquisitionInterval = 0.001;
+numDataFields = 3;
+acquisitionInterval = TrackingData.ReportedFPGAParameters.AcquisitionFrequency*0.00001;
+transmitInterval = TrackingData.ReportedFPGAParameters.ActuatorFrequency*0.00001; % 0.001;
 
 
+for stim = 1:numStims
 
-    for stim = 1:numStims
+    ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
+    Stimulus(stim).stimAppliedTime = Stimulus(stim).timeData(ind,8);
+    ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
+    Stimulus(stim).stimEndTime = Stimulus(stim).timeData(ind,8);
+
+    
+    
+    
+
+    if (~strcmp(TrackingData.ExperimentMode,'Behavior Mode') && ~plotByStim)
+        timeFPGA = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
+        timeFPGA = timeFPGA*acquisitionInterval;
+        timeStim = 0:(size(fieldnames(StimulusData.Voltages))-1);
+        timeStim = timeStim*transmitInterval;
         
-        ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
-        Stimulus(stim).stimStartTime = Stimulus(stim).timeData(ind,8);
-        ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
-        Stimulus(stim).stimEndTime = Stimulus(stim).timeData(ind,8);
-
-
+        % find approach, stim on start time
+        approachOnIndex = find(Stimulus(stim).DesiredSignal>0,1,'first');
+        approachOnTime = timeFPGA(approachOnIndex);
+        stimOnIndex =  find(diff(diff(Stimulus(stim).DesiredSignal))>0.0001,3,'first');
+        stimOnIndex = stimOnIndex(3)+1;
+        stimOnTime = timeFPGA(stimOnIndex);
         
-        if (~strcmp(TrackingData.ExperimentMode,'Behavior Mode'))
-            time = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
-            time = time*acquisitionInterval;
-
-            stimOnIndex = find(Stimulus(stim).DesiredSignal>0,1,'first');
-            timeOnIndex = time(stimOnIndex);
-
-            adjustedTime = time+Stimulus(stim).stimStartTime;
         
-            figure;
+        Stimulus(stim).approachStartTime = Stimulus(stim).stimAppliedTime + approachOnTime;
+        Stimulus(stim).stimOnStartTime = Stimulus(stim).stimAppliedTime + stimOnTime;
+        
+        adjustedTimeFPGA = timeFPGA+Stimulus(stim).stimStartTime;
+        adjustedTimeStim = timeStim+Stimulus(stim).stimOnStartTime;
+        
+        figure;
 
-            subplot(numDataFields+2,1,1), plot(Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity, 'LineWidth', 2);
-            title('Stimulus Activity', 'FontSize', 18);
-            xlabel('Time(s)', 'FontSize', 16);
-            ylabel('On/Off', 'FontSize', 16);
-            axis([0 25 0 1.5]);
-            subplot(numDataFields+2,1,2), plot(adjustedTime,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
-            title('Desired Stimulus', 'FontSize', 18);
-            xlabel('Time (s)', 'FontSize', 16);
-            ylabel('Voltage (V)', 'FontSize', 16); 
-        %     axis([11 13.5 0 1.5]);
-            subplot(numDataFields+2,1,3), plot(adjustedTime,Stimulus(stim).PiezoSignal, 'LineWidth', 2);
-            title('Piezo resistor signal', 'FontSize', 18);
-            xlabel('Time (s)', 'FontSize', 16);
-            ylabel('Voltage (V)', 'FontSize', 16);
-            subplot(numDataFields+2,1,4), plot(adjustedTime,Stimulus(stim).ActuatorPosition, 'LineWidth', 2);
-            title('Actuator Position Signal', 'FontSize', 18);
-            xlabel('Time (s)', 'FontSize', 16);
-            ylabel('Voltage (V)', 'FontSize', 16);
-            subplot(numDataFields+2,1,5), plot(adjustedTime,Stimulus(stim).ActuatorCommand, 'LineWidth', 2);
-            title('Actuator Command Signal', 'FontSize', 18);
-            xlabel('Time (s)', 'FontSize', 16);
-            ylabel('Voltage (V)', 'FontSize', 16);
-        end
+        subplot(numDataFields+2,1,1), plot(Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity, 'LineWidth', 2);
+        title('Stimulus Activity', 'FontSize', 18);
+        xlabel('Time(s)', 'FontSize', 16);
+        ylabel('On/Off', 'FontSize', 16);
+        axis([0 25 0 1.5]);
+        subplot(numDataFields+2,1,2), plot(adjustedTimeFPGA,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
+        hold on
+        plot(adjustedTimeStim,Stimulus(stim).VoltagesSentToFPGA, 'MarkerSize',3, 'Color',[1 0 0]);
+        title('Desired Stimulus', 'FontSize', 18);
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Voltage (V)', 'FontSize', 16); 
+    %     axis([11 13.5 0 1.5]);
+        subplot(numDataFields+2,1,3), plot(adjustedTimeFPGA,Stimulus(stim).PiezoSignal, 'LineWidth', 2);
+        title('Piezo resistor signal', 'FontSize', 18);
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Voltage (V)', 'FontSize', 16);
+        subplot(numDataFields+2,1,4), plot(adjustedTimeFPGA,Stimulus(stim).ActuatorPosition, 'LineWidth', 2);
+        title('Actuator Position Signal', 'FontSize', 18);
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Voltage (V)', 'FontSize', 16);
+        subplot(numDataFields+2,1,5), plot(adjustedTimeFPGA,Stimulus(stim).ActuatorCommand, 'LineWidth', 2);
+        title('Actuator Command Signal', 'FontSize', 18);
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Voltage (V)', 'FontSize', 16);
     end
+end
 
 
 %% Sort Frames based on Stimulus
@@ -506,48 +530,34 @@ for stim = 1:numStims
     end
 
 
+    if (~plotByStim)
+        figure;
+        numGoodFrames = length(Stimulus(stim).goodFrames);
+        %subplot(311),plot(Stimulus(stim).centroidPosition.x, Stimulus(stim).centroidPosition.y, 'k-', 'MarkerSize',12);
+        hold on 
+    %     subplot(111);
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).PreStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).PreStimFrames), 'r-', 'LineWidth',2);  
+        hold on
+    %     subplot(111);
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).DuringStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).DuringStimFrames), 'b-', 'LineWidth',2); 
+        hold on
+    %     subplot(111);
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).PostStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).PostStimFrames), 'k-', 'LineWidth',2); 
+        hold on
+    %     subplot(111);
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).goodFrames(1)), Stimulus(stim).centroidPosition.y(Stimulus(stim).goodFrames(1)), 'ro', 'MarkerSize',14);
+        hold on
+    %     subplot(111);
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).goodFrames( numGoodFrames)), Stimulus(stim).centroidPosition.y(Stimulus(stim).goodFrames( numGoodFrames)), 'kx', 'MarkerSize',14);
 
-    figure;
-    numGoodFrames = length(Stimulus(stim).goodFrames);
-    %subplot(311),plot(Stimulus(stim).centroidPosition.x, Stimulus(stim).centroidPosition.y, 'k-', 'MarkerSize',12);
-    hold on 
-%     subplot(111);
-    plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).PreStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).PreStimFrames), 'r-', 'LineWidth',2);  
-    hold on
-%     subplot(111);
-    plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).DuringStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).DuringStimFrames), 'b-', 'LineWidth',2); 
-    hold on
-%     subplot(111);
-    plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).PostStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).PostStimFrames), 'k-', 'LineWidth',2); 
-    hold on
-%     subplot(111);
-    plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).goodFrames(1)), Stimulus(stim).centroidPosition.y(Stimulus(stim).goodFrames(1)), 'ro', 'MarkerSize',14);
-    hold on
-%     subplot(111);
-    plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).goodFrames( numGoodFrames)), Stimulus(stim).centroidPosition.y(Stimulus(stim).goodFrames( numGoodFrames)), 'kx', 'MarkerSize',14);
+        title(['Mid-Skeleton Position, Stimulus ' num2str(stim)], 'FontSize' , 18)
+        axis equal;
+        xlabel('x position (um)', 'FontSize' , 16)
+        ylabel('y position (um)', 'FontSize' , 16)
+        legend('Pre Stimulus Movement', 'During Stimulus Movement', 'Post Stimulus Movement','Start','End','Location','SouthWest');
 
-    title(['Mid-Skeleton Position, Stimulus ' num2str(stim)], 'FontSize' , 18)
-    axis equal;
-    xlabel('x position (um)', 'FontSize' , 16)
-    ylabel('y position (um)', 'FontSize' , 16)
-    legend('Pre Stimulus Movement', 'During Stimulus Movement', 'Post Stimulus Movement','Start','End','Location','SouthWest');
-   
+    end
 
-%     subplot(312), plot(Stimulus(stim).ProcessedFrameNumber,Stimulus(stim).speed)
-%     title('Speed')
-%     ylabel('Speed (um/s)');
-    
-%     subplot(212);
-%     [AX,H1,H2] = plotyy(Stimulus(stim).timeData([directionSmoothing+1:length(Stimulus(stim).timeData(:,1))],8),Stimulus(stim).movementDirection,... 'k.', 'MarkerSize',12,...
-%         Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity);
-%   
-%     title('Movement Angle', 'FontSize' , 20)
-%     xlabel('Time (s)', 'FontSize' , 16)
-%     set(get(AX(1),'Ylabel'),'String','Angle from x-axis (degrees)','FontSize' , 16) 
-%     set(get(AX(2),'Ylabel'),'String','Stimulus Activity (on/off)') 
-%     set(H1,'LineStyle','.')
-%     set(H2,'LineStyle','-', 'LineWidth', 2)
-% %     ylabel('Angle from x-axis (degrees)', 'FontSize' , 16);
 
 end
 
@@ -619,4 +629,93 @@ end
 [data, firstColumn] = populatePerStimulusData( Stimulus, spreadsheetTitles, numStims);
 xlwrite(excelFile, data, 'Experiment Log', strcat('A'+firstColumn-1,num2str(experimentRow+1)));
 
+
+%% plot by stimulus
+if (plotByStim)
+    for stim = 1:numStims
+        figure;
+
+
+        % stimulus plot (need to do this first so that plot can be nested):
+        timeFPGA = 0:(size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1);
+        timeFPGA = timeFPGA*acquisitionInterval;
+        adjustedTime = timeFPGA+Stimulus(stim).stimStartTime;
+
+        subplot(3,2,2), 
+        plot(Stimulus(stim).timeData(:,8),Stimulus(stim).StimulusActivity, 'LineWidth', 2);
+        title('Stimulus Activity', 'FontSize', 18);
+        xlabel('Time(s)', 'FontSize', 16);
+        ylabel('On/Off', 'FontSize', 16);
+        axis([0 25 0 1.5]);
+        subplot(3,2,4), 
+        plot(adjustedTime,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
+        title('Desired Stimulus', 'FontSize', 18);
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Voltage (V)', 'FontSize', 16); 
+        subplot(3,2,6), 
+        plot(adjustedTime,Stimulus(stim).PiezoSignal, 'LineWidth', 2);
+        title('Piezo resistor signal', 'FontSize', 18);
+        xlabel('Time (s)', 'FontSize', 16);
+        ylabel('Voltage (V)', 'FontSize', 16);
+        
+        % body length plot pre analysis:
+%         subplot(3,2,1)
+%         plot(Stimulus(stim).ProcessedFrameNumber,Stimulus(stim).bodyLength,'r.',...
+%             [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength, Stimulus(stim).averageBodyLength], 'r:',...
+%             [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength, Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength], 'k:',...
+%             [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength/2, Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength/2], 'b:', 'LineWidth', 3);
+%         title(['Body Length per Frame, Stimulus ', num2str(stim)], 'FontSize', 18);
+%         xlabel('Frame', 'FontSize', 16);
+%         ylabel('Body Length (um)', 'FontSize', 16);
+%         legend('Body Length','Average Body Length', 'STD','STD/2','Location','South')
+%         axis([Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser), 150, 1000])
+
+       
+        % body length plot post analysis:
+        subplot(3,2,1);
+        plot(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).goodFrames),Stimulus(stim).bodyLength(Stimulus(stim).goodFrames),'r.',...
+            Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).droppedFrames),Stimulus(stim).bodyLength(Stimulus(stim).droppedFrames),'b.',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames, Stimulus(stim).averageBodyLengthGoodFrames], 'r:',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames+Stimulus(stim).stdBodyLengthGoodFrames/2, Stimulus(stim).averageBodyLengthGoodFrames+Stimulus(stim).stdBodyLengthGoodFrames/2], 'k:',...
+            [Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser)],[Stimulus(stim).averageBodyLengthGoodFrames-Stimulus(stim).stdBodyLengthGoodFrames/2, Stimulus(stim).averageBodyLengthGoodFrames-Stimulus(stim).stdBodyLengthGoodFrames/2], 'b:','LineWidth',3);%,...
+           % Stimulus(stim).ProcessedFrameNumber, Stimulus(stim).headTailToggle*(Stimulus(stim).averageBodyLengthGoodFrames/2), 'b-');
+        if (any(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges)))
+            hold on 
+            plot(Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges(:,1)),Stimulus(stim).bodyLength(Stimulus(stim).omegaTurnRanges(:,1)),'g+',...
+            Stimulus(stim).ProcessedFrameNumber(Stimulus(stim).omegaTurnRanges(:,2)),Stimulus(stim).bodyLength(Stimulus(stim).omegaTurnRanges(:,2)),'g+','LineWidth',5);
+        end
+        title(['Body Length per Frame, Stimulus ', num2str(stim)], 'FontSize', 18);
+        xlabel('Frame', 'FontSize', 16);
+        ylabel('Body Length (um)', 'FontSize', 16);
+        legend('Body Length Good Frames','Body Length Dropped Frames','Average Body Length', 'STD/2','STD/2','Beginning, End Omega Turn','Location','South')
+        axis([Stimulus(stim).ProcessedFrameNumber(1), Stimulus(stim).ProcessedFrameNumber(frameParser), 150, 1000])
+
+        %Trajectory plot:
+        subplot(3,2,[3,5]);
+        numGoodFrames = length(Stimulus(stim).goodFrames);
+        %pre stim:
+        hold on 
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).PreStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).PreStimFrames), 'r-', 'LineWidth',2);  
+        %during stim:
+        hold on
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).DuringStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).DuringStimFrames), 'b-', 'LineWidth',2); 
+        %post stim:
+        hold on
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).PostStimFrames), Stimulus(stim).centroidPosition.y(Stimulus(stim).PostStimFrames), 'k-', 'LineWidth',2); 
+        %first position:
+        hold on
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).goodFrames(1)), Stimulus(stim).centroidPosition.y(Stimulus(stim).goodFrames(1)), 'ro', 'MarkerSize',14);
+        %last position:
+        hold on
+        plot(Stimulus(stim).centroidPosition.x(Stimulus(stim).goodFrames( numGoodFrames)), Stimulus(stim).centroidPosition.y(Stimulus(stim).goodFrames( numGoodFrames)), 'kx', 'MarkerSize',14);
+
+        title(['Mid-Skeleton Position, Stimulus ' num2str(stim)], 'FontSize' , 18)
+        axis equal;
+        xlabel('x position (um)', 'FontSize' , 16)
+        ylabel('y position (um)', 'FontSize' , 16)
+        legend('Pre Stimulus Movement', 'During Stimulus Movement', 'Post Stimulus Movement','Start','End','Location','SouthWest');
+
+
+    end
+end
 

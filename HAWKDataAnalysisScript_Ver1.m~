@@ -264,7 +264,7 @@ else %otherwise, create the Stimulus data structure.
         %ninth column of timing data is the time since the last frame.
          Stimulus(stim).timeData(:,9) = [0; diff( Stimulus(stim).timeData(:,7))];
          timeDifference = Stimulus(stim).timeData(1,[1:6]) - datevec(TrackingData.ExperimentTime);
-         Stimulus(stim).firstFrameTime = timeDifference(4)*60*60 + timeDifference(5)*60 + timeDifference(6);
+         Stimulus(stimCount).firstFrameTime = 
 
     end
     

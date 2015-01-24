@@ -108,7 +108,7 @@ else %otherwise, parse through .yaml file:
     fid = fopen(fpga_file);
     firstLine = fgetl(fid);
     if (firstLine(1:9) == '%YAML:1.0')
-        buffer = fread(fid, Inf);
+        buffer = fread(fid,  Inf);
         fclose(fid);
         delete(fpga_file)
         fid = fopen(fpga_file, 'w')  ;   % Open destination file.
@@ -178,20 +178,25 @@ IMAGE_HEIGHT_PIXELS = 768;
 PIXEL_SCALE = 1;
 
 %% Stop here if no stimulus
-if (TrackingData.NumberOfStimulus < 1) % fix this once corrected in HAWK software
-    disp('No Stimulus Recorded');
-    break;
+if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
+    if (TrackingData.NumberOfStimulus < 1) % fix this once corrected in HAWK software
+        disp('No Stimulus Recorded');
+        break;
+    end
 end
 
 %% Extract General Properties:
 % mat file name for the per stimulus data structure.
 mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
-numStims = TrackingData.NumberOfStimulus;
 %if the data has already been read from the .yaml file, just load the mat
 %file created last time:
 if (exist(mat_file, 'file')==2)
     load(mat_file);
-%     numStims = length(Stimulus);
+    if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
+        numStims = TrackingData.NumberOfStimulus;
+    else
+        numStims =  min(length(Stimulus), length(fieldnames(FPGAData)));
+    end
 else %otherwise, create the Stimulus data structure.
     %Start by moving through all the tracking data to get position data of
     %worm per frame, per stim count.
@@ -234,7 +239,12 @@ else %otherwise, create the Stimulus data structure.
 
     end
     frameCount = frameCount-1;
-    %numStims = length(Stimulus);
+    if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
+        numStims = TrackingData.NumberOfStimulus;
+    else
+        numStims =  min(length(Stimulus), length(fieldnames(FPGAData)));
+    end
+   
     
     if (~strcmp(TrackingData.ExperimentMode,'Behavior Mode'))
     %Extract the stimulus application data from the FPGA to align with the
@@ -242,12 +252,17 @@ else %otherwise, create the Stimulus data structure.
         for stim = 1:numStims
            for i = 0:size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes))-1
                Stimulus(stim).PiezoSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).PiezoSignalMagnitudes.(['Point', num2str(i)]);
+           end
+           for i = 0:size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).ActuatorPositionMagnitudes))-1
                Stimulus(stim).ActuatorPosition(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorPositionMagnitudes.(['Point', num2str(i)]);
+           end
+           for i = 0:size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).ActuatorCommandMagnitudes))-1
                Stimulus(stim).ActuatorCommand(i+1) = FPGAData.(['Stimulus',num2str(stim)]).ActuatorCommandMagnitudes.(['Point', num2str(i)]);
+           end
+           for i = 0:size(fieldnames(FPGAData.(['Stimulus',num2str(stim)]).DesiredSignalMagnitudes))-1
                Stimulus(stim).DesiredSignal(i+1) = FPGAData.(['Stimulus',num2str(stim)]).DesiredSignalMagnitudes.(['Point', num2str(i)]);
 
            end
-            
            for i = 0:size(fieldnames(StimulusData.Voltages))-1
                Stimulus(stim).VoltagesSentToFPGA(i+1) = StimulusData.Voltages.(['Point', num2str(i) ]);
            end
@@ -634,7 +649,8 @@ end
 %% Write per stimulus data to excel spread sheet
 [data, firstColumn] = populatePerStimulusData( Stimulus, spreadsheetTitles, numStims);
 xlwrite(excelFile, data, 'Experiment Log', strcat('A'+firstColumn-1,num2str(experimentRow+1)));
-
+mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
+save(mat_file, 'Stimulus');
 
 %% plot by stimulus
 if (plotByStim)
@@ -658,14 +674,14 @@ if (plotByStim)
         axis([0 25 0 1.5]);
         subplot(3,2,4), 
         %plot(adjustedTime,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
-        plot(adjustedTimeFPGA,Stimulus(stim).DesiredSignal, 'LineWidth', 2);
+        plot(adjustedTimeFPGA(1:length(Stimulus(stim).DesiredSignal)),Stimulus(stim).DesiredSignal, 'LineWidth', 2);
             hold on
-        plot(adjustedTimeStim,Stimulus(stim).VoltagesSentToFPGA, 'MarkerSize',3, 'Color',[1 0 0]);
+        plot(adjustedTimeStim(1:length(Stimulus(stim).VoltagesSentToFPGA)),Stimulus(stim).VoltagesSentToFPGA, 'MarkerSize',3, 'Color',[1 0 0]);
         title('Desired Stimulus', 'FontSize', 18);
         xlabel('Time (s)', 'FontSize', 16);
         ylabel('Voltage (V)', 'FontSize', 16); 
         subplot(3,2,6), 
-        plot(adjustedTimeFPGA,Stimulus(stim).PiezoSignal, 'LineWidth', 2);
+        plot(adjustedTimeFPGA(1:length(Stimulus(stim).PiezoSignal)),Stimulus(stim).PiezoSignal, 'LineWidth', 2);
         title('Piezo resistor signal', 'FontSize', 18);
         xlabel('Time (s)', 'FontSize', 16);
         ylabel('Voltage (V)', 'FontSize', 16);

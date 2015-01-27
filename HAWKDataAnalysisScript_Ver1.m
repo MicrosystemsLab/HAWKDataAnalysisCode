@@ -218,7 +218,9 @@ else %otherwise, create the Stimulus data structure.
             Stimulus(stimCount).head.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.x/PIXEL_SCALE;
             Stimulus(stimCount).head.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.y/PIXEL_SCALE;
             Stimulus(stimCount).tail.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.x/PIXEL_SCALE;
-            Stimulus(stimCount).tail.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.y/PIXEL_SCALE; 
+            Stimulus(stimCount).tail.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.y/PIXEL_SCALE;
+            Stimulus(stimCount).target.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Target.x/PIXEL_SCALE;
+            Stimulus(stimCount).target.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Target.y/PIXEL_SCALE;
             Stimulus(stimCount).stageMovement.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.x0x2Daxis; %*UM_PER_MICROSTEP;
             Stimulus(stimCount).stageMovement.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.y0x2Daxis; %*UM_PER_MICROSTEP;
             Stimulus(stimCount).StimulusActivity(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StimulusActive;

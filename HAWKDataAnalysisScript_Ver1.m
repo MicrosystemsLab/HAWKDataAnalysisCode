@@ -427,7 +427,7 @@ for stim = 1:numStims
         adjustedTimeFPGA = timeFPGA+Stimulus(stim).stimAppliedTime;
         adjustedTimeStim = timeStim+Stimulus(stim).stimOnStartTime;
         
-        Stimulus(stim).stimulusAnalysis = calculateStimulusStatistics(Stimulus, StimulusData);
+        Stimulus(stim).stimulusAnalysis = calculateStimulusStatistics(Stimulus(stim), StimulusData);
         
         if (~plotByStim)
             figure;

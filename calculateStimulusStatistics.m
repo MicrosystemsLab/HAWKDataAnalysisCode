@@ -62,7 +62,7 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
         stats(stim).zeroPulsePoints.average = mean(stats(stim).zeroPulsePoints.data);
         stats(stim).zeroPulsePoints.std = std(stats(stim).zeroPulsePoints.data);
         stats(stim).zeroPulsePoints.rmsError = sqrt(mean((stats(stim).zeroPulsePoints.data - stats(stim).preApproachPoints.average).^2));
-
+        stats(stim).zeroPulsePoints.duration = StimulusData.ZeroPulseDuration;
         % 5. Post pulse
         stats(stim).postPulsePoints.data = Stimulus(stim).PiezoSignal([Stimulus(stim).FPGAStats.stimOnIndex+numberOfStimulusPoints+numberOfZeroPulsePoints:numPoints]);
         stats(stim).postPulsePoints.min = min(stats(stim).postPulsePoints.data);

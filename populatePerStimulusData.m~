@@ -1,7 +1,4 @@
-%% Populate data by stimulus 
-% This function prepares a matrix to  be written to the experiment log,
-% extracting all the relevant information for a series of stimulus and
-% placing it in the correct columns. 
+%% This function prepares a
 
 function [data, firstColumn] = populatePerStimulusData( Stimulus, titles, numStims)
     firstColumn = strmatch('Stimulus Number',titles,'exact');
@@ -16,7 +13,7 @@ function [data, firstColumn] = populatePerStimulusData( Stimulus, titles, numSti
         data(stim, strmatch('Stimulus Number',titles,'exact')-firstColumn+1) = stim;
         data(stim, strmatch('Average Body length (um)', titles, 'exact')-firstColumn+1) = Stimulus(stim).averageBodyLengthGoodFrames;
         data(stim, strmatch('STD Body Length', titles, 'exact')-firstColumn+1) = Stimulus(stim).stdBodyLengthGoodFrames;
-        data(stim, strmatch('Soft Balance Value (V)', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.preApproachPoints.average;
+        data(stim, strmatch('Soft Balance Value (V)', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.prePulsePoints.average;
         data(stim, strmatch('Approach Duration (s)', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.approachPoints.duration;
         data(stim, strmatch('Stimulus RMS Error', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.stimulusPoints.rmsError;
         data(stim, strmatch('Stimulus Rise Time (s)', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.stimulusPoints.response.RiseTime;

@@ -105,20 +105,23 @@ for stim = 1:length(Stimulus)
         distance(stim) = distanceCalc(target_x, target_y,x(stim)*2,y(stim)*2);
         distanceUM(stim) = distance(stim)*UM_PER_PIXEL;
     end
-end
+%end
 
-%% Find point on skeleton closest to contact points
-for stim = 1:length(Stimulus)
+ % Find point on skeleton closest to contact points
+%for stim = 1:length(Stimulus)
     skeletonPoints = length(skeleton(stim).points.x);
     for point = 1:skeletonPoints
         minDistanceVector(point) = distanceCalc(skeleton(stim).points.x(point), skeleton(stim).points.y(point), x(stim)*2,y(stim)*2);
     end
-    [minDistance(stim), indDistace(stim)] = min(minDistanceVector);
-
+    [minDistance, indDistance] = sort(minDistanceVector);
+    closestTwoPoints(stim,:) = indDistance(1:2);
+    %how far from skeleton?
+    [x3(stim), y3(stim), dist(stim)] = pointClosestToSegment(skeleton(stim).points.x(closestTwoPoints(stim,1)), skeleton(stim).points.y(closestTwoPoints(stim,1)),skeleton(stim).points.x(closestTwoPoints(stim,2)), skeleton(stim).points.y(closestTwoPoints(stim,2)), x(stim),y(stim));
+    %closest to point to skeleton is how far down the body?
+    percent(stim) = findPercentDownBody(skeleton(stim).points, min(closestTwoPoints(stim,:)), x3(stim) ,y3(stim));
+    
 end
- 
-%how far from skeleton?
-%closest to point to skeleton is how far down the body?
+
 
 %% record information to excel spreadsheet
 

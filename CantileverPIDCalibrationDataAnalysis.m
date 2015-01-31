@@ -53,7 +53,7 @@ end
 for fileCount = 1:numFiles;
     for point = 1:length(fieldnames(RawData(fileCount).CantileverSignal))
         Data(fileCount).PiezoSignal(point) = RawData(fileCount).CantileverSignal.(['Point' num2str(point-1)]);
-        Data(fileCount).DriveSignal(point) = RawData(fileCount).ActuatorCommandSignal.(['Point' num2str(point-1)]);
+        Data(fileCount).DriveSignal(point) = RawData(fileCount).ActuatorPositions.(['Point' num2str(point-1)]);
     end
 end
 

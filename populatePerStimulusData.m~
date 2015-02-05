@@ -26,9 +26,9 @@ function [data, firstColumn] = populatePerStimulusData( Stimulus, titles, numSti
         data(stim, strmatch('Zero Pulse Average (V)', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.zeroPulsePoints.average;
         data(stim, strmatch('Zero Pulse RMS Error', titles, 'exact')-firstColumn+1)	= Stimulus(stim).stimulusAnalysis.zeroPulsePoints.rmsError;
         data(stim, strmatch('Pull off Voltage (V)', titles, 'exact')-firstColumn+1) = Stimulus(stim).stimulusAnalysis.postPulsePoints.min;
-        data(stim, strmatch('Distance from Target (um)', titles, 'exact')-firstColumn+1) = Stimulus(stim).distanceFromTarget;
-        data(stim, strmatch('Percent Down Body Hit (%)', titles, 'exact')-firstColumn+1) = Stimulus(stim).percentDownBodyHit;
-        data(stim, strmatch('Distance from Skeleton (um)', titles, 'exact')-firstColumn+1) = Stimulus(stim).distanceFromSketelon;
+        data(stim, strmatch('Distance from Target (um)', titles, 'exact')-firstColumn+1) = Stimulus(stim).
+        data(stim, strmatch('Percent Down Body Hit (%)', titles, 'exact')-firstColumn+1) = Stimulus(stim).
+        data(stim, strmatch('Distance from Skeleton (um)', titles, 'exact')-firstColumn+1) = Stimulus(stim).
     end
    
     

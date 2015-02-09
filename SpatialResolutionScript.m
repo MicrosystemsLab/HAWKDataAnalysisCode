@@ -64,43 +64,47 @@ function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, Tr
     %extracts file name
 %     load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')));
 %     load(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')));
+    
     % import video
+        obj = VideoReader(fullfile(directory,strcat(experimentTitle,'_video.avi')));
 
-    obj = VideoReader(fullfile(directory,strcat(experimentTitle,'_video.avi')));
+        % find frame in video where the cantilever contacts the worm
+        stim = 1;
+        clear numFrames;
+        for (stim = 1:numStims)
+            numFrames(stim) = length(Stimulus(stim).ProcessedFrameNumber);
 
-    % find frame in video where the cantilever contacts the worm
-    stim = 1;
-    clear numFrames;
-    for (stim = 1:numStims)
-        numFrames(stim) = length(Stimulus(stim).ProcessedFrameNumber);
+            if (stim == 1)
+                firstFrame = 1;
+            else 
+                firstFrame = runningSumNumFrames;
+            end
 
-        if (stim == 1)
-            firstFrame = 1;
-        else 
-            firstFrame = runningSumNumFrames;
+            runningSumNumFrames = sum(numFrames);
+
+            approachDuration = Stimulus(stim).stimOnStartTime - Stimulus(stim).approachStartTime;
+            frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
+            numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
+            testFrameStim(stim) = Stimulus(stim).DuringStimFrames(numberOfApproachFrames);
+            skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim(stim));
+            testFrameVideo(stim) = testFrameStim(stim) + firstFrame;
+
         end
 
-        runningSumNumFrames = sum(numFrames);
-
-        approachDuration = Stimulus(stim).stimOnStartTime - Stimulus(stim).approachStartTime;
-        frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
-        numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
-        testFrameStim(stim) = Stimulus(stim).DuringStimFrames(numberOfApproachFrames);
-        skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim(stim));
-        testFrameVideo(stim) = testFrameStim(stim) + firstFrame;
-
-    end
-
-    % ask user to select where cantilever acutally contacted work by clicking
-    % on the frame
-    if (TrackingData.CantileverProperties.)
-    else
-    figure;
-     for stim = 1:numStims
-        frame = read(obj,testFrameVideo(stim));
-        imshow(frame)
-        [x(stim), y(stim)] = ginput(1);
-     end
+       
+    if (TrackingData.CantileverProperties.CantileverPosition.x>0)
+        x([1:numStims]) = TrackingData.CantileverProperties.CantileverPosition.x;
+        y([1:numStims]) = TrackingData.CantileverProperties.CantileverPosition.y;
+    else % ask user to select where cantilever acutally contacted work by clicking
+        % on the frame
+        figure;
+         for stim = 1:numStims
+            frame = read(obj,testFrameVideo(stim));
+            imshow(frame)
+            [x(stim), y(stim)] = ginput(1);
+            x(stim) = x(stim)*2;
+            y(stim) = y(stim)*2;
+         end
     end
 
     % find distance between target and contact location
@@ -108,11 +112,11 @@ function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, Tr
     UM_PER_PIXEL = 1/PIXEL_PER_UM;
     for stim = 1:numStims
         if (ismember('target',fieldnames(Stimulus)))
-           distance(stim) = distanceCalc(Stimulus(stim).target.x(testFrameStim(stim)),Stimulus(stim).target.y(testFrameStim(stim)), x(stim)*2, y(stim)*2);
+           distance(stim) = distanceCalc(Stimulus(stim).target.x(testFrameStim(stim)),Stimulus(stim).target.y(testFrameStim(stim)), x(stim), y(stim));
         else
             target_x = TrackingData.(['WormInfo' num2str(testFrameVideo(stim))]).Target.x;
             target_y = TrackingData.(['WormInfo' num2str(testFrameVideo(stim))]).Target.y;
-            distance(stim) = distanceCalc(target_x, target_y,x(stim)*2,y(stim)*2);
+            distance(stim) = distanceCalc(target_x, target_y,x(stim),y(stim));
             
         end
         distanceUM(stim) = distance(stim)*UM_PER_PIXEL;
@@ -122,14 +126,14 @@ function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, Tr
     %for stim = 1:length(Stimulus)
         skeletonPoints = length(skeleton(stim).points.x);
         for point = 1:skeletonPoints
-            minDistanceVector(point) = distanceCalc(skeleton(stim).points.x(point), skeleton(stim).points.y(point), x(stim)*2,y(stim)*2);
+            minDistanceVector(point) = distanceCalc(skeleton(stim).points.x(point), skeleton(stim).points.y(point), x(stim),y(stim));
         end
         [minDistance, indDistance] = sort(minDistanceVector);
         closestTwoPoints(stim,:) = indDistance(1:2);
         %how far from skeleton?
         [x3(stim), y3(stim), dist(stim)] = pointClosestToSegment(skeleton(stim).points.x(closestTwoPoints(stim,1)), skeleton(stim).points.y(closestTwoPoints(stim,1)),...
             skeleton(stim).points.x(closestTwoPoints(stim,2)), skeleton(stim).points.y(closestTwoPoints(stim,2)), ...
-            x(stim)*2,y(stim)*2);
+            x(stim),y(stim));
         %closest to point to skeleton is how far down the body?
         percent(stim) = findPercentDownBody(skeleton(stim).points, min(closestTwoPoints(stim,:)), x3(stim) ,y3(stim));
         

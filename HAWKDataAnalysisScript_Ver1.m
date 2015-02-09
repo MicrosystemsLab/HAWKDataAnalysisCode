@@ -44,7 +44,7 @@ end
 
 %Choice of how to export plots, either individual plots (false), or grouped in a
 %single window by stimulus (true)
-plotByStim = false; 
+plotByStim = true; 
 
 %asks user for the directory where all the files are:
 directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
@@ -654,11 +654,18 @@ end
 %% Write per stimulus data to excel spread sheet
 %save(mat_file, 'Stimulus');
 
-spatialResolutionData = SpatialResolutionScript(directory, Stimulus, TrackingData, numStims);
-for stim = 1:numStims
-    Stimulus(stim).distanceFromTarget = spatialResolutionData(stim,1);
-    Stimulus(stim).percentDownBodyHit = spatialResolutionData(stim,2);
-    Stimulus(stim).distanceFromSketelon = spatialResolutionData(stim,3);
+videoPresent = true;
+if videoPresent == true
+    spatialResolutionData = SpatialResolutionScript(directory, Stimulus, TrackingData, numStims);
+    for stim = 1:numStims
+        Stimulus(stim).distanceFromTarget = spatialResolutionData(stim,1);
+        Stimulus(stim).percentDownBodyHit = spatialResolutionData(stim,2);
+        Stimulus(stim).distanceFromSketelon = spatialResolutionData(stim,3);
+    end
+else
+    Stimulus(stim).distanceFromTarget = 0;
+    Stimulus(stim).percentDownBodyHit = 0;
+    Stimulus(stim).distanceFromSketelon = 0;
 end
 mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
 save(mat_file, 'Stimulus');

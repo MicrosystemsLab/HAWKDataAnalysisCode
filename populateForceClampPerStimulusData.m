@@ -3,7 +3,7 @@
 % extracting all the relevant information for a series of stimulus and
 % placing it in the correct columns. 
 
-function [data, firstColumn] = populateBehaviorPerStimulusData( Stimulus, titles, numStims)
+function [data, firstColumn] = populateForceClampPerStimulusData( Stimulus, titles, numStims)
     firstColumn = strmatch('Stimulus Number',titles,'exact');
    
     

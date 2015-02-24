@@ -1,4 +1,23 @@
-function Row = populateExperimentParameters( experimentTitle, TrackingData, titles)
+%%%% Function: Populate Force Clamp Experiment Paramters
+%  This function organizes the experiment information from the TrackingData
+%  structure into a matrix to be written to the aggregation spreadsheet as
+%  a row.
+%
+%  param {experimentTitle} string, location where the data on the disk 
+%  param {TrackingData} struct, structure containing the information to be
+%  sorted and entered into the excel spreadsheet.
+%  param {titles} struct<strings>, column titles to match data with
+%  spreadsheet organization.
+%  returns {Row} matrix of the entries to be added to the excel
+%  spreadsheet.
+%
+%  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
+%  This file is part of HAWK_AnalysisMethods.
+%
+%%%%%
+
+
+function Row = populateForceClampExperimentParameters( experimentTitle, TrackingData, titles)
     
     
     

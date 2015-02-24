@@ -5,47 +5,7 @@
 % Created: January 27, 2015
 
 
-%% import data
-% clear all;
-% close all;
-% % Get Folder where all the files are:
-% clear all
-% if (ispc) %if on PC workstation in MERL 223
-%     DestinationFolder = 'C:\Users\HAWK\Documents\HAWKData';
-%     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
-%     excelFile = 'C:\Users\HAWK\Dropbox\HAWK\HAWKExperimentLog.xls';
-%     addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');
-%     slash = '\';
-%     % For excel writing, need these files linked:
-%     % Initialisation of POI Libs
-%     % Add Java POI Libs to matlab javapath
-%     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\poi-3.8-20120326.jar');
-%     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\poi-ooxml-3.8-20120326.jar');
-%     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\poi-ooxml-schemas-3.8-20120326.jar');
-%     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\xmlbeans-2.3.0.jar');
-%     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
-%     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
-% elseif (ismac) % if on Eileen's personal computer
-%     DestinationFolder = '/Volumes/home/HAWK Data/';
-%     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-%     excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
-%     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
-%     slash = '/';
-%     % For excel writing, need these files linked:
-%     % Initialisation of POI Libs
-%     % Add Java POI Libs to matlab javapath
-%     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/poi-3.8-20120326.jar');
-%     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/poi-ooxml-3.8-20120326.jar');
-%     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/poi-ooxml-schemas-3.8-20120326.jar');
-%     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/xmlbeans-2.3.0.jar');
-%     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/dom4j-1.6.1.jar');
-%     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/stax-api-1.0.1.jar');
-% end
-% 
-% %asks user for the directory where all the files are:
-% directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
-
-function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, TrackingData, numStims)
+function Stimulus = SpatialResolutionScript(directory, Stimulus, TrackingData, numStims, videoPresent)
 
     if (ispc) %if on PC workstation in MERL 223
         slash = '\';
@@ -60,43 +20,44 @@ function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, Tr
         end
     end
     experimentTitle = directory(startTitleIndex:length(directory));
+    % find frame  where the cantilever contacts the worm
+    stim = 1;
+    clear numFrames;
+    for (stim = 1:numStims)
+        numFrames(stim) = length(Stimulus(stim).ProcessedFrameNumber);
 
-    %extracts file name
-%     load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')));
-%     load(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')));
-    
-    % import video
-        obj = VideoReader(fullfile(directory,strcat(experimentTitle,'_video.avi')));
-
-        % find frame in video where the cantilever contacts the worm
-        stim = 1;
-        clear numFrames;
-        for (stim = 1:numStims)
-            numFrames(stim) = length(Stimulus(stim).ProcessedFrameNumber);
-
-            if (stim == 1)
-                firstFrame = 1;
-            else 
-                firstFrame = runningSumNumFrames;
-            end
-
-            runningSumNumFrames = sum(numFrames);
-
-            approachDuration = Stimulus(stim).stimOnStartTime - Stimulus(stim).approachStartTime;
-            frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
-            numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
-            testFrameStim(stim) = Stimulus(stim).DuringStimFrames(numberOfApproachFrames);
-            skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim(stim));
-            testFrameVideo(stim) = testFrameStim(stim) + firstFrame;
-
+        if (stim == 1)
+            firstFrame = 1;
+        else 
+            firstFrame = runningSumNumFrames;
         end
 
+        runningSumNumFrames = sum(numFrames);
+
+        approachDuration = Stimulus(stim).stimOnStartTime - Stimulus(stim).approachStartTime;
+        frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
+        numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
+        if(numberOfApproachFrames <= length(Stimulus(stim).DuringStimFrames))
+            testFrameStim(stim) = Stimulus(stim).DuringStimFrames(numberOfApproachFrames);
+            
+        else
+             testFrameStim(stim) = Stimulus(stim).DuringStimFrames(1);
+        end
+        skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim(stim));
+        testFrameVideo(stim) = testFrameStim(stim) + firstFrame;
+
+    end
+
        
-    if (TrackingData.CantileverProperties.CantileverPosition.x>0)
+   
+      
+    if (ismember('CantileverPosition',fieldnames(TrackingData.CantileverProperties)))
         x([1:numStims]) = TrackingData.CantileverProperties.CantileverPosition.x;
         y([1:numStims]) = TrackingData.CantileverProperties.CantileverPosition.y;
-    else % ask user to select where cantilever acutally contacted work by clicking
+    elseif (videoPresent == true) % ask user to select where cantilever acutally contacted work by clicking
         % on the frame
+        % import video
+        obj = VideoReader(fullfile(directory,strcat(experimentTitle,'_video.avi')));
         figure;
          for stim = 1:numStims
             frame = read(obj,testFrameVideo(stim));
@@ -105,6 +66,9 @@ function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, Tr
             x(stim) = x(stim)*2;
             y(stim) = y(stim)*2;
          end
+    else
+        x([1:numStims]) = 0;
+        y([1:numStims]) = 0;
     end
 
     % find distance between target and contact location
@@ -142,10 +106,15 @@ function spatialResolutionData = SpatialResolutionScript(directory, Stimulus, Tr
         clear indDistance;
     end
 
+    for stim = 1:numStims
+    Stimulus(stim).distanceFromTarget = distanceUM(stim); % spatialResolutionData(stim,1);
+    Stimulus(stim).percentDownBodyHit = percent(stim); %spatialResolutionData(stim,2);
+    Stimulus(stim).distanceFromSketelon = dist(stim)*UM_PER_PIXEL;%spatialResolutionData(stim,3);
+    end
     
     % returns: distance from target, percent along body it was closest to,
     % shortest distance from the skeleton 
-    spatialResolutionData = [distanceUM' percent' dist'.*UM_PER_PIXEL];
+   % spatialResolutionData = [distanceUM' percent' dist'.*UM_PER_PIXEL];
 end
 %% record information to excel spreadsheet
 

@@ -97,34 +97,36 @@ for dir = 1:length(directories)
         save(mat_file, 'TrackingData');
     end
 
-    % Get FPGA Data:
-    mat_file = fullfile(directory,strcat(experimentTitle,'_FPGAdata_parsedData.mat'));
-    %if the data has already been read from the .yaml file, just load the mat
-    %file created last time:
-    if (exist(mat_file, 'file')==2)
-        load(mat_file);
-    else %otherwise, parse through .yaml file:
-        %file to parse name (must be structured correctly)
-        fpga_file = fullfile(directory, fpgaDataFilename);
-        %If necessary, remove the first line of the yaml file.
-        fid = fopen(fpga_file);
-        firstLine = fgetl(fid);
-        if (firstLine(1:9) == '%YAML:1.0')
-            buffer = fread(fid,  Inf);
-            fclose(fid);
-            delete(fpga_file)
-            fid = fopen(fpga_file, 'w')  ;   % Open destination file.
-            fwrite(fid, buffer) ;                         % Save to file.
-            fclose(fid) ;
-        else
-            fclose(fid);
+   
+    if (TrackingData.ExperimentMode ~= 'Behavior Mode')
+        % Get FPGA Data:
+        mat_file = fullfile(directory,strcat(experimentTitle,'_FPGAdata_parsedData.mat'));
+        %if the data has already been read from the .yaml file, just load the mat
+        %file created last time:
+        if (exist(mat_file, 'file')==2)
+            load(mat_file);
+        else %otherwise, parse through .yaml file:
+            %file to parse name (must be structured correctly)
+            fpga_file = fullfile(directory, fpgaDataFilename);
+            %If necessary, remove the first line of the yaml file.
+            fid = fopen(fpga_file);
+            firstLine = fgetl(fid);
+            if (firstLine(1:9) == '%YAML:1.0')
+                buffer = fread(fid,  Inf);
+                fclose(fid);
+                delete(fpga_file)
+                fid = fopen(fpga_file, 'w')  ;   % Open destination file.
+                fwrite(fid, buffer) ;                         % Save to file.
+                fclose(fid) ;
+            else
+                fclose(fid);
+            end
+            %parse
+            FPGAData = ReadYaml(fpga_file);
+            %write file to .mat
+            save(mat_file, 'FPGAData');
         end
-        %parse
-        FPGAData = ReadYaml(fpga_file);
-        %write file to .mat
-        save(mat_file, 'FPGAData');
     end
-
 
     % Get Stimulus Data:
     mat_file = fullfile(directory,strcat(experimentTitle,'_stimulus_parsedData.mat'));

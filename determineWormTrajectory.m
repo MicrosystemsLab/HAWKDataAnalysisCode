@@ -20,15 +20,17 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
     
     for stim = 1:numStims
     
-        directionSmoothing = 15; %frames.
+        directionSmoothing = 1; %frames.
 
-        for frame = 1:length(Stimulus(stim).head.x)
+        for frame = 1:Stimulus(stim).numFrames
             Stimulus(stim).headRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).head.x(frame)).*UM_PER_PIXEL;
             Stimulus(stim).headRealSpace.y(frame) = Stimulus(stim).head.y(frame).*UM_PER_PIXEL;
             Stimulus(stim).tailRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).tail.x(frame)).*UM_PER_PIXEL;
             Stimulus(stim).tailRealSpace.y(frame) = Stimulus(stim).tail.y(frame).*UM_PER_PIXEL;
             Stimulus(stim).centroidRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).centroid.x(frame)).*UM_PER_PIXEL;
             Stimulus(stim).centroidRealSpace.y(frame) = Stimulus(stim).centroid.y(frame).*UM_PER_PIXEL;
+            Stimulus(stim).meanRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).meanPosition.x(frame)).*UM_PER_PIXEL;
+            Stimulus(stim).meanRealSpace.y(frame) = Stimulus(stim).meanPosition.y(frame).*UM_PER_PIXEL;
 
             if frame == 1
                 Stimulus(stim).stagePosition.x(1) = 0;
@@ -39,6 +41,8 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
                 Stimulus(stim).tailPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).tailRealSpace.y(1);
                 Stimulus(stim).centroidPosition.x(1) = Stimulus(stim).stagePosition.x(1) + Stimulus(stim).centroidRealSpace.x(1);
                 Stimulus(stim).centroidPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).centroidRealSpace.y(1);
+                Stimulus(stim).meanPosition.x(1) = Stimulus(stim).stagePosition.x(1) + Stimulus(stim).meanRealSpace.x(1);
+                Stimulus(stim).meanPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).meanRealSpace.y(1);
                 Stimulus(stim).speed(1) = 0;
 
             else
@@ -55,29 +59,45 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
 
                 Stimulus(stim).centroidPosition.x(frame) = Stimulus(stim).stagePosition.x(frame) + Stimulus(stim).centroidRealSpace.x(frame);
                 Stimulus(stim).centroidPosition.y(frame) = Stimulus(stim).stagePosition.y(frame) + Stimulus(stim).centroidRealSpace.y(frame);
-
-                deltaX = Stimulus(stim).centroidPosition.x(frame)-Stimulus(stim).centroidPosition.x(frame-1);
-                deltaY = Stimulus(stim).centroidPosition.y(frame)-Stimulus(stim).centroidPosition.y(frame-1);
+                
+                Stimulus(stim).meanPosition.x(frame) = Stimulus(stim).stagePosition.x(frame) + Stimulus(stim).meanRealSpace.x(frame);
+                Stimulus(stim).meanPosition.y(frame) = Stimulus(stim).stagePosition.y(frame) + Stimulus(stim).meanRealSpace.y(frame);
+                
+                
+                deltaX = Stimulus(stim).meanPosition.x(frame)-Stimulus(stim).meanPosition.x(frame-1);
+                deltaY = Stimulus(stim).meanPosition.y(frame)-Stimulus(stim).meanPosition.y(frame-1);
 
                 if Stimulus(stim).timeData(frame,9) <= 0.011
                     Stimulus(stim).speed(frame) = 0;
                 else
                     Stimulus(stim).speed(frame) = sqrt(deltaX^2 + deltaY^2)/Stimulus(stim).timeData(frame,9);
                 end
-
-                if frame > directionSmoothing
-                    deltaX = Stimulus(stim).centroidPosition.x(frame)-Stimulus(stim).centroidPosition.x(frame-directionSmoothing);
-                    deltaY = Stimulus(stim).centroidPosition.y(frame)-Stimulus(stim).centroidPosition.y(frame-directionSmoothing);
+                
+                %Find movement angle:
+                if frame <= directionSmoothing
+                    Stimulus(stim).movementDirection(frame) = 0;
+                    Stimulus(stim).track(frame) = 0;
+                elseif frame > directionSmoothing
+                    
+                    deltaX = Stimulus(stim).meanPosition.x(frame)-Stimulus(stim).meanPosition.x(frame-directionSmoothing);
+                    deltaY = Stimulus(stim).meanPosition.y(frame)-Stimulus(stim).meanPosition.y(frame-directionSmoothing);
+                    
+                    %Calculate angle:
                     if deltaX == 0
-                        Stimulus(stim).movementDirection(frame-directionSmoothing) = 90;
+                        Stimulus(stim).movementDirection(frame) = 90;
                     elseif deltaX>0
-                        Stimulus(stim).movementDirection(frame-directionSmoothing) = (180/pi) * atan(deltaY/deltaX);
+                        Stimulus(stim).movementDirection(frame) = (180/pi) * atan(deltaY/deltaX);
                     elseif deltaX<0 && deltaY>=0
-                        Stimulus(stim).movementDirection(frame-directionSmoothing) = 180 - (180/pi) * (atan(deltaY/abs(deltaX)));
+                        Stimulus(stim).movementDirection(frame) = 180 - (180/pi) * (atan(deltaY/abs(deltaX)));
                     elseif deltaX<0 && deltaY<0
-                        Stimulus(stim).movementDirection(frame-directionSmoothing) = -(180 - (180/pi) * atan(abs(deltaY)/abs(deltaX))); 
+                        Stimulus(stim).movementDirection(frame) = -(180 - (180/pi) * atan(abs(deltaY)/abs(deltaX))); 
                     end
+                    
+                    
+                    Stimulus(stim).track(frame) = getTrackData(Stimulus(stim).Skeleton(frame).x, Stimulus(stim).Skeleton(frame).y, Stimulus(stim).movementDirection(frame));
                 end
+                
+               
             end
         end
     end

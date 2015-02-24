@@ -82,26 +82,34 @@ if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
     end
 end
 
-%% Extract General Properties:
+%% Extract General Properties, sorting by Stimulus:
 % mat file name for the per stimulus data structure.
 mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
 %if the data has already been read from the .yaml file, just load the mat
 %file created last time:
-if (exist(mat_file, 'file')==2)
-    load(mat_file);
-    if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
-        numStims = TrackingData.NumberOfStimulus;
-    else
-        numStims =  length(Stimulus);
-    end
-else %otherwise, create the Stimulus data structure.
+% if (exist(mat_file, 'file')==2)
+%     load(mat_file);
+%     if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
+%         numStims = TrackingData.NumberOfStimulus;
+%     else
+%         numStims =  length(Stimulus);
+%     end
+% else %otherwise, create the Stimulus data structure.
     %Start by moving through all the tracking data to get position data of
     %worm per frame, per stim count.
     [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData);
     %Save stimulus to mat file
     save(mat_file, 'Stimulus');
-end
+% end
 
+
+
+%% Determine the worm's trajectory in real space:
+[Stimulus] = determineWormTrajectory(Stimulus, numStims);
+
+
+%% Sort Frames based on Stimulus
+Stimulus = sortFramesBasedOnStimulus(Stimulus, numStims);
 
 %% Filter Frames:
 
@@ -206,13 +214,6 @@ end
 averageBodyLength = averageBodyLength/numStims;
 
 
-
-
-%% Sort Frames based on Stimulus
-Stimulus = sortFramesBasedOnStimulus(Stimulus, numStims);
-
-%% Determine the worm's trajectory in real space:
-[Stimulus] = determineWormTrajectory(Stimulus, numStims);
 
 %% Plot Head, Centroid position, direction vector if desired:
  if (~plotByStim)

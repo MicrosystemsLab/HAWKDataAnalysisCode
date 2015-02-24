@@ -60,8 +60,17 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
             %Find the mid-skeleton point
             Stimulus(stimCount).centroid.x(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).x(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x)/2));
             Stimulus(stimCount).centroid.y(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).y(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).y)/2));
+            numSkeletonPoints = length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x);
+            antTrunc = 0.25;
+            postTrunc = 0.1;
+            anteriorPointsToEliminate = floor(antTrunc*numSkeletonPoints);
+            posteriorPointsToEliminate = floor(postTrunc*numSkeletonPoints);
+            Stimulus(stimCount).meanPosition.x(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).x([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
+            Stimulus(stimCount).meanPosition.y(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
             %Also calculate body length based on skeleton length:
             Stimulus(stimCount).bodyLength(frameCountInsideStim) = calculateBodyLength(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y)*UM_PER_PIXEL; 
+            % Calculate curvature statistics.
+            Stimulus(stimCount).curve(frameCountInsideStim) = curvatureSpline(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y, 100);
             
             % Find worm body width if possible:
             if ismember('TargetSegment1',fieldnames(TrackingData.(['WormInfo',num2str(frameCount)])))
@@ -82,9 +91,10 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
             frameCount = frameCount + 1;
             frameCountInsideStim = frameCountInsideStim + 1;
        end
-
+        
     end
-    frameCount = frameCount-1;
+    % need to catch the frame count for the last stimulus 
+    Stimulus(stimCount).numFrames = frameCountInsideStim-1;
     
     % Determine the total number of stimulus to be analyzed:
     if (ismember('NumberOfStimulus',fieldnames(TrackingData)))

@@ -98,7 +98,7 @@ for dir = 1:length(directories)
     end
 
    
-    if (TrackingData.ExperimentMode ~= 'Behavior Mode')
+    if ( ~strcmp(TrackingData.ExperimentMode, 'Behavior Mode'))
         % Get FPGA Data:
         mat_file = fullfile(directory,strcat(experimentTitle,'_FPGAdata_parsedData.mat'));
         %if the data has already been read from the .yaml file, just load the mat

@@ -1,5 +1,5 @@
 % This script is set up to semi-automate the calculation of the spatial
-% targetting resolution of HAWK.
+% targeting resolution of HAWK.
 
 % Created by: Eileen Mazzochette
 % Created: January 27, 2015

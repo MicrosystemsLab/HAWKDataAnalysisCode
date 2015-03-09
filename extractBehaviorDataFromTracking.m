@@ -32,7 +32,7 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
            %the stimulus count number from the last one. If if it a new
            %one, advanced counter and move to next Stimulus.
             if stimCount ~= TrackingData.(['WormInfo',num2str(frameCount)]).StimulusNumber
-                Stimulus(stimCount).numFrames = frameCountInsideStim;
+                Stimulus(stimCount).numFrames = frameCountInsideStim-1;
                 stimCount = stimCount+1;
                 frameCountInsideStim = 1;
             end
@@ -57,7 +57,7 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
                Stimulus(stimCount).Skeleton(frameCountInsideStim).y(skeletonParser+1) = TrackingData.(['WormInfo' num2str(frameCount)]).Skeleton.(['Point' num2str(skeletonParser)]).y/PIXEL_SCALE;
 
             end
-            %Find the mid-skeleton point
+            %Find the mid-skeleton point, mean skeleton point
             Stimulus(stimCount).centroid.x(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).x(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x)/2));
             Stimulus(stimCount).centroid.y(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).y(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).y)/2));
             numSkeletonPoints = length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x);
@@ -65,8 +65,8 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
             postTrunc = 0.1;
             anteriorPointsToEliminate = floor(antTrunc*numSkeletonPoints);
             posteriorPointsToEliminate = floor(postTrunc*numSkeletonPoints);
-            Stimulus(stimCount).meanPosition.x(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).x([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
-            Stimulus(stimCount).meanPosition.y(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
+            Stimulus(stimCount).mean.x(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).x([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
+            Stimulus(stimCount).mean.y(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
             %Also calculate body length based on skeleton length:
             Stimulus(stimCount).bodyLength(frameCountInsideStim) = calculateBodyLength(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y)*UM_PER_PIXEL; 
             % Calculate curvature statistics.
@@ -84,7 +84,7 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
                      Stimulus(stimCount).targetSegment1.x(frameCountInsideStim), Stimulus(stimCount).targetSegment1.y(frameCountInsideStim), ...
                      Stimulus(stimCount).targetSegment2.x(frameCountInsideStim), Stimulus(stimCount).targetSegment2.y(frameCountInsideStim));
                 %Worm fatness is defined as the width/length of the worm. 
-                Stimulus(stimCount).fatness(frameCountInsideStim) = Stimulus(stimCount).widthAtTarget(frameCountInsideStim)/Stimulus(stimCount).bodyLength(frameCountInsideStim);
+                Stimulus(stimCount).widthToLengthRatio(frameCountInsideStim) = Stimulus(stimCount).widthAtTarget(frameCountInsideStim)/Stimulus(stimCount).bodyLength(frameCountInsideStim);
             end
             
             %Frame counters:

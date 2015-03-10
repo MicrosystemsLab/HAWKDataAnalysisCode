@@ -22,13 +22,14 @@ function Stimulus = sortFramesBasedOnStimulus(Stimulus, numStims)
         postCount = 1;
         
         for frame = 1:Stimulus(stim).numFrames;
-            if (Stimulus(stim).timeData(frame,8) < Stimulus(stim).stimAppliedTime)
-                Stimulus(stim).PreStimFrames(preCount) = frame;
-            elseif (Stimulus(stim).timeData(frame,8) < Stimulus(stim).stimEndTime)
-                Stimulus(stim).DuringStimFrames(duringCount) = frame;
+            if (Stimulus(stim).timeData(frame,8) < Stimulus(stim).StimulusTiming.stimAppliedTime)
+                Stimulus(stim).FramesByStimulus.PreStimFrames(preCount) = frame;
+                preCount = preCount + 1;
+            elseif (Stimulus(stim).timeData(frame,8) < Stimulus(stim).StimulusTiming.stimEndTime)
+                Stimulus(stim).FramesByStimulus.DuringStimFrames(duringCount) = frame;
                 duringCount = duringCount + 1;
             else
-                Stimulus(stim).PostStimFrames(postCount) = frame;
+                Stimulus(stim).FramesByStimulus.PostStimFrames(postCount) = frame;
                 postCount = postCount + 1;
             end
 

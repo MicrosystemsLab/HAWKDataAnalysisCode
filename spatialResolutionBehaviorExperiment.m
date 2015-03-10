@@ -47,7 +47,7 @@ function Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, Tra
             frame = read(obj,testFrameVideo(stim));
             imshow(frame)
             [x(stim), y(stim)] = ginput(1);
-            % Video frames are saved at half the resolution, conver to
+            % Video frames are saved at half the resolution, convert to
             % original pixel values:
             x(stim) = x(stim)*2;
             y(stim) = y(stim)*2;
@@ -85,7 +85,7 @@ function Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, Tra
             %If experiment was performed after HAWK software was updated to
             %include target location in stimulus, use that:
             if (ismember('target',fieldnames(Stimulus)))
-               distance(frame) = distanceCalc(Stimulus(stim).target.x(testFrameStim),Stimulus(stim).target.y(testFrameStim), x(stim), y(stim));
+               distance(frame) = distanceCalc(Stimulus(stim).PixelPositions.target.x(testFrameStim),Stimulus(stim).PixelPositions.target.y(testFrameStim), x(stim), y(stim));
             %Other was look in in TrackingData information. 
             else
                 target_x = TrackingData.(['WormInfo' num2str(testFrameVideo)]).Target.x;
@@ -121,27 +121,27 @@ function Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, Tra
         
         %For each stimulus, stave the average statistics, check if they exist first:
         if (exist('distanceFromTargetUM'))
-            Stimulus(stim).distanceFromTarget = mean(distanceFromTargetUM);
+            Stimulus(stim).SpatialResolution.distanceFromTarget = mean(distanceFromTargetUM);
         else 
-            Stimulus(stim).distanceFromTarget = 1000; %dummy number
+            Stimulus(stim).SpatialResolution.distanceFromTarget = 1000; %dummy number
         end
         
         if (exist('percentDownSkeleton'))
-            Stimulus(stim).percentDownBodyHit = mean(percentDownSkeleton); 
+            Stimulus(stim).SpatialResolution.percentDownBodyHit = mean(percentDownSkeleton); 
         else
-            Stimulus(stim).percentDownBodyHit = 1000;
+            Stimulus(stim).SpatialResolution.percentDownBodyHit = 1000;
         end
         
         if (exist('distFromSkeleton'))
-            Stimulus(stim).distanceFromSkeleton = mean(distFromSkeleton)*UM_PER_PIXEL;
+            Stimulus(stim).SpatialResolution.distanceFromSkeleton = mean(distFromSkeleton)*UM_PER_PIXEL;
         else
-            Stimulus(stim).distanceFromSkeleton = 1000;
+            Stimulus(stim).SpatialResolution.distanceFromSkeleton = 1000;
         end
         
         if (exist('percentAcrossBody'))
-            Stimulus(stim).percentAcrossBodyHit = mean(percentAcrossBody);
+            Stimulus(stim).SpatialResolution.percentAcrossBodyHit = mean(percentAcrossBody);
         else
-            Stimulus(stim).percentAcrossBodyHit = 1000;
+            Stimulus(stim).SpatialResolution.percentAcrossBodyHit = 1000;
         end
         
         clear distanceFromTargetUM

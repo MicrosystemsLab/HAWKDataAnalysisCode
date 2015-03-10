@@ -1,8 +1,5 @@
 %%%%% Function: Filter Frames By Body Length
-% This function prepares a matrix to  be written to the experiment log,
-% extracting all the relevant information for a series of stimulus and
-% placing it in the correct columns. This is specific to behavior
-% experimeent 
+% Sort between good and back frame based on the body length measurements/
 % 
 %  param {Stimulus} struct,  contains experiment data organized by
 %  stimulus
@@ -30,8 +27,8 @@ function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
         % the original body length statistics, it is classified as a good
         % frame, otherwise it's a bad frame.
         for frameParser = 1:Stimulus(stim).numFrames; 
-            if (Stimulus(stim).bodyLength(frameParser) < Stimulus(stim).averageBodyLength-Stimulus(stim).stdBodyLength || ...
-                Stimulus(stim).bodyLength(frameParser) > Stimulus(stim).averageBodyLength+Stimulus(stim).stdBodyLength)
+            if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength-Stimulus(stim).BodyMorphology.stdBodyLength || ...
+                Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength+Stimulus(stim).BodyMorphology.stdBodyLength)
                 Stimulus(stim).droppedFrames(droppedFrameCounter) = frameParser;
                 droppedFrameCounter = droppedFrameCounter + 1;
             else
@@ -42,10 +39,10 @@ function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
         end
         
         %Save new statistics:
-        Stimulus(stim).averageBodyLengthGoodFrames = mean(Stimulus(stim).bodyLength(Stimulus(stim).goodFrames)); 
-        Stimulus(stim).stdBodyLengthGoodFrames = std(Stimulus(stim).bodyLength(Stimulus(stim).goodFrames));
-        Stimulus(stim).averageBodyWidthGoodFrames = mean(Stimulus(stim).widthAtTarget(Stimulus(stim).goodFrames)); 
-        Stimulus(stim).stdBodyWidthGoodFrames = std(Stimulus(stim).widthAtTarget(Stimulus(stim).goodFrames));
+        Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames = mean(Stimulus(stim).BodyMorphology.bodyLength(Stimulus(stim).goodFrames)); 
+        Stimulus(stim).BodyMorphology.stdBodyLengthGoodFrames = std(Stimulus(stim).BodyMorphology.bodyLength(Stimulus(stim).goodFrames));
+        Stimulus(stim).BodyMorphology.averageBodyWidthGoodFrames = mean(Stimulus(stim).BodyMorphology.widthAtTarget(Stimulus(stim).goodFrames)); 
+        Stimulus(stim).BodyMorphology.stdBodyWidthGoodFrames = std(Stimulus(stim).BodyMorphology.widthAtTarget(Stimulus(stim).goodFrames));
     end
 
 end

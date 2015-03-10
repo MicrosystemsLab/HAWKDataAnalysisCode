@@ -23,87 +23,87 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
         directionSmoothing = 4; %frames.
 
         for frame = 1:Stimulus(stim).numFrames
-            Stimulus(stim).headRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).head.x(frame)).*UM_PER_PIXEL;
-            Stimulus(stim).headRealSpace.y(frame) = Stimulus(stim).head.y(frame).*UM_PER_PIXEL;
-            Stimulus(stim).tailRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).tail.x(frame)).*UM_PER_PIXEL;
-            Stimulus(stim).tailRealSpace.y(frame) = Stimulus(stim).tail.y(frame).*UM_PER_PIXEL;
-            Stimulus(stim).centroidRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).centroid.x(frame)).*UM_PER_PIXEL;
-            Stimulus(stim).centroidRealSpace.y(frame) = Stimulus(stim).centroid.y(frame).*UM_PER_PIXEL;
-            Stimulus(stim).meanRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).mean.x(frame)).*UM_PER_PIXEL;
-            Stimulus(stim).meanRealSpace.y(frame) = Stimulus(stim).mean.y(frame).*UM_PER_PIXEL;
+            headRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.head.x(frame)).*UM_PER_PIXEL;
+            headRealSpace.y(frame) = Stimulus(stim).PixelPositions.head.y(frame).*UM_PER_PIXEL;
+            tailRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.tail.x(frame)).*UM_PER_PIXEL;
+            tailRealSpace.y(frame) = Stimulus(stim).PixelPositions.tail.y(frame).*UM_PER_PIXEL;
+            centroidRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.centroid.x(frame)).*UM_PER_PIXEL;
+            centroidRealSpace.y(frame) = Stimulus(stim).PixelPositions.centroid.y(frame).*UM_PER_PIXEL;
+            meanRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.mean.x(frame)).*UM_PER_PIXEL;
+            meanRealSpace.y(frame) = Stimulus(stim).PixelPositions.mean.y(frame).*UM_PER_PIXEL;
 
             if frame == 1
-                Stimulus(stim).stagePosition.x(1) = 0;
-                Stimulus(stim).stagePosition.y(1) = 0;
-                Stimulus(stim).headPosition.x(1) = Stimulus(stim).stagePosition.x(1) + Stimulus(stim).headRealSpace.x(1);
-                Stimulus(stim).headPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).headRealSpace.y(1);
-                Stimulus(stim).tailPosition.x(1) = Stimulus(stim).stagePosition.x(1) + Stimulus(stim).tailRealSpace.x(1);
-                Stimulus(stim).tailPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).tailRealSpace.y(1);
-                Stimulus(stim).centroidPosition.x(1) = Stimulus(stim).stagePosition.x(1) + Stimulus(stim).centroidRealSpace.x(1);
-                Stimulus(stim).centroidPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).centroidRealSpace.y(1);
-                Stimulus(stim).meanPosition.x(1) = Stimulus(stim).stagePosition.x(1) + Stimulus(stim).meanRealSpace.x(1);
-                Stimulus(stim).meanPosition.y(1) = Stimulus(stim).stagePosition.y(1) + Stimulus(stim).meanRealSpace.y(1);
-                Stimulus(stim).speed(1) = 0;
+                Stimulus(stim).Trajectory.stagePosition.x(1) = 0;
+                Stimulus(stim).Trajectory.stagePosition.y(1) = 0;
+                Stimulus(stim).Trajectory.headPosition.x(1) = Stimulus(stim).Trajectory.stagePosition.x(1) + headRealSpace.x(1);
+                Stimulus(stim).Trajectory.headPosition.y(1) = Stimulus(stim).Trajectory.stagePosition.y(1) + headRealSpace.y(1);
+                Stimulus(stim).Trajectory.tailPosition.x(1) = Stimulus(stim).Trajectory.stagePosition.x(1) + tailRealSpace.x(1);
+                Stimulus(stim).Trajectory.tailPosition.y(1) = Stimulus(stim).Trajectory.stagePosition.y(1) + tailRealSpace.y(1);
+                Stimulus(stim).Trajectory.centroidPosition.x(1) = Stimulus(stim).Trajectory.stagePosition.x(1) + centroidRealSpace.x(1);
+                Stimulus(stim).Trajectory.centroidPosition.y(1) = Stimulus(stim).Trajectory.stagePosition.y(1) + centroidRealSpace.y(1);
+                Stimulus(stim).Trajectory.meanPosition.x(1) = Stimulus(stim).Trajectory.stagePosition.x(1) + meanRealSpace.x(1);
+                Stimulus(stim).Trajectory.meanPosition.y(1) = Stimulus(stim).Trajectory.stagePosition.y(1) + meanRealSpace.y(1);
+                Stimulus(stim).Trajectory.speed(1) = 0;
 
             else
 
 
-                Stimulus(stim).stagePosition.x(frame) = Stimulus(stim).stagePosition.x(frame-1) + Stimulus(stim).stageMovement.x(frame-1);
-                Stimulus(stim).stagePosition.y(frame) = Stimulus(stim).stagePosition.y(frame-1) + Stimulus(stim).stageMovement.y(frame-1);
+                Stimulus(stim).Trajectory.stagePosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame-1) + Stimulus(stim).stageMovement.x(frame-1);
+                Stimulus(stim).Trajectory.stagePosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame-1) + Stimulus(stim).stageMovement.y(frame-1);
 
-                Stimulus(stim).headPosition.x(frame) = Stimulus(stim).stagePosition.x(frame) + Stimulus(stim).headRealSpace.x(frame);
-                Stimulus(stim).headPosition.y(frame) = Stimulus(stim).stagePosition.y(frame) + Stimulus(stim).headRealSpace.y(frame);
+                Stimulus(stim).Trajectory.headPosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame) + headRealSpace.x(frame);
+                Stimulus(stim).Trajectory.headPosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame) + headRealSpace.y(frame);
 
-                Stimulus(stim).tailPosition.x(frame) = Stimulus(stim).stagePosition.x(frame) + Stimulus(stim).tailRealSpace.x(frame);
-                Stimulus(stim).tailPosition.y(frame) = Stimulus(stim).stagePosition.y(frame) + Stimulus(stim).tailRealSpace.y(frame);
+                Stimulus(stim).Trajectory.tailPosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame) + tailRealSpace.x(frame);
+                Stimulus(stim).Trajectory.tailPosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame) + tailRealSpace.y(frame);
 
-                Stimulus(stim).centroidPosition.x(frame) = Stimulus(stim).stagePosition.x(frame) + Stimulus(stim).centroidRealSpace.x(frame);
-                Stimulus(stim).centroidPosition.y(frame) = Stimulus(stim).stagePosition.y(frame) + Stimulus(stim).centroidRealSpace.y(frame);
+                Stimulus(stim).Trajectory.centroidPosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame) + centroidRealSpace.x(frame);
+                Stimulus(stim).Trajectory.centroidPosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame) + centroidRealSpace.y(frame);
                 
-                Stimulus(stim).meanPosition.x(frame) = Stimulus(stim).stagePosition.x(frame) + Stimulus(stim).meanRealSpace.x(frame);
-                Stimulus(stim).meanPosition.y(frame) = Stimulus(stim).stagePosition.y(frame) + Stimulus(stim).meanRealSpace.y(frame);
+                Stimulus(stim).Trajectory.meanPosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame) + meanRealSpace.x(frame);
+                Stimulus(stim).Trajectory.meanPosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame) + meanRealSpace.y(frame);
                 
             end
         end
         
         for frame = 2:Stimulus(stim).numFrames
                 
-                deltaX = Stimulus(stim).meanPosition.x(frame)-Stimulus(stim).meanPosition.x(frame-1);
-                deltaY = Stimulus(stim).meanPosition.y(frame)-Stimulus(stim).meanPosition.y(frame-1);
+                deltaX = Stimulus(stim).Trajectory.meanPosition.x(frame)-Stimulus(stim).Trajectory.meanPosition.x(frame-1);
+                deltaY = Stimulus(stim).Trajectory.meanPosition.y(frame)-Stimulus(stim).Trajectory.meanPosition.y(frame-1);
 
                 if Stimulus(stim).timeData(frame,9) <= 0.011
-                    Stimulus(stim).speed(frame) = 0;
+                    Stimulus(stim).Trajectory.speed(frame) = 0;
                 else
-                    Stimulus(stim).speed(frame) = sqrt(deltaX^2 + deltaY^2)/Stimulus(stim).timeData(frame,9);
+                    Stimulus(stim).Trajectory.speed(frame) = sqrt(deltaX^2 + deltaY^2)/Stimulus(stim).timeData(frame,9);
                 end
                 
                 %Find movement angle:
                 if frame <= directionSmoothing
-                    Stimulus(stim).movementDirection(frame) = 0;
-                    Stimulus(stim).track(frame).amplitude = 0;
-                    Stimulus(stim).track(frame).wavelength = 0;
+                    Stimulus(stim).Trajectory.movementDirection(frame) = 0;
+                    Stimulus(stim).Trajectory.track(frame).amplitude = 0;
+                    Stimulus(stim).Trajectory.track(frame).wavelength = 0;
                 elseif (frame > directionSmoothing && frame <= Stimulus(stim).numFrames-directionSmoothing)
                     
-                    deltaX = Stimulus(stim).meanPosition.x(frame+directionSmoothing)-Stimulus(stim).meanPosition.x(frame-directionSmoothing);
-                    deltaY = Stimulus(stim).meanPosition.y(frame+directionSmoothing)-Stimulus(stim).meanPosition.y(frame-directionSmoothing);
+                    deltaX = Stimulus(stim).Trajectory.meanPosition.x(frame+directionSmoothing)-Stimulus(stim).Trajectory.meanPosition.x(frame-directionSmoothing);
+                    deltaY = Stimulus(stim).Trajectory.meanPosition.y(frame+directionSmoothing)-Stimulus(stim).Trajectory.meanPosition.y(frame-directionSmoothing);
                     
                     %Calculate angle:
                     if deltaX == 0
-                        Stimulus(stim).movementDirection(frame) = 90;
+                        Stimulus(stim).Trajectory.movementDirection(frame) = 90;
                     elseif deltaX>0
-                        Stimulus(stim).movementDirection(frame) = (180/pi) * atan(deltaY/deltaX);
+                        Stimulus(stim).Trajectory.movementDirection(frame) = (180/pi) * atan(deltaY/deltaX);
                     elseif deltaX<0 && deltaY>=0
-                        Stimulus(stim).movementDirection(frame) = 180 - (180/pi) * (atan(deltaY/abs(deltaX)));
+                        Stimulus(stim).Trajectory.movementDirection(frame) = 180 - (180/pi) * (atan(deltaY/abs(deltaX)));
                     elseif deltaX<0 && deltaY<0
-                        Stimulus(stim).movementDirection(frame) = -(180 - (180/pi) * atan(abs(deltaY)/abs(deltaX))); 
+                        Stimulus(stim).Trajectory.movementDirection(frame) = -(180 - (180/pi) * atan(abs(deltaY)/abs(deltaX))); 
                     end
                     
                     
-                    Stimulus(stim).track(frame) = getTrackData(Stimulus(stim).Skeleton(frame).x, Stimulus(stim).Skeleton(frame).y, Stimulus(stim).movementDirection(frame));
+                    Stimulus(stim).Trajectory.track(frame) = getTrackData(Stimulus(stim).Skeleton(frame).x, Stimulus(stim).Skeleton(frame).y, Stimulus(stim).Trajectory.movementDirection(frame));
                 else 
-                    Stimulus(stim).movementDirection(frame) = 0;
-                    Stimulus(stim).track(frame).amplitude = 0;
-                    Stimulus(stim).track(frame).wavelength = 0;
+                    Stimulus(stim).Trajectory.movementDirection(frame) = 0;
+                    Stimulus(stim).Trajectory.track(frame).amplitude = 0;
+                    Stimulus(stim).Trajectory.track(frame).wavelength = 0;
                 end  
                
             end

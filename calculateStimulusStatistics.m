@@ -4,13 +4,17 @@
 % into its different parts, gathers the statistics and revelant information
 % on each part and returns a data structure containing the data. 
 
-% It requires two input parameters: Stimulus, where all the FPGA data is
-% stored, and the Stimulus data from the Stimulus.yaml file created by the
+% It requires two input parameters: 
+% param {Stimulus}, where all the FPGA data is stored,
+% param {StimulusData}, struct, data from the Stimulus.yaml file created by the
 % HAWK software at experiment set up.
-
-% created by: Eileen Mazzochette
-% January 26, 2015
-
+%
+% returns {stats} struct, contains all the statistical information about
+% the stimulus as compared to the desired stimulus.
+%
+%  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
+%  This file is part of HAWK_AnalysisMethods.
+%%%%%
 
 
 function stats = calculateStimulusStatistics(Stimulus, StimulusData)
@@ -18,10 +22,10 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
     interval = 0.001;
     
     for stim = 1:numStims;
-        numPoints = length(Stimulus(stim).PiezoSignal);
+        numPoints = length(Stimulus(stim).FPGAData.PiezoSignal);
         % Break Piezo data into five parts:
         % 1. Pre approach
-        stats(stim).preApproachPoints.data = Stimulus(stim).PiezoSignal([1:Stimulus(stim).FPGAStats.approachOnIndex-1]);
+        stats(stim).preApproachPoints.data = Stimulus(stim).FPGAData.PiezoSignal([1:Stimulus(stim).StimulusTiming.approachOnFPGAIndex-1]);
 
         % for each part, calculate: min, max, average, duration.
         stats(stim).preApproachPoints.min = min(stats(stim).preApproachPoints.data);
@@ -32,7 +36,7 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
 
 
         % 2. Approach
-        stats(stim).approachPoints.data = Stimulus(stim).DesiredSignal([Stimulus(stim).FPGAStats.approachOnIndex:Stimulus(stim).FPGAStats.stimOnIndex-1]);
+        stats(stim).approachPoints.data = Stimulus(stim).FPGAData.DesiredSignal([Stimulus(stim).StimulusTiming.approachOnFPGAIndex:Stimulus(stim).StimulusTiming.stimOnFPGAIndex-1]);
         % for approach:
         stats(stim).approachPoints.min = min(stats(stim).approachPoints.data);
         stats(stim).approachPoints.max = max(stats(stim).approachPoints.data);
@@ -41,8 +45,8 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
 
         % 3. Stimulus
         numberOfStimulusPoints = StimulusData.ContactTime/interval;
-        stats(stim).stimulusPoints.data = Stimulus(stim).PiezoSignal([Stimulus(stim).FPGAStats.stimOnIndex:Stimulus(stim).FPGAStats.stimOnIndex+numberOfStimulusPoints-1]);
-        desiredPoints = Stimulus(stim).DesiredSignal([Stimulus(stim).FPGAStats.stimOnIndex:Stimulus(stim).FPGAStats.stimOnIndex+numberOfStimulusPoints-1]);
+        stats(stim).stimulusPoints.data = Stimulus(stim).FPGAData.PiezoSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex:Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints-1]);
+        desiredPoints = Stimulus(stim).FPGAData.DesiredSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex:Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints-1]);
         desiredPoints = desiredPoints + stats(stim).preApproachPoints.average;
         % for stimulus, calculate: rise time, overshoot, rms error
         stats(stim).stimulusPoints.min = min(stats(stim).stimulusPoints.data);
@@ -55,7 +59,7 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
 
         % 4. Zero pulse
         numberOfZeroPulsePoints = StimulusData.ZeroPulseDuration/interval;
-        stats(stim).zeroPulsePoints.data = Stimulus(stim).PiezoSignal([Stimulus(stim).FPGAStats.stimOnIndex+numberOfStimulusPoints:Stimulus(stim).FPGAStats.stimOnIndex+numberOfStimulusPoints+numberOfZeroPulsePoints-1]);
+        stats(stim).zeroPulsePoints.data = Stimulus(stim).FPGAData.PiezoSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints:Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints+numberOfZeroPulsePoints-1]);
         % for zero pulse, calculate: rms error
         stats(stim).zeroPulsePoints.min = min(stats(stim).zeroPulsePoints.data);
         stats(stim).zeroPulsePoints.max = max(stats(stim).zeroPulsePoints.data);
@@ -64,7 +68,7 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
         stats(stim).zeroPulsePoints.rmsError = sqrt(mean((stats(stim).zeroPulsePoints.data - stats(stim).preApproachPoints.average).^2));
         stats(stim).zeroPulsePoints.duration = StimulusData.ZeroPulseDuration;
         % 5. Post pulse
-        stats(stim).postPulsePoints.data = Stimulus(stim).PiezoSignal([Stimulus(stim).FPGAStats.stimOnIndex+numberOfStimulusPoints+numberOfZeroPulsePoints:numPoints]);
+        stats(stim).postPulsePoints.data = Stimulus(stim).FPGAData.PiezoSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints+numberOfZeroPulsePoints:numPoints]);
         stats(stim).postPulsePoints.min = min(stats(stim).postPulsePoints.data);
         stats(stim).postPulsePoints.max = max(stats(stim).postPulsePoints.data);
         stats(stim).postPulsePoints.average = mean(stats(stim).postPulsePoints.data);

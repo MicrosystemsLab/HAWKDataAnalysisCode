@@ -16,7 +16,7 @@
 
 function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
 
-    HAWKSystemConstants
+    HAWKSystemConstants;
 
 
     fields = fieldnames(TrackingData);
@@ -40,12 +40,12 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
             % data:
             Stimulus(stimCount).ProcessedFrameNumber(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).ProcessedFrameNumber;
             Stimulus(stimCount).timeData(frameCountInsideStim,1:6) = datevec(TrackingData.(['WormInfo',num2str(frameCount)]).Time);
-            Stimulus(stimCount).head.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.x/PIXEL_SCALE;
-            Stimulus(stimCount).head.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.y/PIXEL_SCALE;
-            Stimulus(stimCount).tail.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.x/PIXEL_SCALE;
-            Stimulus(stimCount).tail.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.y/PIXEL_SCALE;
-            Stimulus(stimCount).target.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Target.x/PIXEL_SCALE;
-            Stimulus(stimCount).target.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Target.y/PIXEL_SCALE;
+            Stimulus(stimCount).PixelPositions.head.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.x/PIXEL_SCALE;
+            Stimulus(stimCount).PixelPositions.head.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Head.y/PIXEL_SCALE;
+            Stimulus(stimCount).PixelPositions.tail.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.x/PIXEL_SCALE;
+            Stimulus(stimCount).PixelPositions.tail.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Tail.y/PIXEL_SCALE;
+            Stimulus(stimCount).PixelPositions.target.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Target.x/PIXEL_SCALE;
+            Stimulus(stimCount).PixelPositions.target.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).Target.y/PIXEL_SCALE;
             Stimulus(stimCount).stageMovement.x(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.x0x2Daxis; 
             Stimulus(stimCount).stageMovement.y(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StageMovement.y0x2Daxis; 
             Stimulus(stimCount).StimulusActivity(frameCountInsideStim) = TrackingData.(['WormInfo' num2str(frameCount)]).StimulusActive;
@@ -58,33 +58,33 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
 
             end
             %Find the mid-skeleton point, mean skeleton point
-            Stimulus(stimCount).centroid.x(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).x(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x)/2));
-            Stimulus(stimCount).centroid.y(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).y(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).y)/2));
+            Stimulus(stimCount).PixelPositions.centroid.x(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).x(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x)/2));
+            Stimulus(stimCount).PixelPositions.centroid.y(frameCountInsideStim) = Stimulus(stimCount).Skeleton(frameCountInsideStim).y(floor(length(Stimulus(stimCount).Skeleton(frameCountInsideStim).y)/2));
             numSkeletonPoints = length(Stimulus(stimCount).Skeleton(frameCountInsideStim).x);
             antTrunc = 0.25;
             postTrunc = 0.1;
             anteriorPointsToEliminate = floor(antTrunc*numSkeletonPoints);
             posteriorPointsToEliminate = floor(postTrunc*numSkeletonPoints);
-            Stimulus(stimCount).mean.x(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).x([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
-            Stimulus(stimCount).mean.y(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
+            Stimulus(stimCount).PixelPositions.mean.x(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).x([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
+            Stimulus(stimCount).PixelPositions.mean.y(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
             %Also calculate body length based on skeleton length:
-            Stimulus(stimCount).bodyLength(frameCountInsideStim) = calculateBodyLength(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y)*UM_PER_PIXEL; 
+            Stimulus(stimCount).BodyMorphology.bodyLength(frameCountInsideStim) = calculateBodyLength(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y)*UM_PER_PIXEL; 
             % Calculate curvature statistics.
-            Stimulus(stimCount).curve(frameCountInsideStim) = curvatureSpline(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y, 100);
+            Stimulus(stimCount).BodyMorphology.curve(frameCountInsideStim) = curvatureSpline(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y, 100);
             
             % Find worm body width if possible:
             if ismember('TargetSegment1',fieldnames(TrackingData.(['WormInfo',num2str(frameCount)])))
-                Stimulus(stimCount).targetSegment1.x(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment1.x;
-                Stimulus(stimCount).targetSegment1.y(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment1.y;
-                Stimulus(stimCount).targetSegment2.x(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment2.x;
-                Stimulus(stimCount).targetSegment2.y(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment2.y;
+                Stimulus(stimCount).PixelPositions.targetSegment1.x(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment1.x;
+                Stimulus(stimCount).PixelPositions.targetSegment1.y(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment1.y;
+                Stimulus(stimCount).PixelPositions.targetSegment2.x(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment2.x;
+                Stimulus(stimCount).PixelPositions.targetSegment2.y(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment2.y;
                 %Width is distance between two segment points at target,
                 %converted to um.
-                Stimulus(stimCount).widthAtTarget(frameCountInsideStim) = UM_PER_PIXEL * distanceCalc(...
-                     Stimulus(stimCount).targetSegment1.x(frameCountInsideStim), Stimulus(stimCount).targetSegment1.y(frameCountInsideStim), ...
-                     Stimulus(stimCount).targetSegment2.x(frameCountInsideStim), Stimulus(stimCount).targetSegment2.y(frameCountInsideStim));
+                Stimulus(stimCount).BodyMorphology.widthAtTarget(frameCountInsideStim) = UM_PER_PIXEL * distanceCalc(...
+                     Stimulus(stimCount).PixelPositions.targetSegment1.x(frameCountInsideStim), Stimulus(stimCount).PixelPositions.targetSegment1.y(frameCountInsideStim), ...
+                     Stimulus(stimCount).PixelPositions.targetSegment2.x(frameCountInsideStim), Stimulus(stimCount).PixelPositions.targetSegment2.y(frameCountInsideStim));
                 %Worm fatness is defined as the width/length of the worm. 
-                Stimulus(stimCount).widthToLengthRatio(frameCountInsideStim) = Stimulus(stimCount).widthAtTarget(frameCountInsideStim)/Stimulus(stimCount).bodyLength(frameCountInsideStim);
+                Stimulus(stimCount).BodyMorphology.widthToLengthRatio(frameCountInsideStim) = Stimulus(stimCount).BodyMorphology.widthAtTarget(frameCountInsideStim)/Stimulus(stimCount).BodyMorphology.bodyLength(frameCountInsideStim);
             end
             
             %Frame counters:
@@ -122,17 +122,17 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
     % calculate come body statistics.
     for stim=1:numStims
         ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
-        Stimulus(stim).stimAppliedTime = Stimulus(stim).timeData(ind,8);
+        Stimulus(stim).StimulusTiming.stimAppliedTime = Stimulus(stim).timeData(ind,8);
         ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
-        Stimulus(stim).stimEndTime = Stimulus(stim).timeData(ind,8);
+        Stimulus(stim).StimulusTiming.stimEndTime = Stimulus(stim).timeData(ind,8);
         
         %Body Length Statistics:
-        Stimulus(stim).averageBodyLength = mean(Stimulus(stim).bodyLength);
-        Stimulus(stim).stdBodyLength = std(Stimulus(stim).bodyLength);
+        Stimulus(stim).BodyMorphology.averageBodyLength = mean(Stimulus(stim).BodyMorphology.bodyLength);
+        Stimulus(stim).BodyMorphology.stdBodyLength = std(Stimulus(stim).BodyMorphology.bodyLength);
         %Body Width Statistics:
         if ismember('TargetSegment1',fieldnames(TrackingData.(['WormInfo',num2str(1)])))
-            Stimulus(stim).averageBodyWidth = mean(Stimulus(stim).widthAtTarget);
-            Stimulus(stim).stdBodyWidth = std(Stimulus(stim).widthAtTarget);
+            Stimulus(stim).BodyMorphology.averageBodyWidth = mean(Stimulus(stim).BodyMorphology.widthAtTarget);
+            Stimulus(stim).BodyMorphology.stdBodyWidth = std(Stimulus(stim).BodyMorphology.widthAtTarget);
         end
        
     end

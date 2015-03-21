@@ -25,7 +25,7 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Volumes/home/HAWK Data/';
+    DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
     excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
@@ -58,14 +58,15 @@ StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
 
 [NUM,TXT,RAW]=xlsread(excelFile,'Experiment Log Force Clamp');
 [rowCount columnCount] = size(RAW);
-spreadsheetTitles = TXT(1,:);
-%check if it's already been populated:
-if(strmatch(experimentTitle,TXT(:,strmatch('Experiment Name',TXT(1,:),'exact')),'exact')>0)
-    experimentRow = strmatch(experimentTitle,TXT(:,2));
-else
+% spreadsheetTitles = TXT(1,:);
+load('spreadsheetTitlesForceClamp.mat');
+% %check if it's already been populated:
+% if(strmatch(experimentTitle,TXT(:,strmatch('Experiment Name',TXT(1,:),'exact')),'exact')>0)
+%     experimentRow = strmatch(experimentTitle,TXT(:,2));
+% else
     experimentRow = rowCount+1;
     
-end
+% end
 newRow = populateForceClampExperimentParameters( experimentTitle, TrackingData, spreadsheetTitles);
 
 xlwrite(excelFile, newRow, 'Experiment Log Force Clamp', strcat('A',num2str(experimentRow)));
@@ -110,22 +111,20 @@ end
 %% Determine the Worm Trajectory in real space:
 [Stimulus] = determineWormTrajectory(Stimulus, numStims);
 
-%% Get information about the stimulus timing, also statistics abotu timing
+%% Get information about the stimulus timing, also statistics about timing
 [Stimulus] = determineStimulusTiming(TrackingData, StimulusData, Stimulus, numStims);
 
-%% Write per stimulus data to excel spread sheet
-%save(mat_file, 'Stimulus');
-
+%% Calculate precision of targeting:
 videoPresent = true;
+Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingData, numStims, videoPresent);
 
-spatialResolutionData = spatialResolutionForceClamp(directory, Stimulus, TrackingData, numStims, videoPresent);
-
-mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
-save(mat_file, 'Stimulus');
-
+%% Write per stimulus data to excel spread sheet
 [data, firstColumn] = populateForceClampPerStimulusData( Stimulus, spreadsheetTitles, numStims);
 xlwrite(excelFile, data, 'Experiment Log Force Clamp', strcat('A'+firstColumn-1,num2str(experimentRow+1)));
 
+%% Save mat file 
+mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
+save(mat_file, 'Stimulus');
 
-
-
+%% Plot Data
+% plotData(Stimulus, numStims, true);

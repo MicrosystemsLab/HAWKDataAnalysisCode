@@ -63,5 +63,16 @@ for dir = 1:length(directories)
     if ( ~strcmp(TrackingData.ExperimentMode, 'Behavior Mode'))
           FPGAData = getFPGADataFromYAML(directory, experimentTitle);
     end
+    % Extract Stimulus Data from the yaml file:
     StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
+    %Start sorting by stimulus now to help later.
+    mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
+    %Extract behavior information from Tracking Data
+    [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData);
+    %Extract stimulus data from FPGA and Stimulus files:
+    if ( ~strcmp(TrackingData.ExperimentMode, 'Behavior Mode'))    
+        Stimulus = extractFPGADataFromFPGAData(FPGAData, StimulusData, Stimulus, numStims);
+    end
+    %Save stimulus to mat file
+    save(mat_file, 'Stimulus');
 end

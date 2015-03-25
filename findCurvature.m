@@ -17,10 +17,11 @@
 %%%%%
 
 
-function curvature_smooth = findCurvature(skeleton, sigma, numcurvpts)
+function [curvature_smooth, distanceBetweenPoints]= findCurvature(skeleton, sigma, numcurvpts)
     %Create structures to hold data:
     curvature = zeros(numcurvpts,length(skeleton));
     curvature_smooth = zeros(numcurvpts,length(skeleton));
+    distanceBetweenPoints = zeros(1,numcurvpts);
     %for each skeleton spline, do the following:
     for frame = 1:length(skeleton)
         x = skeleton(frame).x;
@@ -32,7 +33,7 @@ function curvature_smooth = findCurvature(skeleton, sigma, numcurvpts)
         %create a smooth spline of equally spaced points:
         xy_smoothSpline = generateSmoothSpline([x_filtered; y_filtered],numcurvpts);
         %Calculate the curvature based on the delta Theta method:
-        curvature(:,frame) = calculateCurvatureDeltaTheta(xy_smoothSpline);
+        [curvature(:,frame), distanceBetweenPoints(1,frame) ] = calculateCurvatureDeltaTheta(xy_smoothSpline);
         %Use filter again to smooth the curvature:
         curvature_smooth(:,frame) = lowpass1D(curvature(:,frame), 1.5);
       

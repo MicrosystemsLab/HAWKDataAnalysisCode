@@ -13,11 +13,11 @@
 %  modified by A. Leifer.
 %
 %%%%%
-function ps = calculateCurvaturePhaseShift(curvature)
+function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature)
 
    
     %omit head and tail portion of the worm to discount foraging behavior:
-    headCrop = 0.1;
+    headCrop = 0.2;
     tailCrop = 0.05;
     %Create vector of indices:
     xs = 1:size(curvature,1);
@@ -44,11 +44,12 @@ function ps = calculateCurvaturePhaseShift(curvature)
         nextCurve = curvature(cinds,i+1)';
         %We find the "x" that will minimize the least squares error between
         %the next curve and shiftfn when evaulated at x and the current curve 
-        x = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
+        [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
         %Adjust for next curve evaluation by moving next curve to current curve:
         curveAccumulated = curvature(:,i+1)';
         %Save phase shift value:
         ps(i) = x;
+        ps_residual(i) = residual;
     end
 
 

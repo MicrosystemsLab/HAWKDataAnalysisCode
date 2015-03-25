@@ -5,6 +5,8 @@
 %  params {xy} 2D vector, vector of points x,y that coorespond to the
 %  spline
 %  returns {kappa} 1D vector containing the curvature at each point.
+%  returns {distanceBetweenPoints}, double, the distance, in pixels between
+%  each point for which a curvature is calculated.
 %
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
@@ -12,7 +14,7 @@
 %  modified by A. Leifer.
 %%%%%
 
-function kappa = calculateCurvatureDeltaTheta(xy)
+function [kappa, distanceBetweenPoints] = calculateCurvatureDeltaTheta(xy)
     
     %Calculate the differences between each point in x vector and each
     %point in y vector:
@@ -28,5 +30,5 @@ function kappa = calculateCurvatureDeltaTheta(xy)
     deltaTheta = unwrap(diff(atdf2,1));
     %Kappa is deltaTheta/dS:
     kappa = deltaTheta*numcurvpts/lengthOfWorm;
-    
+    distanceBetweenPoints = lengthOfWorm/numcurvpts;
 end

@@ -1,4 +1,4 @@
-
+% Script for debugging the curvature phase shift analysis 
 x = zeros(size(curvature));
 x(:,1) = 1:size(curvature,1);
 

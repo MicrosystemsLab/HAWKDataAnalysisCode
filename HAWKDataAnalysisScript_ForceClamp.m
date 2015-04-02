@@ -27,7 +27,7 @@ if (ispc) %if on PC workstation in MERL 223
 elseif (ismac) % if on Eileen's personal computer
     DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-    excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
+    excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
     % For excel writing, need these files linked:
     % Initialisation of POI Libs

@@ -69,9 +69,7 @@ function [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData)
             Stimulus(stimCount).PixelPositions.mean.y(frameCountInsideStim) = mean(Stimulus(stimCount).Skeleton(frameCountInsideStim).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
             %Also calculate body length based on skeleton length:
             Stimulus(stimCount).BodyMorphology.bodyLength(frameCountInsideStim) = calculateBodyLength(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y)*UM_PER_PIXEL; 
-            % Calculate curvature statistics.
-            Stimulus(stimCount).BodyMorphology.curve(frameCountInsideStim) = curvatureSpline(Stimulus(stimCount).Skeleton(frameCountInsideStim).x, Stimulus(stimCount).Skeleton(frameCountInsideStim).y, 100);
-            
+          
             % Find worm body width if possible:
             if ismember('TargetSegment1',fieldnames(TrackingData.(['WormInfo',num2str(frameCount)])))
                 Stimulus(stimCount).PixelPositions.targetSegment1.x(frameCountInsideStim) = TrackingData.(['WormInfo',num2str(frameCount)]).TargetSegment1.x;

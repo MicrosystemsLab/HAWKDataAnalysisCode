@@ -13,12 +13,13 @@
 %  modified by A. Leifer.
 %
 %%%%%
-function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature)
+function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim)
 
    
     %omit head and tail portion of the worm to discount foraging behavior:
     headCrop = 0.2;
     tailCrop = 0.05;
+    alpha_accum = 0.1;
     %Create vector of indices:
     xs = 1:size(curvature,1);
     %Crop indice vector using tail and head portion cut offs:
@@ -44,9 +45,12 @@ function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature)
         nextCurve = curvature(cinds,i+1)';
         %We find the "x" that will minimize the least squares error between
         %the next curve and shiftfn when evaulated at x and the current curve 
-        [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
+        try [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
+        catch x = 0; disp([' Stimulus:  ' num2str(stim) ' Frame:  ' num2str(i) ': least squares curve fit failed!']);
+        end
         %Adjust for next curve evaluation by moving next curve to current curve:
-        curveAccumulated = curvature(:,i+1)';
+%         curveAccumulated = curvature(:,i+1)';
+        curveAccumulated = alpha_accum * interp1(xs,curveAccumulated,xs+x,'linear','extrap') + (1-alpha_accum) * curvature(:,i+1)';
         %Save phase shift value:
         ps(i) = x;
         ps_residual(i) = residual;

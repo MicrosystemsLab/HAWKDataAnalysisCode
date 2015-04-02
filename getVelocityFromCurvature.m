@@ -13,27 +13,20 @@
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
 %%%%% 
-function [velocity] = getVelocityFromCurvature(Stimulus, numStims)
+function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
     HAWKSystemConstants;
-    numcurvpts = 50;
-    colors = {'r','b','k','g','m','y'};
+    HAWKProcessingConstants;
+
     for stim = 1:numStims
         skeleton = Stimulus(stim).Skeleton;
 
         numFrames = length(skeleton);
-        [curvature, distanceBetweenPoints] = findCurvature(skeleton,1,numcurvpts);
-        ps = calculateCurvaturePhaseShift(curvature);
+        [Stimulus(stim).curvature, distanceBetweenPoints] = findCurvature(skeleton,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
+        [Stimulus(stim).phaseShift.ps, Stimulus(stim).phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).curvature, stim);
 
-%         averageDistances = [distanceBetweenPoints 1] + [1 distanceBetweenPoints];
-%         averageDistances = 0.5*averageDistances(2:numFrames);
-%         distanceMoved = ps.*averageDistances.*UM_PER_PIXEL;
-%         velocity(stim).speed = distanceMoved.*Stimulus(stim).timeData(2:numFrames,9)';
+        Stimulus(stim).velocity.speed =  Stimulus(stim).phaseShift.ps.*(1/NUMCURVPTS).*Stimulus(stim).timeData(2:numFrames,9)';
+        Stimulus(stim).velocity.direction = sign( Stimulus(stim).phaseShift.ps);
 
-        velocity(stim).speed = ps.*(1/numcurvpts).*Stimulus(stim).timeData(2:numFrames,9)';
-        velocity(stim).direction = sign(ps);
-        
-        plot(1:numFrames-1,velocity(stim).speed, colors{stim});
-        hold on
     end
     
 end

@@ -16,6 +16,7 @@
 
 
 function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
+    HAWKProcessingConstants;
     clear Stimulus.droppedFrames;
     clear Stimulus.goodFrames;
 
@@ -27,9 +28,12 @@ function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
         % the original body length statistics, it is classified as a good
         % frame, otherwise it's a bad frame.
         for frameParser = 1:Stimulus(stim).numFrames; 
-            if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength-Stimulus(stim).BodyMorphology.stdBodyLength || ...
-                Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength+Stimulus(stim).BodyMorphology.stdBodyLength)
-                Stimulus(stim).droppedFrames(droppedFrameCounter) = frameParser;
+            %if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength-Stimulus(stim).BodyMorphology.stdBodyLength || ...
+             %   Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength+Stimulus(stim).BodyMorphology.stdBodyLength)
+            if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength*BODY_LENGTH_PERCENT_THRESHOLD || ...
+                Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength*(1+(1-BODY_LENGTH_PERCENT_THRESHOLD)))
+
+            Stimulus(stim).droppedFrames(droppedFrameCounter) = frameParser;
                 droppedFrameCounter = droppedFrameCounter + 1;
             else
                 Stimulus(stim).goodFrames(goodFrameCounter) = frameParser;

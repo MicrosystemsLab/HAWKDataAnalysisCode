@@ -21,7 +21,6 @@ function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
     clear Stimulus.goodFrames;
 
     for stim = 1:numStims
-        clear goodFrames;
         %Figure out dropped frames:
         droppedFrameCounter = 1;
         goodFrameCounter = 1;
@@ -34,20 +33,20 @@ function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
             if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength*BODY_LENGTH_PERCENT_THRESHOLD || ...
                 Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength*(1+(1-BODY_LENGTH_PERCENT_THRESHOLD)))
 
-                Stimulus(stim).BodyMorphology.framesOutOfBodyLengthRange(droppedFrameCounter) = frameParser;
+            Stimulus(stim).BodyMorphology.framesOutOfBodyLengthRange(droppedFrameCounter) = frameParser;
                 droppedFrameCounter = droppedFrameCounter + 1;
-            else
-                goodFrames(goodFrameCounter) = frameParser;
-                goodFrameCounter = goodFrameCounter + 1;      
-            end
+%             else
+%                  Stimulus(stim).BodyMorphology.goodFrames(goodFrameCounter) = frameParser;
+%                 goodFrameCounter = goodFrameCounter + 1;      
+%             end
 
         end
-     
+        
         %Save new statistics:
-        Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames = mean(Stimulus(stim).BodyMorphology.bodyLength(goodFrames)); 
-        Stimulus(stim).BodyMorphology.stdBodyLengthGoodFrames = std(Stimulus(stim).BodyMorphology.bodyLength(goodFrames));
-        Stimulus(stim).BodyMorphology.averageBodyWidthGoodFrames = mean(Stimulus(stim).BodyMorphology.widthAtTarget(goodFrames)); 
-        Stimulus(stim).BodyMorphology.stdBodyWidthGoodFrames = std(Stimulus(stim).BodyMorphology.widthAtTarget(goodFrames));
+        Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames = mean(Stimulus(stim).BodyMorphology.bodyLength(Stimulus(stim).goodFrames)); 
+        Stimulus(stim).BodyMorphology.stdBodyLengthGoodFrames = std(Stimulus(stim).BodyMorphology.bodyLength(Stimulus(stim).goodFrames));
+        Stimulus(stim).BodyMorphology.averageBodyWidthGoodFrames = mean(Stimulus(stim).BodyMorphology.widthAtTarget(Stimulus(stim).goodFrames)); 
+        Stimulus(stim).BodyMorphology.stdBodyWidthGoodFrames = std(Stimulus(stim).BodyMorphology.widthAtTarget(Stimulus(stim).goodFrames));
     end
 
 end

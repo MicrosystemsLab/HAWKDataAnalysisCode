@@ -28,12 +28,12 @@ xlabel('1/50ths of Body Length','FontSize', 16)
 ylabel('Curvature','FontSize',16);
 
 %%
-
+stim = 4;
 x= 1:50;
 prePhaseShiftPoints = x(20:40);
 preCurvaturePoints = Stimulus(stim).curvature(20:40,1);
 
-stim = 4;
+
 endFrame = Stimulus(stim).numFrames-1;
 
     
@@ -73,8 +73,8 @@ guessPre = getZeroCrossings(sortedPrePhaseShiftPoints, sortedPreCurvaturePoints)
 guessPost = getZeroCrossings(sortedPostPhaseShiftPoints, sortedPostCurvaturePoints)
 
 f = fittype('(a*x+b).*sin(c.*x+d)');
-preFit = fit(sortedPrePhaseShiftPoints',sortedPreCurvaturePoints,f, 'StartPoint',[1 max(sortedPreCurvaturePoints) 2*pi*(guessPre) 0]);
-postFit = fit(sortedPostPhaseShiftPoints',sortedPostCurvaturePoints,f, 'StartPoint',[1 max(sortedPostCurvaturePoints) 2*pi*(guessPost) 0]);
+preFit = fit(sortedPrePhaseShiftPoints',sortedPreCurvaturePoints,f, 'StartPoint',[1 max(sortedPreCurvaturePoints) 2*pi*(1/guessPre) 0]);
+postFit = fit(sortedPostPhaseShiftPoints',sortedPostCurvaturePoints,f, 'StartPoint',[1 max(sortedPostCurvaturePoints) 2*pi*(1/guessPost) 0]);
 
 figure(1);
 plot(sortedPrePhaseShiftPoints, sortedPreCurvaturePoints)

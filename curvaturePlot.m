@@ -42,7 +42,9 @@ for i=1:size(curvature,1)
     
 end
 
-curvatureimage.img = [curvatureimage.R; curvatureimage.G; curvatureimage.B];
-
+% curvatureimage.img = [curvatureimage.R; curvatureimage.G; curvatureimage.B];
+curvatureimage.img(:,:,1) = curvatureimage.R;
+curvatureimage.img(:,:,2) = curvatureimage.G;
+curvatureimage.img(:,:,3) = curvatureimage.B;
 end
 

@@ -118,6 +118,12 @@ end
 videoPresent = true;
 Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingData, numStims, videoPresent);
 
+%% Extract velocity, phase shift by determining the curvature.
+ Stimulus = getVelocityFromCurvature(Stimulus, numStims);
+ 
+%% Determine which frames are not viable:
+ Stimulus = scoreFrames(Stimulus, numStims);
+Stimulus = scoreTrials(TrackingData, Stimulus, numStims);
 %% Write per stimulus data to excel spread sheet
 [data, firstColumn] = populateForceClampPerStimulusData( Stimulus, spreadsheetTitles, numStims);
 xlwrite(excelFile, data, 'Experiment Log Force Clamp', strcat('A'+firstColumn-1,num2str(experimentRow+1)));

@@ -7,8 +7,8 @@
 %  stimulus
 %  param {numStims} int, the number of stimulus in this experiment.
 %
-%  returns {velocity}, struct, a speed and direction vector for each
-%  stimulus
+%  returns {Stimulus}, struct, the input parameter with structure added 
+%  that gives the speed and direction vector for each stimulus
 % 
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
@@ -22,10 +22,22 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
 
         numFrames = length(skeleton);
         [Stimulus(stim).curvature, distanceBetweenPoints] = findCurvature(skeleton,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
-        [Stimulus(stim).phaseShift.ps, Stimulus(stim).phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).curvature, stim);
-
-        Stimulus(stim).velocity.speed =  Stimulus(stim).phaseShift.ps.*(1/NUMCURVPTS).*Stimulus(stim).timeData(2:numFrames,9)';
-        Stimulus(stim).velocity.direction = sign( Stimulus(stim).phaseShift.ps);
+        [Stimulus(stim).phaseShift.ps, Stimulus(stim).phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).curvature, stim, Stimulus(stim).computerScoredBadFrames);
+        cumulativeTime = 0;                 
+        Stimulus(stim).velocity.speed(1) =  0;
+        Stimulus(stim).velocity.direction(1) = 0;
+        for(frame = 2:numFrames)
+            if (isnan(Stimulus(stim).phaseShift.ps(frame-1)))
+                 Stimulus(stim).velocity.speed(frame) =  NaN;
+                 Stimulus(stim).velocity.direction(frame) = NaN;
+            else
+                deltaX = Stimulus(stim).phaseShift.ps(frame-1) .* (1/NUMCURVPTS) .* Stimulus(stim).BodyMorphology.bodyLength(frame);
+                deltaT = Stimulus(stim).timeData(frame,8)-cumulativeTime;
+                Stimulus(stim).velocity.speed(frame) =  deltaX./deltaT';
+                Stimulus(stim).velocity.direction(frame) = sign( Stimulus(stim).phaseShift.ps(frame-1));
+                cumulativeTime = Stimulus(stim).timeData(frame,8);
+            end
+        end
 
     end
     

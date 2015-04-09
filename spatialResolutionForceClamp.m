@@ -78,15 +78,18 @@ function Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingDat
 
         %Figure out the frame in which the cantilever comes in contact with
         %the worm.
-        approachDuration = Stimulus(stim).StimulusTiming.stimOnStartTime - Stimulus(stim).StimulusTiming.approachStartTime;
-        frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
-        numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
-        if(numberOfApproachFrames <= length(Stimulus(stim).FramesByStimulus.DuringStimFrames))
-            testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(numberOfApproachFrames);
-            
-        else
-            testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(1);
-        end
+        
+        stimOnFrame =  find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime,1);
+        testFrameStim = stimOnFrame;
+%         approachDuration = Stimulus(stim).StimulusTiming.stimOnStartTime - Stimulus(stim).StimulusTiming.approachStartTime;
+%         frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
+%         numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
+%         if(numberOfApproachFrames <= length(Stimulus(stim).FramesByStimulus.DuringStimFrames))
+%             testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(numberOfApproachFrames);
+%             
+% %         else
+%             testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(1);
+%         end
         skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim);
         testFrameVideo = testFrameStim + firstFrame;
 

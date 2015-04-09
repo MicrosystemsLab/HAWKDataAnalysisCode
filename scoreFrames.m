@@ -17,9 +17,8 @@
 %  stimulus
 %  param {numStims} int, the number of stimulus in this experiment.
 %  
-%  returns {Stimulus} struct, contains experiment data organized by
-%  stimulus, includes good frames, bad frames filtered by body length
-%  statistics.
+%  returns {Stimulus} struct, returns the same Stimulus with an added list
+%  of the computer determined bad frames.
 %
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
@@ -32,7 +31,7 @@ function Stimulus = scoreFrames(Stimulus, numStims)
     
 %     weights = zeros(4,numStims);
     for stim = 1:numStims
-        metrics = zeros(Stimulus(stim).numFrames,4);
+        metrics = zeros(Stimulus(stim).numFrames,3);
         
         % Find frames where the skeleton intersects itself:
         skeleton = Stimulus(stim).Skeleton;
@@ -45,14 +44,19 @@ function Stimulus = scoreFrames(Stimulus, numStims)
         end
         metrics(find(numberOfIntersections>0),1) = 1;
 
+        
         %find dropped frames based on length calculation           
-        metrics(Stimulus(stim).BodyMorphology.framesOutOfBodyLengthRange,2) = 1;
+        if ismember('framesOutOfBodyLengthRange',fieldnames(Stimulus(stim).BodyMorphology))
+            metrics(Stimulus(stim).BodyMorphology.framesOutOfBodyLengthRange,2) = 1;
+        end
             
         % find frames based on large width measurements:
+     
         metrics(find(Stimulus(stim).BodyMorphology.widthAtTarget>WIDTH_AT_TARGET_LIMIT),3) = 1;
+      
           
         % find frames where residual is high:
-        metrics(1+find(Stimulus(stim).phaseShift.residual>PHASE_SHIFT_RESIDUAL_LIMIT),4) = 1;
+%         metrics(1+find(Stimulus(stim).phaseShift.residual>PHASE_SHIFT_RESIDUAL_LIMIT),4) = 1;
           
 %         
 %         y = zeros(Stimulus(stim).numFrames,1);

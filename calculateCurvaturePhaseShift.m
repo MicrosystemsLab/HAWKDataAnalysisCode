@@ -5,6 +5,10 @@
 %  params {curvature} maxtrix, each column is the smoothed curvature matrix
 %  from a single frame. The first row is the head, the last row is the
 %  tail.
+%  params {stim} int, the stimulus that this phase shift calculation
+%  corresponds to.
+%  params {badFrames} vector<int>, a list of the frames to ignore in the
+%  calulation.
 %  returns {ps} 1D vector, contains the phase shift between frames.
 %
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
@@ -13,13 +17,13 @@
 %  modified by A. Leifer.
 %
 %%%%%
-function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim)
+function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim, badFrames)
 
    
     %omit head and tail portion of the worm to discount foraging behavior:
     headCrop = 0.2;
-    tailCrop = 0.05;
-    alpha_accum = 0.1;
+    tailCrop = 0.1;
+    alpha_accum = 0.5;
     %Create vector of indices:
     xs = 1:size(curvature,1);
     %Crop indice vector using tail and head portion cut offs:
@@ -41,19 +45,29 @@ function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim)
     %initialize with the first curve:
     curveAccumulated = curvature(:,1)';
     for i = 1:numberOfCurves-1
-        %select the next curve to compare:
-        nextCurve = curvature(cinds,i+1)';
-        %We find the "x" that will minimize the least squares error between
-        %the next curve and shiftfn when evaulated at x and the current curve 
-        try [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
-        catch x = 0; disp([' Stimulus:  ' num2str(stim) ' Frame:  ' num2str(i) ': least squares curve fit failed!']);
+        if (ismember(i+1,badFrames))
+            x = 0;
+            ps(i) = NaN;
+            ps_residual(i) = NaN;
+        else
+            %select the next curve to compare:
+            nextCurve = curvature(cinds,i+1)';
+            %We find the "x" that will minimize the least squares error between
+            %the next curve and shiftfn when evaulated at x and the current curve 
+            try [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
+            catch
+                x = 0; 
+                residual=NaN; 
+                disp([' Stimulus:  ' num2str(stim) ' Frame:  ' num2str(i) ': least squares curve fit failed!']);
+            end
+            %Adjust for next curve evaluation by moving next curve to current curve:
+    %         curveAccumulated = curvature(:,i+1)';
+            curveAccumulated = alpha_accum * interp1(xs,curveAccumulated,xs+x,'linear','extrap') + (1-alpha_accum) * curvature(:,i+1)';
+        
+            %Save phase shift value:
+            ps(i) = x;
+            ps_residual(i) = residual;
         end
-        %Adjust for next curve evaluation by moving next curve to current curve:
-%         curveAccumulated = curvature(:,i+1)';
-        curveAccumulated = alpha_accum * interp1(xs,curveAccumulated,xs+x,'linear','extrap') + (1-alpha_accum) * curvature(:,i+1)';
-        %Save phase shift value:
-        ps(i) = x;
-        ps_residual(i) = residual;
     end
 
 

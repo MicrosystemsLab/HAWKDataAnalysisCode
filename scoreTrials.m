@@ -30,11 +30,11 @@ function Stimulus = scoreTrials(TrackingData, Stimulus, numStims)
         %Check stimulus
         stimulusApplicationCheck = true;
         
-        Stimulus(stim).trialSuccessScoring = [droppedFramesCheck   stimulusLocationCheck   stimulusApplicationCheck];
+        Stimulus(stim).TrialScoring.trialSuccessScoring = [droppedFramesCheck   stimulusLocationCheck   stimulusApplicationCheck];
         if (droppedFramesCheck && stimulusLocationCheck && stimulusApplicationCheck)
-            Stimulus(stim).trialSuccess = 1;
+            Stimulus(stim).TrialScoring.trialSuccess = 1;
         else
-            Stimulus(stim).trialSuccess = 0;
+            Stimulus(stim).TrialScoring.trialSuccess = 0;
         end    
     end
 end

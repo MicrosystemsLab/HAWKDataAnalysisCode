@@ -21,20 +21,20 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
         skeleton = Stimulus(stim).Skeleton;
 
         numFrames = length(skeleton);
-        [Stimulus(stim).curvature, distanceBetweenPoints] = findCurvature(skeleton,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
-        [Stimulus(stim).phaseShift.ps, Stimulus(stim).phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).curvature, stim, Stimulus(stim).computerScoredBadFrames);
+        [Stimulus(stim).CurvatureAnalysis.curvature, distanceBetweenPoints] = findCurvature(skeleton,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
+        [Stimulus(stim).CurvatureAnalysis.phaseShift.ps, Stimulus(stim).CurvatureAnalysis.phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).CurvatureAnalysis.curvature, stim, Stimulus(stim).computerScoredBadFrames);
         cumulativeTime = 0;                 
-        Stimulus(stim).velocity.speed(1) =  0;
-        Stimulus(stim).velocity.direction(1) = 0;
+        Stimulus(stim).CurvatureAnalysis.velocity(1) =  0;
+%         Stimulus(stim).velocity.direction(1) = 0;
         for(frame = 2:numFrames)
-            if (isnan(Stimulus(stim).phaseShift.ps(frame-1)))
-                 Stimulus(stim).velocity.speed(frame) =  NaN;
-                 Stimulus(stim).velocity.direction(frame) = NaN;
+            if (isnan(Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1)))
+                 Stimulus(stim).CurvatureAnalysis.velocity(frame) =  NaN;
+%                  Stimulus(stim).CurvatureAnalysis.velocity.direction(frame) = NaN;
             else
-                deltaX = Stimulus(stim).phaseShift.ps(frame-1) .* (1/NUMCURVPTS) .* Stimulus(stim).BodyMorphology.bodyLength(frame);
+                deltaX = Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1) .* (1/NUMCURVPTS) .* Stimulus(stim).BodyMorphology.bodyLength(frame);
                 deltaT = Stimulus(stim).timeData(frame,8)-cumulativeTime;
-                Stimulus(stim).velocity.speed(frame) =  deltaX./deltaT';
-                Stimulus(stim).velocity.direction(frame) = sign( Stimulus(stim).phaseShift.ps(frame-1));
+                Stimulus(stim).CurvatureAnalysis.velocity(frame) =  deltaX./deltaT';
+%                 Stimulus(stim).CurvatureAnalysis.velocity.direction(frame) = sign( Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1));
                 cumulativeTime = Stimulus(stim).timeData(frame,8);
             end
         end

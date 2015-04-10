@@ -1,3 +1,21 @@
+%%%% Function: Get Track Data
+%  Extracts the amplitude and wavelength of the current worm skeleton. It
+%  rotates the skeleton to the x-axis and then finds the amplide and
+%  wavelength.
+% 
+%  param {xx} vector<int>,  the x coordinates of the skeleton
+%  param {yy} vector<int>,  the y coordinates of the skeleton.
+%  param {theta} double, the angle to rotate the skeleton.
+
+%  returns {track} struct, contains the amplitude and wavelength vectors of
+%  the skeleton
+% 
+%  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
+%  This file is part of HAWK_AnalysisMethods.
+%
+%%%%%
+
+
 function [track] = getTrackData(xx, yy, theta)
         
         w = [xx; yy];   % Matrix of x's & y's
@@ -36,6 +54,6 @@ function [track] = getTrackData(xx, yy, theta)
                                         %   (in pixels)
                                         
         % calculate track wavelength - TBD
-        track.wavelength = 0;
+        track.wavelength = 0;%getZeroCrossings(wwx, wwy);
 
 end

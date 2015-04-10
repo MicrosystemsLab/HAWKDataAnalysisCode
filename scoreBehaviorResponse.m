@@ -22,52 +22,40 @@
 %
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
-%  This method is compilation of adapted methods written by C. Fang-Yen and A.
-%  Leifer. 
 %%%%%
 
 function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
     
     HAWKProcessingConstants;
     for stim = 1:numStims
-        speed = Stimulus(stim).velocity.speed;
+        %Filter the speed to analysze it
+        speed = Stimulus(stim).CurvatureAnalysis.velocity;
         speed_smoothed = lowpass1D(speed,2);
         direction_smoothed = sign(speed_smoothed);
-        direction = Stimulus(stim).velocity.direction;
+        direction = sign(Stimulus(stim).CurvatureAnalysis.velocity);
         preStimCount= length(Stimulus(stim).FramesByStimulus.PreStimFrames);
         
+        %Get time the stimulus started:
         stimOnFrame =  find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime,1)-1;
-
+        %Grab frames of intered: 10 frames before stimulus, during stim
+        %frames and 20 frames after stimulus
         frames = [Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-10:preStimCount),...
             Stimulus(stim).FramesByStimulus.DuringStimFrames, ...
             Stimulus(stim).FramesByStimulus.PostStimFrames(1:20)];
-        
-%        %Determine if there's a change in direction:
-%         ind = find(diff(direction_smoothed(frames))~=0)+1+frames(1);
-%         if(length(ind) ~=0 &&( length(ind) == 1 || ind(2)-ind(1)>5))
-%            
-%             deltaDirection = true;
-%             reversalFrame = find(diff(direction(ind(1)-5:ind(1)+5))~=0,1)-5+ind(1)+1;
-%             latency = Stimulus(stim).timeData(reversalFrame,8)-Stimulus(stim).StimulusTiming.stimOnStartTime;
-% %         
-%         else
-%             
-%             deltaDirection = false;
-%             reversalFrame = 0;
-%             latency = 0;
-%         end
-%         
+          
         %determine speed delta
         preStimAveSpeed = nanmean(speed(frames(1)-1 + find(frames<=stimOnFrame-1)) ); 
         postStimAveSpeed = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES)) ); 
         postStimAcceleration = diff(speed(find(frames>=stimOnFrame+1,POST_STIM_FRAMES)));
         
+        %Compare before and after movement directions to determine delta:
         if sign(preStimAveSpeed) ~= sign(postStimAveSpeed)
             deltaDirection = true;
         else
             deltaDirection = false;
         end
         
+        %Compare before and after average speeds to determine delta speed:
         if ( abs(postStimAveSpeed) < abs(preStimAveSpeed)*(SPEED_THRESHOLD_PAUSE))
             deltaSpeed = -1;
         elseif  (abs(postStimAveSpeed) > abs(preStimAveSpeed)*(SPEED_THRESHOLD_SPEEDUP))
@@ -76,52 +64,60 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
             deltaSpeed = 0;
         end
             
-        
-        stimOnFrames = find(Stimulus(stim).StimulusActivity(frames)==1);
-        figure(stim);
-        subplot(211), plot(frames,speed(frames),'LineStyle',':','LineWidth',6, 'Color','b','Marker','none');
-        hold on
-        plot(frames,speed_smoothed(frames),'LineStyle','-','LineWidth',6, 'Color','r','Marker','none');
-        legend('Speed','Smoothed Speed','Location','SouthEast');
-        title('Signed speed of worm during stimulus','FontSize', 24)
-        xlabel('Frame','FontSize', 20)
-        ylabel('Speed','FontSize', 20)
-%         axis([0 60 -Inf Inf])
-        subplot(212), plot(frames,direction(frames),'LineStyle',':','LineWidth',6, 'Color','b','Marker','none');
-         hold on
-        plot(frames,direction_smoothed(frames),'LineStyle','-','LineWidth',6, 'Color','r','Marker','none');
-        plot(frames(stimOnFrames),ones(size(stimOnFrames)).*1.3,'LineStyle','-','LineWidth',6, 'Color','g','Marker','none')
-        axis([-Inf Inf -1.5 1.5])
-        legend('Velocity Direction','Smoothed Velocity Direction','Stimulus On','Location','SouthEast');
-        title('Direction of worm during stimulus','FontSize', 24)
-        xlabel('Frame','FontSize', 20)
-        ylabel('Direction (binary)','FontSize', 20)
-        
-        
+
+        %First check if there is a reversal by checking for a change in
+        %direction:
         if (deltaDirection == 1)
             responseType = 'reversal';
-%             reversalFrame(stim) = find(diff(direction(ind(1)-5:ind(1)+5))~=0,1)-5+ind(1)+1;
-%             latency(stim) = Stimulus(stim).timeData(reversalFrame(stim),8)-Stimulus(stim).StimulusTiming.stimOnStartTime;     
-            latency = 0;
+            %Measure latency of reversal:
+            ind = find(diff(direction_smoothed(frames))~=0)+1+frames(1);
+            reversalFrame = find(diff(direction(ind(1)-5:ind(1)+5))~=0,1)-5+ind(1)+1;
+            latency = Stimulus(stim).timeData(reversalFrame,8)-Stimulus(stim).StimulusTiming.stimOnStartTime;
+        %If there is no significant change in speed, classify as "none"
         elseif (deltaSpeed == 0)
             responseType = 'none';
             latency = 0;
+        %If there is a significant drop in speed, classify as a pause
         elseif (deltaSpeed == -1)
             responseType = 'pause';
             latency = 0;
-
+        %If there is a significant increase in speed, classify as speed up
         elseif (deltaSpeed == 1)
             responseType = 'speedup';
             latency = 0;
+        %Else classify as unknown:
         else 
             responseType = 'unknown';
             latency = 0;
         end
         
+        %Save data to Stimulus:
         Stimulus(stim).Response.Type = responseType;
         Stimulus(stim).Response.Latency = latency;
         Stimulus(stim).Response.preStimSpeed = preStimAveSpeed;
         Stimulus(stim).Response.postStimSpeed = postStimAveSpeed;
         Stimulus(stim).Response.postStimAcceleration = postStimAcceleration;
+        
+                %Plotting for debug:
+%         stimOnFrames = find(Stimulus(stim).StimulusActivity(frames)==1);
+%         figure(stim);
+%         subplot(211), plot(frames,speed(frames),'LineStyle',':','LineWidth',6, 'Color','b','Marker','none');
+%         hold on
+%         plot(frames,speed_smoothed(frames),'LineStyle','-','LineWidth',6, 'Color','r','Marker','none');
+%         legend('Speed','Smoothed Speed','Location','SouthEast');
+%         title('Signed speed of worm during stimulus','FontSize', 24)
+%         xlabel('Frame','FontSize', 20)
+%         ylabel('Speed','FontSize', 20)
+% %         axis([0 60 -Inf Inf])
+%         subplot(212), plot(frames,sign(speed(frames)),'LineStyle',':','LineWidth',6, 'Color','b','Marker','none');
+%          hold on
+%         plot(frames,direction_smoothed(frames),'LineStyle','-','LineWidth',6, 'Color','r','Marker','none');
+%         plot(frames(stimOnFrames),ones(size(stimOnFrames)).*1.3,'LineStyle','-','LineWidth',6, 'Color','g','Marker','none')
+%         axis([-Inf Inf -1.5 1.5])
+%         legend('Velocity Direction','Smoothed Velocity Direction','Stimulus On','Location','SouthEast');
+%         title('Direction of worm during stimulus','FontSize', 24)
+%         xlabel('Frame','FontSize', 20)
+%         ylabel('Direction (binary)','FontSize', 20)
+        
     end
 end

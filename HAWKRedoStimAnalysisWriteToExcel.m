@@ -1,12 +1,3 @@
-%%%% Script: Perform the conversion of yaml data to mat data files in bulk
-%  Prompts user for a selection of folders containing data from HAWK. It
-%  then serially evaluates each folder, converting the yaml files into
-%  useable mat files for Matlab.
-%
-%  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
-%  This file is part of HAWK_AnalysisMethods.
-%
-%%%%%
 clear all;
 close all;
 % Get Folder where all the files are:
@@ -15,8 +6,7 @@ if (ispc) %if on PC workstation in MERL 223
     DestinationFolder = 'C:\Users\HAWK\Documents\HAWKData';
     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
     excelFile = 'C:\Users\HAWK\Dropbox\HAWK\HAWKExperimentLog.xls';
-    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');
-    slash = '\';
+    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');s
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -27,11 +17,10 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Volumes/home/HAWK Data/';
+    DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-    excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
+    excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
-    slash = '/';
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -50,50 +39,39 @@ end
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
 
 for dir = 1:length(directories)
-      %Select next directory:
+    %Select next directory:
     directoryCell = directories(:,dir);
     directory = directoryCell{1};
-    
-    
+        
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
-    %Extract tracking, FPGA, stimulus data from YAML files: 
-    TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
-    
-    
+   
     %Extract General Properties:
     % mat file name for the per stimulus data structure.
     mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
     %if the data has already been read from the .yaml file, just load the mat
     %file created last time:
     if (exist(mat_file, 'file')==2)
+
+        %Extract tracking, FPGA, stimulus data from YAML files: 
+        TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
+        FPGAData = getFPGADataFromYAML(directory, experimentTitle);
+        StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
         load(mat_file);
-        %Also need to extract the number of stimulus 
+        
         if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
             numStims = TrackingData.NumberOfStimulus;
         else
             numStims =  min(length(Stimulus), length(fieldnames(FPGAData)));
         end
-        if num
-       Stimulus = rmfield(Stimulus, 'goodFrames');
-       Stimulus = rmfield(Stimulus, 'droppedFrames');
-       Stimulus = rmfield(Stimulus, 'Trajectory');
-       
-       Stimulus = filterFramesByBodyLength(Stimulus,numStims);
-       Stimulus = determineWormTrajectory(Stimulus, numStims);
-       Stimulus = scoreFrames(Stimulus, numStims);
-       Stimulus = scoreTrials(TrackingData,Stimulus,numStims);
-
-       Stimulus = getVelocityFromCurvature(Stimulus, numStims);
-       Stimulus = calculateCurvatureParameters(Stimulus,numStims);
-
-       Stimulus = scoreBehaviorResponse(Stimulus, numStims);
-
-       %Save stimulus to mat file
-       save(mat_file, 'Stimulus');
-    
+        
+        if numStims>0
+            [NUM,TXT,RAW]=xlsread(excelFile,'Manual Response Scoring');
+            [rowCount columnCount] = size(RAW);
+            experimentRow = rowCount+1;
+            [experimentData stimulusData ]= getDataForExcel(TrackingData, StimulusData, Stimulus,numStims, experimentTitle);
+            xlwrite(excelFile, experimentData, 'Manual Response Scoring', strcat('A',num2str(experimentRow)));
+            xlwrite(excelFile, stimulusData, 'Manual Response Scoring', strcat('AA',num2str(experimentRow)));
+        end
     end
-
-    
-    
 end

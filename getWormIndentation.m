@@ -5,7 +5,7 @@ stim = 1;
 
 duration = 0.1*1.5; %s
 pointsPerSecond = 1000;
-actuatorSensitivity = 18; %um/V
+actuatorSensitivity = 26.04; %um/V
 
 %Get the points of interest:
 numStimPoints = duration*pointsPerSecond;

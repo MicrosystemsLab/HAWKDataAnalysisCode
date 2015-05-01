@@ -57,6 +57,7 @@ for dir = 1:length(directories)
     
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
+    try
     %Extract tracking, FPGA, stimulus data from YAML files: 
     TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
     %Only need FPGA data if not in behavior mode
@@ -75,4 +76,7 @@ for dir = 1:length(directories)
     end
     %Save stimulus to mat file
     save(mat_file, 'Stimulus');
+    catch
+       disp(strcat('Experiment read error: ', experimentTitle));
+    end
 end

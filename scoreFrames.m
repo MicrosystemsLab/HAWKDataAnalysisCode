@@ -38,7 +38,6 @@ function Stimulus = scoreFrames(Stimulus, numStims)
         clear numberOfIntersections;
         for i = 1:length(skeleton)
             lengthOfSkeleton = length(skeleton(i).x);
-
             [x0, y0] = intersections(skeleton(i).x(1:floor(0.9*lengthOfSkeleton)), skeleton(i).y(1:floor(0.9*lengthOfSkeleton)));
             numberOfIntersections(i) = length(x0);
         end
@@ -51,21 +50,11 @@ function Stimulus = scoreFrames(Stimulus, numStims)
         end
             
         % find frames based on large width measurements:
-     
         metrics(find(Stimulus(stim).BodyMorphology.widthAtTarget>WIDTH_AT_TARGET_LIMIT),3) = 1;
       
-          
-        % find frames where residual is high:
-%         metrics(1+find(Stimulus(stim).phaseShift.residual>PHASE_SHIFT_RESIDUAL_LIMIT),4) = 1;
-          
-%         
-%         y = zeros(Stimulus(stim).numFrames,1);
-%         y(Stimulus(stim).manuallyScoredBadFrames-Stimulus(stim).ProcessedFrameNumber(1)+1) = 1;
-%         y(Stimulus(stim).manuallyScoredOmegaTurns-Stimulus(stim).ProcessedFrameNumber(1)+1) = 1;
-
-%         weights(:,stim) = pinv(metrics)*y;
         scores = metrics*metricWeights;
-        Stimulus(stim).computerScoredBadFrames = find(scores>=FRAME_SCORE_THRESHOLD);
+        Stimulus(stim).FrameScoring.BadFrames = find(scores>=FRAME_SCORE_THRESHOLD);
+        Stimulus(stim).FrameScoring.GoodFrames = find(scores<FRAME_SCORE_THRESHOLD);
     end
 end
 

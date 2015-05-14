@@ -56,17 +56,25 @@ for dir = 1:length(directories)
     
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
-    try
-        %Extract tracking, FPGA, stimulus data from YAML files: 
-        TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
-        %Only need FPGA data if not in behavior mode
-        if ( ~strcmp(TrackingData.ExperimentMode, 'Behavior Mode'))
-              FPGAData = getFPGADataFromYAML(directory, experimentTitle);
-        end
-        % Extract Stimulus Data from the yaml file:
-        StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
     
-    catch
-       disp(strcat('Experiment read error: ', experimentTitle));
+    TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
+    FPGAData = getFPGADataFromYAML(directory, experimentTitle);
+    StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
+    
+    %Organize data by Stimulus, both behavior and FPGA data:
+    [Stimulus, numStims, TrackingData] = extractBehaviorDataFromTracking(TrackingData);
+    Stimulus = extractFPGADataFromFPGAData(FPGAData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);
+    
+    if TrackingData.NumberOfStimulus > 0
+        Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
+        Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);
+
+        %Go through stimulus manually and swap head/tail misses:
+        Stimulus = manualHeadTailSwapID(Stimulus,numStims, directory);
+
+        %Save Stimulus file:
+        mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
+        save(mat_file, 'Stimulus');
     end
 end
+   

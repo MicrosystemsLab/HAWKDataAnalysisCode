@@ -22,22 +22,23 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
 
         numFrames = length(skeleton);
         [Stimulus(stim).CurvatureAnalysis.curvature, distanceBetweenPoints] = findCurvature(skeleton,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
-        [Stimulus(stim).CurvatureAnalysis.phaseShift.ps, Stimulus(stim).CurvatureAnalysis.phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).CurvatureAnalysis.curvature, stim, Stimulus(stim).computerScoredBadFrames);
+        
+        Stimulus(stim).CurvatureAnalysis.curvatureimage = curvaturePlot(Stimulus(stim).CurvatureAnalysis.curvature',NUMCURVPTS, 0.035, -0.035);
+        
+        [Stimulus(stim).CurvatureAnalysis.phaseShift.ps, Stimulus(stim).CurvatureAnalysis.phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).CurvatureAnalysis.curvature, stim, Stimulus(stim).FrameScoring.BadFrames);
         cumulativeTime = 0;                 
         Stimulus(stim).CurvatureAnalysis.velocity(1) =  0;
-%         Stimulus(stim).velocity.direction(1) = 0;
         for(frame = 2:numFrames)
             if (isnan(Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1)))
                  Stimulus(stim).CurvatureAnalysis.velocity(frame) =  NaN;
-%                  Stimulus(stim).CurvatureAnalysis.velocity.direction(frame) = NaN;
             else
                 deltaX = Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1) .* (1/NUMCURVPTS) .* Stimulus(stim).BodyMorphology.bodyLength(frame);
                 deltaT = Stimulus(stim).timeData(frame,8)-cumulativeTime;
                 Stimulus(stim).CurvatureAnalysis.velocity(frame) =  deltaX./deltaT';
-%                 Stimulus(stim).CurvatureAnalysis.velocity.direction(frame) = sign( Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1));
                 cumulativeTime = Stimulus(stim).timeData(frame,8);
             end
         end
+        Stimulus(stim).CurvatureAnalysis.velocitySmoothed = lowpass1D( Stimulus(stim).CurvatureAnalysis.velocity,2);
 
     end
     

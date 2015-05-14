@@ -30,35 +30,43 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
     for stim = 1:numStims
         %Filter the speed to analysze it
         speed = Stimulus(stim).CurvatureAnalysis.velocity;
-        speed_smoothed = lowpass1D(speed,2);
+        speed_smoothed = Stimulus(stim).CurvatureAnalysis.velocitySmoothed;
         direction_smoothed = sign(speed_smoothed);
         direction = sign(Stimulus(stim).CurvatureAnalysis.velocity);
         preStimCount= length(Stimulus(stim).FramesByStimulus.PreStimFrames);
         
         %Get time the stimulus started:
         stimOnFrame =  find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime,1)-1;
-        %Grab frames of intered: 10 frames before stimulus, during stim
-        %frames and 20 frames after stimulus
-        frames = [Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-10:preStimCount),...
+        %Grab frames of intered: 15 frames before stimulus (~1.5s), during stim
+        %frames and 34 frames after stimulus (~3s)
+        numPreStimFrames = length(Stimulus(stim).FramesByStimulus.PreStimFrames);
+        if numPreStimFrames < 15
+            cutoff = numPreStimFrames - 1;
+        else
+            cutoff = 15;
+        end
+        frames = [Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount),...
             Stimulus(stim).FramesByStimulus.DuringStimFrames, ...
-            Stimulus(stim).FramesByStimulus.PostStimFrames(1:20)];
+            Stimulus(stim).FramesByStimulus.PostStimFrames(1:34)];
           
         %determine speed delta
         preStimAveSpeed = nanmean(speed(frames(1)-1 + find(frames<=stimOnFrame-1)) ); 
-        postStimAveSpeed = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES)) ); 
+        postStimAveSpeed1_5sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES)) );
+        postStimAveSpeed4sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES2)) );
+        
         postStimAcceleration = diff(speed(find(frames>=stimOnFrame+1,POST_STIM_FRAMES)));
         
         %Compare before and after movement directions to determine delta:
-        if sign(preStimAveSpeed) ~= sign(postStimAveSpeed)
+        if sign(preStimAveSpeed) ~= sign(postStimAveSpeed4sec)
             deltaDirection = true;
         else
             deltaDirection = false;
         end
         
         %Compare before and after average speeds to determine delta speed:
-        if ( abs(postStimAveSpeed) < abs(preStimAveSpeed)*(SPEED_THRESHOLD_PAUSE))
+        if ( abs(postStimAveSpeed1_5sec) < abs(preStimAveSpeed)*(SPEED_THRESHOLD_PAUSE))
             deltaSpeed = -1;
-        elseif  (abs(postStimAveSpeed) > abs(preStimAveSpeed)*(SPEED_THRESHOLD_SPEEDUP))
+        elseif  (abs(postStimAveSpeed1_5sec) > abs(preStimAveSpeed)*(SPEED_THRESHOLD_SPEEDUP))
             deltaSpeed = 1;
         else
             deltaSpeed = 0;
@@ -95,7 +103,8 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         Stimulus(stim).Response.Type = responseType;
         Stimulus(stim).Response.Latency = latency;
         Stimulus(stim).Response.preStimSpeed = preStimAveSpeed;
-        Stimulus(stim).Response.postStimSpeed = postStimAveSpeed;
+        Stimulus(stim).Response.postStimSpeed1_5 = postStimAveSpeed1_5sec;
+        Stimulus(stim).Response.postStimSpeed4 = postStimAveSpeed4sec;
         Stimulus(stim).Response.postStimAcceleration = postStimAcceleration;
         
                 %Plotting for debug:

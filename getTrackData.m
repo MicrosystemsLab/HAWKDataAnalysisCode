@@ -12,11 +12,26 @@
 % 
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
+%  Method adapted from Cronin, et al, 2005
 %
 %%%%%
 
 
-function [track] = getTrackData(xx, yy, theta)
+function [amplitude wavelength] = getTrackData(x, y, theta)
+       HAWKSystemConstants;
+       HAWKProcessingConstants;
+       numPoints = 100;
+        %Smooth the spline via a guassian filter:
+        x_filtered =  lowpass1D(x,CURVATURE_FILTERING_SIGMA);
+        y_filtered =  lowpass1D(y,CURVATURE_FILTERING_SIGMA);
+        %create a smooth spline of equally spaced points:
+        xy_smoothSpline = generateSmoothSpline([x_filtered; y_filtered],numPoints);
+        
+        xx = xy_smoothSpline(:,1)';
+        yy = xy_smoothSpline(:,2)';
+       
+        npts = length(xx);
+        nintervals = npts - 1;
         
         w = [xx; yy];   % Matrix of x's & y's
         w(3,:) = 1;     % Bottom row of 1's
@@ -49,11 +64,64 @@ function [track] = getTrackData(xx, yy, theta)
         wwy = ww(2,:);
         
         % Calculate track amplitude 
-        track.amplitude = max(wwy) - min(wwy);  % Width of bounding box
+        amplitude = (max(wwy) - min(wwy)).*UM_PER_PIXEL;  % Width of bounding box
                                         %   aligned with x-axis
-                                        %   (in pixels)
+                                        %   (in pixels, then converted to um)
                                         
         % calculate track wavelength - TBD
-        track.wavelength = 0;%getZeroCrossings(wwx, wwy);
+        df2 = diff([wwx' wwy'],1,1); df2p = df2';
+        splineLength =  cumsum([0, sqrt([1 1]*(df2p.*df2p))]);
+        
+        % Reference vector of equally distributed X-positions
+        iwwx = [wwx(1) : (wwx(end)-wwx(1))/nintervals : wwx(end)];
+        
+        % Signal interpolated to reference vector
+        iwwy = interp1(wwx, wwy, iwwx); 
+        
+        
+        samplingFrequency = IMAGE_WIDTH_PIXELS/2;
+        % Calculate spatial frequency of signal (cycles/PIXEL)
+        iY = fft(iwwy, samplingFrequency);
+        iPyy = iY.* conj(iY) /  samplingFrequency; % Power of constitutive 
+                                        %   "frequency" components
+                                        %   (From Matlab online 
+                                        %   documentation for _fft [1]_)
+                                        
+         xlength = max(iwwx) - min(iwwx);    % Worm length (pixels)
+        
+          % Vector of "frequencies" (cycles/pixel), from 0 (steady 
+            %   state factor) to Nyquist frequency (i.e. 0.5*sampling 
+            %   frequency).  (In our case sampling frequency is 
+            %   typically 12 samples per worm).  
+            % (Nyquist frequency is the theoretical highest frequency
+            %   that can be accurately detected for a given sampling 
+            %   frequency.)
+            %Not sure where 512 comes from
+          f = (nintervals/xlength)*(0: samplingFrequency/2)/ samplingFrequency;
+         % Find index(es) of maximum power measurement (for look-up 
+            %   in frequency vector)
+            indx = find( iPyy(1: samplingFrequency/2+1) == max(iPyy(1: samplingFrequency/2+1)) );
+            
+            if ( prod(size(indx)) == 1 ) & ( f(indx(1)) == 0 )
+                wavelnth = NaN;     % Disregard the (expected-to-be- 
+                                    %   rare) case where 0 Hz is the
+                                    %   only maximum-power frequency
+            else
+                if f(indx(1)) == 0  % If the first element yields 0 Hz,
+                    indx = indx(2:end); % take the next element
+                end
+            
+                % Calculate wormtrack wavelength (finally...)
+                wavelnth = 1/f(indx(1));     % In pixels/cycle
+                
+                wavelnth = wavelnth * UM_PER_PIXEL;   % Convert 
+                                                    %   wavelength 
+                                                    %   into um/cycle
+                
+            end
+                                        
+                                        
+       
+        wavelength = wavelnth;%getZeroCrossings(wwx, wwy);
 
 end

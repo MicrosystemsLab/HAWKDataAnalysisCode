@@ -12,7 +12,7 @@
 %%%%%
 
 
-function experimentTitle = getExperimentTitle(directory, slash)
+function experimentTitle = getExperimentTitle(directory)
     if (ispc) %if on PC workstation in MERL 223
         slash = '\';
     elseif(ismac) % if on MAC workstation

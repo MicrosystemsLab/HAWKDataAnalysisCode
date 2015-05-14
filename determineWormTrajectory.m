@@ -99,14 +99,26 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
                     end
                     
                     
-                    Stimulus(stim).Trajectory.track(frame) = getTrackData(Stimulus(stim).Skeleton(frame).x, Stimulus(stim).Skeleton(frame).y, Stimulus(stim).Trajectory.movementDirection(frame));
+                    [Stimulus(stim).Trajectory.amplitude(frame), Stimulus(stim).Trajectory.wavelength(frame)] = getTrackData(Stimulus(stim).Skeleton(frame).x, Stimulus(stim).Skeleton(frame).y, Stimulus(stim).Trajectory.movementDirection(frame)*pi/180);
                 else 
                     Stimulus(stim).Trajectory.movementDirection(frame) = 0;
                     Stimulus(stim).Trajectory.track(frame).amplitude = 0;
                     Stimulus(stim).Trajectory.track(frame).wavelength = 0;
                 end  
                
+        end
+           %Calculate trajectory statistics:
+            stimOnFrame = find(Stimulus(stim).StimulusActivity == 1, 1);
+            numPreStimFrames = length(Stimulus(stim).FramesByStimulus.PreStimFrames);
+            if numPreStimFrames < 15
+                cutoff = numPreStimFrames - 1;
+            else
+                cutoff = 15;
             end
+           Stimulus(stim).Trajectory.amplitudePreStimAve = nanmean(Stimulus(stim).Trajectory.amplitude(stimOnFrame - cutoff:stimOnFrame));       
+           Stimulus(stim).Trajectory.wavelengthPreStimAve = nanmean(Stimulus(stim).Trajectory.wavelength(stimOnFrame - cutoff:stimOnFrame));
+           Stimulus(stim).Trajectory.amplitudePostStimAve = nanmean(Stimulus(stim).Trajectory.amplitude(stimOnFrame:stimOnFrame+55));
+           Stimulus(stim).Trajectory.wavelengthPostStimAve = nanmean(Stimulus(stim).Trajectory.wavelength(stimOnFrame:stimOnFrame+55));
         end
 end
 

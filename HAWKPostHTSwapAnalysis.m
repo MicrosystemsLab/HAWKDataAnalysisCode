@@ -29,7 +29,7 @@ if (ispc) %if on PC workstation in MERL 223
 elseif (ismac) % if on Eileen's personal computer
     DestinationFolder = '/Volumes/home/HAWK Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-    excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
+    excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
     slash = '/';
     % For excel writing, need these files linked:
@@ -48,6 +48,7 @@ end
 %asks user for the directory where all the files are:
 %directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
+fileID = fopen('/Users/emazzochette/Desktop/ErrorList.txt','a');
 
 for dir = 1:length(directories)
     %Select next directory:
@@ -56,17 +57,59 @@ for dir = 1:length(directories)
     
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
-    try
-        %Extract tracking, FPGA, stimulus data from YAML files: 
-        TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
-        %Only need FPGA data if not in behavior mode
-        if ( ~strcmp(TrackingData.ExperimentMode, 'Behavior Mode'))
-              FPGAData = getFPGADataFromYAML(directory, experimentTitle);
-        end
-        % Extract Stimulus Data from the yaml file:
-        StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
     
-    catch
-       disp(strcat('Experiment read error: ', experimentTitle));
+    %Save Stimulus file:
+    mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
+    if (exist(mat_file, 'file')==2)
+        try
+            TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
+            FPGAData = getFPGADataFromYAML(directory, experimentTitle);
+            StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
+            if TrackingData.NumberOfStimulus > 0
+                load(mat_file);
+
+%                 Stimulus = calculateBodyMorphology(Stimulus,TrackingData.NumberOfStimulus);
+%                 Stimulus = calculateWormCentroidMean(Stimulus,TrackingData.NumberOfStimulus);
+                 try  Stimulus = rmfield(Stimulus, 'BodyMorpholoy'); end
+                Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
+                
+%                 Stimulus = sortFramesBasedOnStimulus(Stimulus, TrackingData.NumberOfStimulus);
+%                 Stimulus = scoreFrames(Stimulus, TrackingData.NumberOfStimulus);
+% 
+%                 Stimulus = getWormIndentation(Stimulus, TrackingData, StimulusData, TrackingData.NumberOfStimulus);
+% 
+                Stimulus = determineWormTrajectory(Stimulus, TrackingData.NumberOfStimulus);
+% 
+%                 videoPresent = true;
+%                 Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingData, TrackingData.NumberOfStimulus, videoPresent);
+% 
+% 
+%                 Stimulus = scoreTrials(TrackingData,Stimulus,TrackingData.NumberOfStimulus);
+% 
+%                 Stimulus = getVelocityFromCurvature(Stimulus, TrackingData.NumberOfStimulus);
+%                 Stimulus = calculateCurvatureParameters(Stimulus,TrackingData.NumberOfStimulus);
+% 
+%                 Stimulus = scoreBehaviorResponse(Stimulus, TrackingData.NumberOfStimulus);
+% 
+    %                 plotData(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory)
+                [NUM,TXT,RAW]=xlsread(excelFile,'ForceTouchAssay DataSet 3');
+                [rowCount, columnCount] = size(RAW);
+                experimentRow = rowCount+1;
+                [experimentData, stimulusData ]= getDataForExcel(TrackingData, StimulusData, Stimulus,TrackingData.NumberOfStimulus, experimentTitle);
+                for stim = 1:TrackingData.NumberOfStimulus
+                    xlwrite(excelFile, experimentData, 'ForceTouchAssay DataSet 3', strcat('A',num2str(experimentRow+stim-1)));
+                end
+                xlwrite(excelFile, stimulusData, 'ForceTouchAssay DataSet 3', strcat('AA',num2str(experimentRow)));
+
+
+                save(mat_file, 'Stimulus');
+                close all;
+            end
+        catch
+            disp(strcat('Error with: ',experimentTitle));
+            fprintf(fileID,'%s\n',experimentTitle);
+        end
     end
 end
+fclose(fileID);
+   

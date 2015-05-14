@@ -21,6 +21,14 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
     % Get the timing interval between points reported from FPGA:
     acquisitionInterval = TrackingData.ReportedFPGAParameters.AcquisitionFrequency*0.00001;
     for stim = 1:numStims
+        %Get frame time when stimulus button was hit:
+        ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
+        Stimulus(stim).StimulusTiming.stimAppliedTime = Stimulus(stim).timeData(ind,8);
+        %Get frame time when stimulus was over:
+        ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
+        Stimulus(stim).StimulusTiming.stimEndTime = Stimulus(stim).timeData(ind,8);    
+
+        
         % setup time vectors:
         timeFPGA = 0:length(Stimulus(stim).FPGAData.DesiredSignal)-1;
         timeFPGA = timeFPGA*acquisitionInterval;

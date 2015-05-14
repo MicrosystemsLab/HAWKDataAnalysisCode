@@ -1,15 +1,15 @@
 
 
-function [experimentData stimulusData] = getDataForExcel(TrackingData, StimulusData, Stimulus,numStims, experimentTitle)
-    ManualScoringColumnHeaders;
-%     Row(1:numStims,1:length(titles)) = {'---'};
+function [experimentData, stimulusData] = getDataForExcel(TrackingData, StimulusData, Stimulus,numStims, experimentTitle)
+    DataSet3ColumnHeaders;
+
     %ExperimentParameters:
     try Row(1, strmatch('Date',titles,'exact')) = {TrackingData.ExperimentTime(1:10)}; end
     try Row(1, strmatch('Experiment Name',titles,'exact')) = {experimentTitle}; end
     try Row(1, strmatch('Experiment Title',titles,'exact')) = {TrackingData.ExperimentTitle}; end		
     try Row(1, strmatch('Time Stamp',titles,'exact')) =	{TrackingData.ExperimentTime}; end
-    try Row(1, strmatch('Slide No.',titles,'exact')) = TrackingData.SlideNumber; end
-    try Row(1, strmatch('Experiment No.',titles,'exact')) =	TrackingData.ExperimentOnThisSlideNumber; end
+    try Row(1, strmatch('Slide No.',titles,'exact')) = {num2str(TrackingData.SlideNumber)}; end
+    try Row(1, strmatch('Experiment No.',titles,'exact')) =	{num2str(TrackingData.ExperimentOnThisSlideNumber)}; end
     try Row(1, strmatch('Strain',titles,'exact')) =	{TrackingData.WormProperties.WormStrain}; end
     try Row(1, strmatch('Treatments',titles,'exact')) =	{TrackingData.WormProperties.WormTreatments}; end
     try Row(1, strmatch('Gender',titles,'exact')) =	{TrackingData.WormProperties.WormGender}; end
@@ -32,7 +32,10 @@ function [experimentData stimulusData] = getDataForExcel(TrackingData, StimulusD
     try Row(1, strmatch('Post Stim Recording Time (s)',titles,'exact')) = {TrackingData.Post0x2DStimulusRecordTime}; end
     
     experimentData = Row;
-    clear Row
+    clear Row;
+    
+    
+    
     firstColumn = strmatch('Stimulus Number',titles,'exact');
     for stim = 1:numStims
         
@@ -69,8 +72,8 @@ function [experimentData stimulusData] = getDataForExcel(TrackingData, StimulusD
         try Row(stim, strmatch('Zero Pulse Average (V)',titles,'exact')-firstColumn+1) =	Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.average; end
         try Row(stim, strmatch('Zero Pulse RMS Error',titles,'exact')-firstColumn+1) =  Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.rmsError; end	
         try Row(stim, strmatch('Pull off Voltage (V)',titles,'exact')-firstColumn+1) = Stimulus(stim).StimulusTiming.stimulusAnalysis.postPulsePoints.min; end
-        try Row(stim, strmatch('Number of Bad Frames',titles,'exact')-firstColumn+1) = length(Stimulus(stim).computerScoredBadFrames); end
-        try Row(stim, strmatch('Trial Success Scoring',titles,'exact')-firstColumn+1) = Stimulus(stim).TrialScoring.trialSuccessScoring(1)*100+ Stimulus(stim).TrialScoring.trialSuccessScoring(2)*10+ Stimulus(stim).TrialScoring.trialSuccessScoring(1); end
+        try Row(stim, strmatch('Number of Bad Frames',titles,'exact')-firstColumn+1) = length(Stimulus(stim).FrameScoring.BadFrames); end
+        try Row(stim, strmatch('Trial Success Scoring',titles,'exact')-firstColumn+1) = Stimulus(stim).TrialScoring.trialSuccessScoring(1)*100+ Stimulus(stim).TrialScoring.trialSuccessScoring(2)*10+ Stimulus(stim).TrialScoring.trialSuccessScoring(3); end
         try Row(stim, strmatch('Trial Success?',titles,'exact')-firstColumn+1) = Stimulus(stim).TrialScoring.trialSuccess; end
         try 
             if strcmp(Stimulus(stim).Response.Type, 'reversal')
@@ -85,7 +88,7 @@ function [experimentData stimulusData] = getDataForExcel(TrackingData, StimulusD
         end          
         try Row(stim, strmatch('Response Latency (s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.Latency; end
         try Row(stim, strmatch('Pre Stimulus Average Speed (um/s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.preStimSpeed; end
-        try Row(stim, strmatch('Post Stimulus Average Speed (um/s)',titles,'exact')-firstColumn+1) =	Stimulus(stim).Response.postStimSpeed; end
+%         try Row(stim, strmatch('Post Stimulus Average Speed (um/s)',titles,'exact')-firstColumn+1) =	Stimulus(stim).Response.postStimSpeed; end
         try Row(stim, strmatch('Pre Stim Fit a',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.a; end
         try Row(stim, strmatch('Pre Stim Fit b',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.b; end
         try Row(stim, strmatch('Pre Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.c; end
@@ -96,6 +99,15 @@ function [experimentData stimulusData] = getDataForExcel(TrackingData, StimulusD
         try Row(stim, strmatch('Post Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.c; end
         try Row(stim, strmatch('Post Stim Fit d',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.d; end
         try Row(stim, strmatch('Post Stim Fit goodness (rmse)',titles,'exact')-firstColumn+1) = Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.goodness.rmse;  end
+        try Row(stim, strmatch('Reported Force (nN)',titles,'exact')-firstColumn+1)	= Stimulus(stim).AppliedStimulus.forceApplied; end
+        try Row(stim, strmatch('Reported Cantilever Deflection (um)',titles,'exact')-firstColumn+1)	= Stimulus(stim).AppliedStimulus.cantileverDeflection;end
+        try Row(stim, strmatch('Reported Indentation (um)'	,titles,'exact')-firstColumn+1)  = Stimulus(stim).AppliedStimulus.indentation;end
+        try Row(stim, strmatch('Post Stimulus Average Speed over 1.5s (um/s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.postStimSpeed1_5;end
+        try Row(stim, strmatch('Post Stimulus Average Speed over 4s (um/s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.postStimSpeed4;end
+        try Row(stim, strmatch('Pre Stim Amplitude (um)',titles,'exact')-firstColumn+1)	= Stimulus(stim).Trajectory.amplitudePreStimAve;end
+        try Row(stim, strmatch('Pre Stim Wavelength (um/cycle)',titles,'exact')-firstColumn+1)	= Stimulus(stim).Trajectory.wavelengthPreStimAve;end
+        try Row(stim, strmatch('Post Stim Amplitude (um)'	,titles,'exact')-firstColumn+1) = Stimulus(stim).Trajectory.amplitudePostStimAve;end
+        try Row(stim, strmatch('Post Stim Wavelength (um/cycle)',titles,'exact')-firstColumn+1) = Stimulus(stim).Trajectory.wavelengthPostStimAve;end
     end
     stimulusData = Row;
 end

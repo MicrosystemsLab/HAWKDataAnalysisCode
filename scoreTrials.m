@@ -23,7 +23,7 @@ function Stimulus = scoreTrials(TrackingData, Stimulus, numStims)
    
     for stim = 1:numStims
         %Check number of frames lost during stimulus
-        droppedFramesCheck = sum(ismember( Stimulus(stim).FramesByStimulus.DuringStimFrames, Stimulus(stim).computerScoredBadFrames))<DROPPED_FRAMES_DURING_STIMULUS;
+        droppedFramesCheck = sum(ismember( Stimulus(stim).FramesByStimulus.DuringStimFrames, Stimulus(stim).FrameScoring.BadFrames))<DROPPED_FRAMES_DURING_STIMULUS;
         %Check within 7.5% of target and 15% of body width
         stimulusLocationCheck = (abs(TrackingData.TargetLocation - Stimulus(stim).SpatialResolution.percentDownBodyHit*100) < PERCENT_DOWN_BODY_DIFFERENCE) & ...
             (Stimulus(stim).SpatialResolution.percentAcrossBodyHit*100 < PERCENT_ACROSS_BODY_DIFFERENCE) ;

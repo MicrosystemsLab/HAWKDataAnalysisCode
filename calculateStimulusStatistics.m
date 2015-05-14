@@ -48,14 +48,19 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
         stats(stim).stimulusPoints.data = Stimulus(stim).FPGAData.PiezoSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex:Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints-1]);
         desiredPoints = Stimulus(stim).FPGAData.DesiredSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex:Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints-1]);
         desiredPoints = desiredPoints + stats(stim).preApproachPoints.average;
-        % for stimulus, calculate: rise time, overshoot, rms error
+        % for stimulus, calculate: rise time, overshoot, rms error, step
+        % response characteristics
         stats(stim).stimulusPoints.min = min(stats(stim).stimulusPoints.data);
         stats(stim).stimulusPoints.max = max(stats(stim).stimulusPoints.data);
         stats(stim).stimulusPoints.average = mean(stats(stim).stimulusPoints.data);
         stats(stim).stimulusPoints.std = std(stats(stim).stimulusPoints.data);
         stats(stim).stimulusPoints.rmsError = sqrt(mean((stats(stim).stimulusPoints.data - desiredPoints).^2));
         time = interval*[0:length(stats(stim).stimulusPoints.data)-1];
-        stats(stim).stimulusPoints.response = stepinfo(stats(stim).stimulusPoints.data,time);
+        
+        desiredVoltage = Stimulus(stim).FPGAData.VoltagesSentToFPGA(1);
+        offset = stats(stim).preApproachPoints.average;
+        yfinal = offset+desiredVoltage;
+        stats(stim).stimulusPoints.response = stepinfo(stats(stim).stimulusPoints.data,time,yfinal);
 
         % 4. Zero pulse
         numberOfZeroPulsePoints = StimulusData.ZeroPulseDuration/interval;

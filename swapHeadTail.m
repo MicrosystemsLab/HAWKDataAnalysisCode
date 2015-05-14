@@ -15,7 +15,8 @@
 function Stimulus = swapHeadTail(Stimulus,stim, framesToSwap)
 
     
-    for frame =1:length(framesToSwap)
+    for i =1:length(framesToSwap)
+        frame = framesToSwap(i);
         tempPoint.x = Stimulus(stim).PixelPositions.head.x(frame);
         tempPoint.y = Stimulus(stim).PixelPositions.head.y(frame);
         Stimulus(stim).PixelPositions.head.x(frame) = Stimulus(stim).PixelPositions.tail.x(frame);

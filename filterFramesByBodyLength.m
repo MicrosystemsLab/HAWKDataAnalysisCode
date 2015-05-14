@@ -17,37 +17,32 @@
 
 function Stimulus = filterFramesByBodyLength(Stimulus,numStims)
     HAWKProcessingConstants;
-    clear Stimulus.droppedFrames;
-    clear Stimulus.goodFrames;
 
     for stim = 1:numStims
-        clear goodFrames;
         %Figure out dropped frames:
         droppedFrameCounter = 1;
         goodFrameCounter = 1;
         % For each frame in the stimulus, if body length is inside 1 std of
         % the original body length statistics, it is classified as a good
         % frame, otherwise it's a bad frame.
-        for frameParser = 1:Stimulus(stim).numFrames; 
-            %if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength-Stimulus(stim).BodyMorphology.stdBodyLength || ...
-             %   Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength+Stimulus(stim).BodyMorphology.stdBodyLength)
-            if (Stimulus(stim).BodyMorphology.bodyLength(frameParser) < Stimulus(stim).BodyMorphology.averageBodyLength*BODY_LENGTH_PERCENT_THRESHOLD || ...
-                Stimulus(stim).BodyMorphology.bodyLength(frameParser) > Stimulus(stim).BodyMorphology.averageBodyLength*(1+(1-BODY_LENGTH_PERCENT_THRESHOLD)))
+        for frame = 1:Stimulus(stim).numFrames; 
+            if (Stimulus(stim).BodyMorphology.bodyLength(frame) < Stimulus(stim).BodyMorphology.averageBodyLength*BODY_LENGTH_PERCENT_THRESHOLD || ...
+                Stimulus(stim).BodyMorphology.bodyLength(frame) > Stimulus(stim).BodyMorphology.averageBodyLength*(1+(1-BODY_LENGTH_PERCENT_THRESHOLD)))
 
-                Stimulus(stim).BodyMorphology.framesOutOfBodyLengthRange(droppedFrameCounter) = frameParser;
+                Stimulus(stim).BodyMorphology.framesOutOfBodyLengthRange(droppedFrameCounter) = frame;
                 droppedFrameCounter = droppedFrameCounter + 1;
             else
-                goodFrames(goodFrameCounter) = frameParser;
+                Stimulus(stim).BodyMorphology.framesInsideBodyLengthRange(goodFrameCounter) = frame;
                 goodFrameCounter = goodFrameCounter + 1;      
             end
 
         end
      
         %Save new statistics:
-        Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames = mean(Stimulus(stim).BodyMorphology.bodyLength(goodFrames)); 
-        Stimulus(stim).BodyMorphology.stdBodyLengthGoodFrames = std(Stimulus(stim).BodyMorphology.bodyLength(goodFrames));
-        Stimulus(stim).BodyMorphology.averageBodyWidthGoodFrames = mean(Stimulus(stim).BodyMorphology.widthAtTarget(goodFrames)); 
-        Stimulus(stim).BodyMorphology.stdBodyWidthGoodFrames = std(Stimulus(stim).BodyMorphology.widthAtTarget(goodFrames));
+        Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames = mean(Stimulus(stim).BodyMorphology.bodyLength(Stimulus(stim).BodyMorphology.framesInsideBodyLengthRange)); 
+        Stimulus(stim).BodyMorphology.stdBodyLengthGoodFrames = std(Stimulus(stim).BodyMorphology.bodyLength(Stimulus(stim).BodyMorphology.framesInsideBodyLengthRange));
+        Stimulus(stim).BodyMorphology.averageBodyWidthGoodFrames = mean(Stimulus(stim).BodyMorphology.widthAtTarget(Stimulus(stim).BodyMorphology.framesInsideBodyLengthRange)); 
+        Stimulus(stim).BodyMorphology.stdBodyWidthGoodFrames = std(Stimulus(stim).BodyMorphology.widthAtTarget(Stimulus(stim).BodyMorphology.framesInsideBodyLengthRange));
     end
 
 end

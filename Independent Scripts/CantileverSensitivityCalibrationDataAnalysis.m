@@ -7,6 +7,9 @@
 
 
 clear all
+
+ACTUATOR_SENS = 26.04;
+
 if (ispc)
     DestinationFolder = 'C:\Users\HAWK\Documents\CantileverCalibrationData';
     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
@@ -56,9 +59,9 @@ DataMean = 0;
 for fileCount = 1:numFiles;
     for point = 1:length(fieldnames(RawData(fileCount).CantileverSignal))
        Data(fileCount).PiezoSignal(point) = RawData(fileCount).CantileverSignal.(['Point' num2str(point-1)]);
-       Data(fileCount).ActuatorPosition(point) = RawData(fileCount).ActuatorPositions.(['Point' num2str(point-1)]);
+       Data(fileCount).ActuatorPosition(point) = ACTUATOR_SENS * RawData(fileCount).ActuatorPositions.(['Point' num2str(point-1)]);
     end
-    Data(fileCount).PositivePiezoPoints = find(Data(fileCount).PiezoSignal > 0);
+    Data(fileCount).PositivePiezoPoints = find(Data(fileCount).PiezoSignal > 0.5);
     [Data(fileCount).fitData] = polyfit(Data(fileCount).ActuatorPosition(Data(fileCount).PositivePiezoPoints), Data(fileCount).PiezoSignal(  Data(fileCount).PositivePiezoPoints),1);
    DataMean = DataMean + 1/Data(fileCount).fitData(1); 
     plot(Data(fileCount).ActuatorPosition, Data(fileCount).PiezoSignal, plottingPoints{fileCount});

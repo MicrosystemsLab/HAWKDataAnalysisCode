@@ -21,6 +21,7 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
     % Get the timing interval between points reported from FPGA:
     acquisitionInterval = TrackingData.ReportedFPGAParameters.AcquisitionFrequency*0.00001;
     for stim = 1:numStims
+        %First get time references in tracking clock:
         %Get frame time when stimulus button was hit:
         ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
         Stimulus(stim).StimulusTiming.stimAppliedTime = Stimulus(stim).timeData(ind,8);
@@ -28,7 +29,7 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
         ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
         Stimulus(stim).StimulusTiming.stimEndTime = Stimulus(stim).timeData(ind,8);    
 
-        
+        %Evaluate FPGA timing:
         % setup time vectors:
         timeFPGA = 0:length(Stimulus(stim).FPGAData.DesiredSignal)-1;
         timeFPGA = timeFPGA*acquisitionInterval;
@@ -41,10 +42,11 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
         %Save those indices in case we need to reference later:
         Stimulus(stim).StimulusTiming.approachOnFPGAIndex = approachOnIndex;
         Stimulus(stim).StimulusTiming.stimOnFPGAIndex = stimOnIndex;
+        approachDuration = stimOnTime - approachOnTime;
         
-        %determine times relative to stimulus clock (not FPGA clock)
-        Stimulus(stim).StimulusTiming.approachStartTime = Stimulus(stim).StimulusTiming.stimAppliedTime + approachOnTime;
-        Stimulus(stim).StimulusTiming.stimOnStartTime = Stimulus(stim).StimulusTiming.stimAppliedTime + stimOnTime;
+        %determine times relative to tracking clock (not FPGA clock)
+        Stimulus(stim).StimulusTiming.approachStartTime = Stimulus(stim).StimulusTiming.stimAppliedTime;% + approachOnTime;
+        Stimulus(stim).StimulusTiming.stimOnStartTime = Stimulus(stim).StimulusTiming.stimAppliedTime + approachDuration;
         %Compare stimulus to desired stimulus, get some statistics:
         Stimulus(stim).StimulusTiming.stimulusAnalysis = calculateStimulusStatistics(Stimulus(stim), StimulusData);
     end

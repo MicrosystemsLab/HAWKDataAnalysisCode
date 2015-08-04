@@ -1,7 +1,6 @@
-%%%% Function: Sort Frames Based on Stimulus
-%  Sorts frames in each stimulus into before, during, and after stimulus
-%  periods
-
+%%%% Function: Determine Stimulus Timing
+%  Determines the important time points during the stimulus
+%
 %  param {TrackingData} struct, contains all the tracking information from
 %  the YAML file
 %  param {StimulusData} struct, contains information about the data sent to
@@ -20,6 +19,7 @@
 function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus, numStims)
     % Get the timing interval between points reported from FPGA:
     acquisitionInterval = TrackingData.ReportedFPGAParameters.AcquisitionFrequency*0.00001;
+    numContactPoints = StimulusData.ContactTime/acquisitionInterval;
     for stim = 1:numStims
         %First get time references in tracking clock:
         %Get frame time when stimulus button was hit:
@@ -36,8 +36,9 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
         % find approach, stim on start time
         approachOnIndex = find(Stimulus(stim).FPGAData.DesiredSignal>0,1,'first');
         approachOnTime = timeFPGA(approachOnIndex);
-        stimOnIndex =  find(diff(diff(Stimulus(stim).FPGAData.DesiredSignal))>0.0001,3,'first');
-        stimOnIndex = stimOnIndex(length(stimOnIndex))+1;
+%         stimOnIndex =  find(diff(diff(Stimulus(stim).FPGAData.DesiredSignal(approachOnIndex:approachOnIndex+numContactPoints)))>0.0001,3,'first')+approachOnIndex;
+        stimOnIndex = find(diff(Stimulus(stim).FPGAData.DesiredSignal(approachOnIndex:approachOnIndex+2*numContactPoints)) == 0,1,'first')+approachOnIndex-1;
+%         stimOnIndex = stimOnIndex(end)+1;
         stimOnTime = timeFPGA(stimOnIndex);
         %Save those indices in case we need to reference later:
         Stimulus(stim).StimulusTiming.approachOnFPGAIndex = approachOnIndex;

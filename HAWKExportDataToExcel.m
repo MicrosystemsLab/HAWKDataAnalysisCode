@@ -19,7 +19,8 @@ if (ispc) %if on PC workstation in MERL 223
 elseif (ismac) % if on Eileen's personal computer
     DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-    excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
+%     excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
+    excelFile = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/Force Position Response Assay/DataDrop.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
@@ -59,19 +60,22 @@ for dir = 1:length(directories)
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
         load(mat_file);
         
-        if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
-            numStims = TrackingData.NumberOfStimulus;
-        else
-            numStims =  min(length(Stimulus), length(fieldnames(FPGAData)));
-        end
-        
-        if numStims>0
-            [NUM,TXT,RAW]=xlsread(excelFile,'Manual Response Scoring');
-            [rowCount columnCount] = size(RAW);
-            experimentRow = rowCount+1;
-            [experimentData stimulusData ]= getDataForExcel(TrackingData, StimulusData, Stimulus,numStims, experimentTitle);
-            xlwrite(excelFile, experimentData, 'Manual Response Scoring', strcat('A',num2str(experimentRow)));
-            xlwrite(excelFile, stimulusData, 'Manual Response Scoring', strcat('AA',num2str(experimentRow)));
+        try
+            if TrackingData.NumberOfStimulus>0
+            
+            
+                [NUM,TXT,RAW]=xlsread(excelFile,'Sheet1');
+                [rowCount, columnCount] = size(RAW);
+                experimentRow = rowCount+1;
+                [experimentData, stimulusData ]= getDataForExcel(TrackingData, StimulusData, Stimulus,TrackingData.NumberOfStimulus, experimentTitle);
+                for stim = 1:TrackingData.NumberOfStimulus
+                    xlwrite(excelFile, experimentData, 'Sheet1', strcat('A',num2str(experimentRow+stim-1)));
+                end
+                xlwrite(excelFile, stimulusData, 'Sheet1', strcat('AA',num2str(experimentRow)));
+            end
+        catch
+                disp(strcat('Error with: ',experimentTitle));
+%                 fprintf(fileID,'%s\n',experimentTitle);
         end
     end
 end

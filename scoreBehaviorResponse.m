@@ -47,17 +47,17 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         end
         frames = [Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount),...
             Stimulus(stim).FramesByStimulus.DuringStimFrames, ...
-            Stimulus(stim).FramesByStimulus.PostStimFrames(1:34)];
+            Stimulus(stim).FramesByStimulus.PostStimFrames(1:POST_STIM_FRAMES2)];
           
         %determine speed delta
         preStimAveSpeed = nanmean(speed(frames(1)-1 + find(frames<=stimOnFrame-1)) ); 
         postStimAveSpeed1_5sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES)) );
-        postStimAveSpeed4sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES2)) );
+        postStimAveSpeed2_5sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES2)) );
         
         postStimAcceleration = diff(speed(find(frames>=stimOnFrame+1,POST_STIM_FRAMES)));
         
         %Compare before and after movement directions to determine delta:
-        if sign(preStimAveSpeed) ~= sign(postStimAveSpeed4sec)
+        if sign(preStimAveSpeed) ~= sign(postStimAveSpeed2_5sec)
             deltaDirection = true;
         else
             deltaDirection = false;
@@ -104,7 +104,7 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         Stimulus(stim).Response.Latency = latency;
         Stimulus(stim).Response.preStimSpeed = preStimAveSpeed;
         Stimulus(stim).Response.postStimSpeed1_5 = postStimAveSpeed1_5sec;
-        Stimulus(stim).Response.postStimSpeed4 = postStimAveSpeed4sec;
+        Stimulus(stim).Response.postStimSpeed4 = postStimAveSpeed2_5sec;
         Stimulus(stim).Response.postStimAcceleration = postStimAcceleration;
         
                 %Plotting for debug:

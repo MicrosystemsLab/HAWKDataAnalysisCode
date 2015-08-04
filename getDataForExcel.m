@@ -1,7 +1,9 @@
 
 
 function [experimentData, stimulusData] = getDataForExcel(TrackingData, StimulusData, Stimulus,numStims, experimentTitle)
-    DataSet3ColumnHeaders;
+%    titles = DataSet3ColumnHeaders();
+%    titles = IndentationOnlyTitles();
+   titles = TargetingOnlyTitles();
 
     %ExperimentParameters:
     try Row(1, strmatch('Date',titles,'exact')) = {TrackingData.ExperimentTime(1:10)}; end
@@ -103,7 +105,7 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
         try Row(stim, strmatch('Reported Cantilever Deflection (um)',titles,'exact')-firstColumn+1)	= Stimulus(stim).AppliedStimulus.cantileverDeflection;end
         try Row(stim, strmatch('Reported Indentation (um)'	,titles,'exact')-firstColumn+1)  = Stimulus(stim).AppliedStimulus.indentation;end
         try Row(stim, strmatch('Post Stimulus Average Speed over 1.5s (um/s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.postStimSpeed1_5;end
-        try Row(stim, strmatch('Post Stimulus Average Speed over 4s (um/s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.postStimSpeed4;end
+        try Row(stim, strmatch('Post Stimulus Average Speed over 2.5s (um/s)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.postStimSpeed4;end
         try Row(stim, strmatch('Pre Stim Amplitude (um)',titles,'exact')-firstColumn+1)	= Stimulus(stim).Trajectory.amplitudePreStimAve;end
         try Row(stim, strmatch('Pre Stim Wavelength (um/cycle)',titles,'exact')-firstColumn+1)	= Stimulus(stim).Trajectory.wavelengthPreStimAve;end
         try Row(stim, strmatch('Post Stim Amplitude (um)'	,titles,'exact')-firstColumn+1) = Stimulus(stim).Trajectory.amplitudePostStimAve;end

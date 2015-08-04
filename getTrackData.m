@@ -17,19 +17,14 @@
 %%%%%
 
 
-function [amplitude wavelength] = getTrackData(x, y, theta)
+function [amplitude, rotatedSkeleton, wavelength] = getTrackData(x, y, theta)
        HAWKSystemConstants;
        HAWKProcessingConstants;
        numPoints = 100;
-        %Smooth the spline via a guassian filter:
-        x_filtered =  lowpass1D(x,CURVATURE_FILTERING_SIGMA);
-        y_filtered =  lowpass1D(y,CURVATURE_FILTERING_SIGMA);
-        %create a smooth spline of equally spaced points:
-        xy_smoothSpline = generateSmoothSpline([x_filtered; y_filtered],numPoints);
+
+        xx = x';
+        yy = y';
         
-        xx = xy_smoothSpline(:,1)';
-        yy = xy_smoothSpline(:,2)';
-       
         npts = length(xx);
         nintervals = npts - 1;
         
@@ -67,7 +62,8 @@ function [amplitude wavelength] = getTrackData(x, y, theta)
         amplitude = (max(wwy) - min(wwy)).*UM_PER_PIXEL;  % Width of bounding box
                                         %   aligned with x-axis
                                         %   (in pixels, then converted to um)
-                                        
+       rotatedSkeleton.x = wwx;
+       rotatedSkeleton.y = wwy;
         % calculate track wavelength - TBD
         df2 = diff([wwx' wwy'],1,1); df2p = df2';
         splineLength =  cumsum([0, sqrt([1 1]*(df2p.*df2p))]);
@@ -88,7 +84,7 @@ function [amplitude wavelength] = getTrackData(x, y, theta)
                                         %   documentation for _fft [1]_)
                                         
          xlength = max(iwwx) - min(iwwx);    % Worm length (pixels)
-        
+         
           % Vector of "frequencies" (cycles/pixel), from 0 (steady 
             %   state factor) to Nyquist frequency (i.e. 0.5*sampling 
             %   frequency).  (In our case sampling frequency is 
@@ -122,6 +118,6 @@ function [amplitude wavelength] = getTrackData(x, y, theta)
                                         
                                         
        
-        wavelength = wavelnth;%getZeroCrossings(wwx, wwy);
+        wavelength = wavelnth;
 
 end

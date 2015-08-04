@@ -76,15 +76,15 @@ function Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, Tra
         runningSumNumFrames = sum(numFrames);
 
         %Loop over all the frames in the stimulus:
-        for frame = 1:length(Stimulus(stim).DuringStimFrames)
+        for frame = 1:length(Stimulus(stim).FramesByStimulus.DuringStimFrames)
             %Select frame to analyze:
-            testFrameStim = Stimulus(stim).DuringStimFrames(frame);
+            testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(frame);
             skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim);
             testFrameVideo = testFrameStim + firstVideoFrameInStim;
 
             %If experiment was performed after HAWK software was updated to
             %include target location in stimulus, use that:
-            if (ismember('target',fieldnames(Stimulus)))
+            if (ismember('target',fieldnames(Stimulus(stim).PixelPositions)))
                distance(frame) = distanceCalc(Stimulus(stim).PixelPositions.target.x(testFrameStim),Stimulus(stim).PixelPositions.target.y(testFrameStim), x(stim), y(stim));
             %Other was look in in TrackingData information. 
             else
@@ -111,7 +111,7 @@ function Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, Tra
             percentDownSkeleton(frame) = findPercentDownBody(skeleton(stim).points, min(closestTwoPoints(stim,:)), x3 ,y3);
             %Find percentage of the body the distance from skeleton makes
             %up:
-            percentAcrossBody(frame) = distFromSkeleton(frame)*UM_PER_PIXEL/(Stimulus(stim).widthAtTarget(testFrameStim));
+            percentAcrossBody(frame) = distFromSkeleton(frame)*UM_PER_PIXEL/(Stimulus(stim).BodyMorphology.widthAtTarget(testFrameStim));
             
             clear minDistanceVector;
             clear minDistance;
@@ -121,25 +121,29 @@ function Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, Tra
         
         %For each stimulus, stave the average statistics, check if they exist first:
         if (exist('distanceFromTargetUM'))
-            Stimulus(stim).SpatialResolution.distanceFromTarget = mean(distanceFromTargetUM);
+            Stimulus(stim).SpatialResolution.distanceFromTarget = distanceFromTargetUM;
+            Stimulus(stim).SpatialResolution.distanceFromTargetMean = mean(distanceFromTargetUM);
         else 
             Stimulus(stim).SpatialResolution.distanceFromTarget = 1000; %dummy number
         end
         
         if (exist('percentDownSkeleton'))
-            Stimulus(stim).SpatialResolution.percentDownBodyHit = mean(percentDownSkeleton); 
+            Stimulus(stim).SpatialResolution.percentDownBodyHit = percentDownSkeleton;
+            Stimulus(stim).SpatialResolution.percentDownBodyHitMean = mean(percentDownSkeleton); 
         else
             Stimulus(stim).SpatialResolution.percentDownBodyHit = 1000;
         end
         
         if (exist('distFromSkeleton'))
-            Stimulus(stim).SpatialResolution.distanceFromSkeleton = mean(distFromSkeleton)*UM_PER_PIXEL;
+            Stimulus(stim).SpatialResolution.distanceFromSkeleton = distFromSkeleton.*UM_PER_PIXEL;
+            Stimulus(stim).SpatialResolution.distanceFromSkeletonMean = mean(distFromSkeleton)*UM_PER_PIXEL;
         else
             Stimulus(stim).SpatialResolution.distanceFromSkeleton = 1000;
         end
         
         if (exist('percentAcrossBody'))
-            Stimulus(stim).SpatialResolution.percentAcrossBodyHit = mean(percentAcrossBody);
+            Stimulus(stim).SpatialResolution.percentAcrossBodyHit = percentAcrossBody;
+            Stimulus(stim).SpatialResolution.percentAcrossBodyHitMean = mean(percentAcrossBody);
         else
             Stimulus(stim).SpatialResolution.percentAcrossBodyHit = 1000;
         end

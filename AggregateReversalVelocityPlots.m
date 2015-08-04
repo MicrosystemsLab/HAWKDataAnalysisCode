@@ -44,9 +44,10 @@ end
 %directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
 
-Forces = [500 1000 5000 10000];
+Forces = [50 100 500 1000 5000 10000];
+Forces2 = [50 100 550 1100 5500 11000];
 Targets = [25 35 45];
-classes = [1 2 3 4; 5 6 7 8; 9 10 11 12];
+classes = [1 2 3 4 5 6; 7 8 9 10 11 12; 13 14 15 16 17 18];
 classCount = zeros(size(classes));
 percentChangeClass = zeros(size(classes));
 
@@ -83,7 +84,7 @@ for dir = 1:length(directories)
                 percentChangeClass(target,force) = percentChangeClass(target,force) + (abs(Stimulus(stim).Response.postStimSpeed4) - abs(Stimulus(stim).Response.preStimSpeed))/abs(Stimulus(stim).Response.preStimSpeed);
 
                 classCount(target,force) = classCount(target,force) + 1;
-                subplot(3,4,classes(target,force))
+                subplot(3,6,classes(target,force))
                 plot(timePlot,speed,'LineWidth',2);
                 hold on
             end
@@ -96,17 +97,17 @@ percentChangeAverage = percentChangeClass./classCount;
 %%
 
 
-for force = 1:4
+for force = 1:6
     for target = 1:3
        
     
-        subplot(3,4,classes(target,force))
+        subplot(3,6,classes(target,force))
         axis([-2 6 -600 600])
         set(gca, 'FontSize',16)
-        if classes(target,force)<=4
-            title(strcat('Force Applied: ',num2str(Forces(force)), ' nN'),'FontSize', 16);
+        if classes(target,force)<=6
+            title(strcat('Force Applied: ',num2str(Forces2(force)), ' nN'),'FontSize', 16);
         end
-        if classes(target,force)>8
+        if classes(target,force)>12
           xlabel('Time (s)','FontSize', 14);
         else 
 %             set(gca,'xtick',[])
@@ -114,9 +115,9 @@ for force = 1:4
         end
         if classes(target,force) == 1
             ylabel('Velocity @ 25% Target (um/s)', 'FontSize',14)
-        elseif classes(target,force) == 5
+        elseif classes(target,force) == 7
             ylabel('Velocity @ 35% Target (um/s)', 'FontSize',14)
-        elseif classes(target,force) == 9
+        elseif classes(target,force) == 13
             ylabel('Velocity @ 45% Target (um/s)', 'FontSize',14)
         else
 %             set(gca,'ytick',[])

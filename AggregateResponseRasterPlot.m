@@ -1,6 +1,6 @@
 
-clear all;
-close all;
+% clear all;
+% close all;
 % Get Folder where all the files are:
 clear all
 if (ispc) %if on PC workstation in MERL 223
@@ -55,10 +55,10 @@ directories = uipickfiles( 'FilterSpec',DestinationFolder);
 
 % directoryCell = directories(:,indices(dir));
 
-Forces = [500 1000 5000 10000];
-Forces2 = [650 1300 6500 13000];
+Forces = [50 100 500 1000 5000 10000];
+Forces2 = [50 100 550 1100 5500 11000];
 Targets = [25 35 45];
-classes = [1 2 3 4; 5 6 7 8; 9 10 11 12];
+classes = [1 2 3 4 5 6; 7 8 9 10 11 12; 13 14 15 16 17 18];
 classCount = zeros(size(classes));
 
 
@@ -162,8 +162,8 @@ end
 
 
 %%
-Forces2 = [650 1300 6500 13000];
-for force = 1:4
+% Forces2 = [650 1300 6500 13000];
+for force = 1:6
     for target = 1:3
        
     
@@ -179,11 +179,11 @@ for force = 1:4
 % %             set(gca,'xtick',[])
 %             set(gca,'xticklabel',[])
 %         end
-        if classes(target,force) >= 1 && classes(target,force) <=4
+        if classes(target,force) >= 1 && classes(target,force) <=6
             ylabel('Trials @ 25% Target', 'FontSize',14)
-        elseif classes(target,force) >= 5 && classes(target,force) <=8
+        elseif classes(target,force) >= 7 && classes(target,force) <=12
             ylabel('Trials @ 35% Target', 'FontSize',14)
-        elseif  classes(target,force) >= 9 && classes(target,force) <=12
+        elseif  classes(target,force) >= 13 && classes(target,force) <=18
             ylabel('Trials @ 45% Target', 'FontSize',14)
 %         else
 % %             set(gca,'ytick',[])

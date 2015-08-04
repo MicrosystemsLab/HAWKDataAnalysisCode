@@ -24,14 +24,17 @@ function Stimulus = getWormIndentation(Stimulus, TrackingData, StimulusData, num
     for stim = 1:numStims
          %Get the points of interest:
         numStimPoints = duration*pointsPerSecond;
-        stimStartIndex = Stimulus(stim).StimulusTiming.stimOnFPGAIndex-20;
-        stimPoints = [stimStartIndex:stimStartIndex+numStimPoints];
+        stimStartIndex = Stimulus(stim).StimulusTiming.stimOnFPGAIndex;
+        stimPoints = [stimStartIndex-20:stimStartIndex-20+numStimPoints];
 
         %Need softbalance value to subtract off piezo signal to get deflection:
         softBalanceValue = Stimulus(stim).StimulusTiming.stimulusAnalysis.preApproachPoints.average;
         %Get cantilever information:
         % Cantilever Sensitivity = um/V
         cantileverSensitivity = TrackingData.CantileverProperties.Sensitivity;
+        if strcmp(TrackingData.CantileverProperties.SerialNumber,'EM10A1306')
+            cantileverSensitivity = 8.9781;
+        end
         % Cantilever Stiffness = N/m
         cantileverStiffness = TrackingData.CantileverProperties.Stiffness;
 
@@ -43,8 +46,11 @@ function Stimulus = getWormIndentation(Stimulus, TrackingData, StimulusData, num
         actuatorPosition = Stimulus(stim).FPGAData.ActuatorPosition(stimPoints) .* ACTUATOR_SENSITIVITY; %V * um/V
         %Need position of actuator at the point when the worm and cantilever come
         %in contact:
-        actuatorZeroPosition = actuatorPosition(find(diff(sign(cantileverDeflection))==2,1)+1);
-
+        actuatorZeroPositionIndices = find(diff(sign(cantileverDeflection(1:30)))==2,3,'first');
+        if isempty(actuatorZeroPositionIndices)
+            actuatorZeroPositionIndices = 19;
+        end
+        actuatorZeroPosition = actuatorPosition(actuatorZeroPositionIndices(end)-1);
         %Indentation: 
         %change in actuator position (in downwards direction): x0-xa
         %change in cantilever tip position (upwards direction): +xc

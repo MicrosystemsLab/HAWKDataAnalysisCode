@@ -6,8 +6,7 @@ if (ispc) %if on PC workstation in MERL 223
     DestinationFolder = 'C:\Users\HAWK\Documents\HAWKData';
     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
     excelFile = 'C:\Users\HAWK\Dropbox\HAWK\HAWKExperimentLog.xls';
-    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');
-    slash = '\';
+    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');s
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -18,11 +17,11 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Volumes/home/HAWK Data/';
+    DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-    excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
+%     excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
+    excelFile = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/Force Position Response Assay/DataDrop.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
-    slash = '/';
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -40,82 +39,42 @@ end
 %directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
 
-Forces = [50 100 500 1000 5000 10000];
-numForces = length(Forces);
-
-interval = 0.001;
-time = -0.2:interval:1;
-prePoints = length(find(time<0));
-count = zeros(numForces,1);
-sum = zeros(numForces,length(time));
-
-
 for dir = 1:length(directories)
-      %Select next directory:
+    %Select next directory:
     directoryCell = directories(:,dir);
     directory = directoryCell{1};
-    
-    
+        
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
    
-
-    
     %Extract General Properties:
     % mat file name for the per stimulus data structure.
     mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
     %if the data has already been read from the .yaml file, just load the mat
     %file created last time:
-    
-
     if (exist(mat_file, 'file')==2)
-        load(mat_file);
+
+        %Extract tracking, FPGA, stimulus data from YAML files: 
         TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
-        FPGAData = getFPGADataFromYAML(directory, experimentTitle);
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
+        load(mat_file);
         
-        force = find(Forces == StimulusData.Magnitude,1);
-
-        %Also need to extract the number of stimulus 
-        if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
-            numStims = TrackingData.NumberOfStimulus;
-        else
-            numStims =  min(length(Stimulus), length(fieldnames(FPGAData)));
-        end
-        
-        if (numStims>0)
-            for stim = 1:numStims
-                if (Stimulus(stim).TrialScoring.trialSuccess == 1)
-                    count(force) = count(force) + 1;
-                    startIndex = Stimulus(stim).StimulusTiming.stimOnFPGAIndex;
-                    endIndex = startIndex + length(time);
-                    stimulus = Stimulus(stim).FPGAData.PiezoSignal;
-                    biasValue = Stimulus(stim).StimulusTiming.stimulusAnalysis.preApproachPoints.average;
-
-                    stimulus = stimulus-biasValue;
-                    figure(force)
-                    hold on
-                    plot(time,stimulus(startIndex-prePoints:endIndex-prePoints-1),'Color',[ 0 0.6 1],'LineWidth',1);
-                    sum(force,:) = sum(force,:)+stimulus(startIndex-prePoints:endIndex-prePoints-1);
+        try
+            if TrackingData.NumberOfStimulus>0
+            
+            
+                [NUM,TXT,RAW]=xlsread(excelFile,'Sheet1');
+                [rowCount, columnCount] = size(RAW);
+                experimentRow = rowCount+1;
+                [experimentData, stimulusData ]= getBehaviorDataForExcel(TrackingData, StimulusData, Stimulus,TrackingData.NumberOfStimulus, experimentTitle);
+                for stim = 1:TrackingData.NumberOfStimulus
+                    xlwrite(excelFile, experimentData, 'Sheet1', strcat('A',num2str(experimentRow+stim-1)));
                 end
+                xlwrite(excelFile, stimulusData, 'Sheet1', strcat('T',num2str(experimentRow)));
             end
-           
-        else 
-            disp(experimentTitle);
+        catch
+                disp(strcat('Error with: ',experimentTitle));
+%                 fprintf(fileID,'%s\n',experimentTitle);
         end
-    
     end
-
-    
-    
-end
-%%
-for force = 1:numForces
-    figure(force)
-    hold on
-    plot(time,sum(force,:)./count(force),'Color',[ 0 0 0.75 ],'LineWidth',3)
-    xlabel('Time (s)','FontSize',16,'FontWeight','bold');
-    ylabel('Voltage (V)','FontSize',16,'FontWeight','bold');
-    title(strcat('Stimulus Profile, ', num2str(Forces(force)),' nN'),'FontSize',20,'FontWeight','bold');
-    axis([min(time) max(time) -Inf Inf])
 end

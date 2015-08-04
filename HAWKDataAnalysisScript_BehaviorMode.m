@@ -15,7 +15,7 @@ if (ispc) %if on PC workstation in MERL 223
     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
     excelFile = 'C:\Users\HAWK\Dropbox\HAWK\HAWKExperimentLog.xls';
     addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');
-%     slash = '\';
+    slash = '\';
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -30,7 +30,7 @@ elseif (ismac) % if on Eileen's personal computer
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
     excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
-%     slash = '/';
+    slash = '/';
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -42,87 +42,46 @@ elseif (ismac) % if on Eileen's personal computer
     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/stax-api-1.0.1.jar');
 end
 
-%Choice of how to export plots, either individual plots (false), or grouped in a
-%single window by stimulus (true)
-plotByStim = false; 
-rewriteStimulus = false;
-
 %asks user for the directory where all the files are:
-directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
-%determine experiment title based on file name:
-experimentTitle = getExperimentTitle(directory);
-%Extract tracking, stimulus data from YAML files: 
-TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
-StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
+%directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
+directories = uipickfiles( 'FilterSpec',DestinationFolder);
+fileID = fopen('/Users/emazzochette/Desktop/ErrorList.txt','a');
 
 
-%% Populate Experiment Log Spreadsheet:
 
-[NUM,TXT,RAW]=xlsread(excelFile,'Experiment Log Behavior');
-[rowCount columnCount] = size(RAW);
-spreadsheetTitles = TXT(1,:);
-%check if it's already been populated:
-if(strmatch(experimentTitle,TXT(:,strmatch('Experiment Name',TXT(1,:),'exact')),'exact')>0)
-    experimentRow = strmatch(experimentTitle,TXT(:,2));
-else
-    experimentRow = rowCount+1;
-end
-newRow = populateBehaviorExperimentParameters( experimentTitle, TrackingData, spreadsheetTitles);
-
-xlwrite(excelFile, newRow, 'Experiment Log Behavior', strcat('A',num2str(experimentRow)));
-
-% Load System Constants necessary for analysis
-%HAWKSystemConstants
-
-
-%% Stop here if no stimulus
-if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
-    if (TrackingData.NumberOfStimulus < 1) % fix this once corrected in HAWK software
-        disp('No Stimulus Recorded');
-        break;
+for dir = 1:length(directories)
+    %Select next directory:
+    directoryCell = directories(:,dir);
+    directory = directoryCell{1};
+    
+    %determine experiment title based on file name:
+    experimentTitle = getExperimentTitle(directory);
+    try
+        TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
+        StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
+        load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')));
+%         [Stimulus, numStims, TrackingData] = extractBehaviorDataFromTracking(TrackingData);
+%         save(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')),'TrackingData');
+        if TrackingData.NumberOfStimulus > 0
+%             Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
+%             Stimulus = determineStimulusTimingBehavior(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = calculateBodyMorphology(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = calculateWormCentroidMean(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = calculateSmoothFitSkeleton(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = sortFramesBasedOnStimulus(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = findCurvature(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = scoreFrames(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = determineWormTrajectory(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = getVelocityFromCurvature(Stimulus, TrackingData.NumberOfStimulus);   
+%             Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, TrackingData, TrackingData.NumberOfStimulus, true);
+            plotDataBehavior(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory)
+%             save(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')),'Stimulus');
+        end
+    catch
+        disp(strcat('Error with: ',experimentTitle));
+        fprintf(fileID,'%s\n',experimentTitle);
     end
 end
-
-%% Extract General Properties, sorting by Stimulus:
-% mat file name for the per stimulus data structure.
-mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
-%if the data has already been read from the .yaml file, just load the mat
-%file created last time:
-if (exist(mat_file, 'file')==2)% && ~rewriteStimulus)
-    load(mat_file);
-    if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
-        numStims = TrackingData.NumberOfStimulus;
-    else
-        numStims = length(Stimulus);
-    end
-else %otherwise, create the Stimulus data structure.
-    %Start by moving through all the tracking data to get position data of
-    %worm per frame, per stim count.
-    [Stimulus, numStims] = extractBehaviorDataFromTracking(TrackingData);
-    %Save stimulus to mat file
-    save(mat_file, 'Stimulus');
-end
-
-%% Filter Frames based on the worm body length statistics:
-[Stimulus] = filterFramesByBodyLength(Stimulus, numStims);
-
-%% Determine the worm's trajectory in real space:
-%[Stimulus] = determineWormTrajectory(Stimulus, numStims);
-
-%% Sort Frames based on Stimulus
-%[Stimulus] = sortFramesBasedOnStimulus(Stimulus, numStims);
-
-
-%% Calculate Stimulus targeting resolution:
-%videoPresent = true;
-%Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, TrackingData, numStims, videoPresent);
-
-%% Save Stimulus file to disk:
-mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
-save(mat_file, 'Stimulus');
-
-%% Write per stimulus data to excel spread sheet:
-[data, firstColumn] = populateBehaviorPerStimulusData( Stimulus, spreadsheetTitles, numStims);
-xlwrite(excelFile, data, 'Experiment Log Behavior', strcat('A'+firstColumn-1,num2str(experimentRow+1)));
-
+fclose(fileID);
 

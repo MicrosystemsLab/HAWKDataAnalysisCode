@@ -64,13 +64,14 @@ for dir = 1:length(directories)
     %Organize data by Stimulus, both behavior and FPGA data:
     [Stimulus, numStims, TrackingData] = extractBehaviorDataFromTracking(TrackingData);
     Stimulus = extractFPGADataFromFPGAData(FPGAData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);
+    save(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')),'TrackingData');
     
     if TrackingData.NumberOfStimulus > 0
         Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
         Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);
 
         %Go through stimulus manually and swap head/tail misses:
-        Stimulus = manualHeadTailSwapID(Stimulus,numStims, directory);
+        Stimulus = manualHeadTailSwapID(Stimulus,TrackingData.NumberOfStimulus, directory);
 
         %Save Stimulus file:
         mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));

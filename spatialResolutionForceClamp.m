@@ -70,7 +70,7 @@ function Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingDat
         %frame.
         numFrames(stim) = length(Stimulus(stim).ProcessedFrameNumber);
         if (stim == 1)
-            firstFrame = 1;
+            firstFrame = 0;
         else 
             firstFrame = runningSumNumFrames;
         end
@@ -79,18 +79,10 @@ function Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingDat
         %Figure out the frame in which the cantilever comes in contact with
         %the worm.
         
-        stimOnFrame =  find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime,1);
-        testFrameStim = stimOnFrame;
-%         approachDuration = Stimulus(stim).StimulusTiming.stimOnStartTime - Stimulus(stim).StimulusTiming.approachStartTime;
-%         frameProcessingTime = mean(Stimulus(stim).timeData(:,9));
-%         numberOfApproachFrames = ceil(approachDuration/frameProcessingTime);
-%         if(numberOfApproachFrames <= length(Stimulus(stim).FramesByStimulus.DuringStimFrames))
-%             testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(numberOfApproachFrames);
-%             
-% %         else
-%             testFrameStim = Stimulus(stim).FramesByStimulus.DuringStimFrames(1);
-%         end
-        skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim);
+      testFrameStim =  find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime,1)-1;
+         skeleton(stim).points = Stimulus(stim).Skeleton(testFrameStim);
+
+       
         testFrameVideo = testFrameStim + firstFrame;
 
 
@@ -99,7 +91,8 @@ function Stimulus = spatialResolutionForceClamp(directory, Stimulus, TrackingDat
 
         %If experiment was performed after HAWK software was updated to
         %include target location in stimulus, use that:
-        if (ismember('target',fieldnames(Stimulus)))
+       
+        if (ismember('target',fieldnames(Stimulus(stim).PixelPositions)))
            distance(stim) = distanceCalc(Stimulus(stim).PixelPositions.target.x(testFrameStim),Stimulus(stim).PixelPositions.target.y(testFrameStim), x(stim), y(stim));
         %Other was look in in TrackingData information. 
         else

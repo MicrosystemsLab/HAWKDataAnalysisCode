@@ -18,13 +18,10 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
     HAWKProcessingConstants;
 
     for stim = 1:numStims
-        skeleton = Stimulus(stim).Skeleton;
+        skeleton = Stimulus(stim).SkeletonSmooth;
 
         numFrames = length(skeleton);
-        [Stimulus(stim).CurvatureAnalysis.curvature, distanceBetweenPoints] = findCurvature(skeleton,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
-        
-        Stimulus(stim).CurvatureAnalysis.curvatureimage = curvaturePlot(Stimulus(stim).CurvatureAnalysis.curvature',NUMCURVPTS, 0.035, -0.035);
-        
+         
         [Stimulus(stim).CurvatureAnalysis.phaseShift.ps, Stimulus(stim).CurvatureAnalysis.phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).CurvatureAnalysis.curvature, stim, Stimulus(stim).FrameScoring.BadFrames);
         cumulativeTime = 0;                 
         Stimulus(stim).CurvatureAnalysis.velocity(1) =  0;

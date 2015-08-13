@@ -20,7 +20,6 @@ function [Stimulus] = calculateBodyMorphology(Stimulus, numStims)
             Stimulus(stim).BodyMorphology.bodyLength(frame) = calculateBodyLength(Stimulus(stim).Skeleton(frame).x, Stimulus(stim).Skeleton(frame).y)*UM_PER_PIXEL; 
 
             % Find worm body width if possible:
-           
             %Width is distance between two segment points at target,
             %converted to um.
             Stimulus(stim).BodyMorphology.widthAtTarget(frame) = UM_PER_PIXEL * distanceCalc(...
@@ -31,7 +30,7 @@ function [Stimulus] = calculateBodyMorphology(Stimulus, numStims)
            
         end
         
-         %Body Length Statistics:
+        %Body Length Statistics:
         Stimulus(stim).BodyMorphology.averageBodyLength = mean(Stimulus(stim).BodyMorphology.bodyLength);
         Stimulus(stim).BodyMorphology.stdBodyLength = std(Stimulus(stim).BodyMorphology.bodyLength);
         %Body Width Statistics:

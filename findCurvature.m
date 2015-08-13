@@ -26,17 +26,23 @@ function [Stimulus]= findCurvature(Stimulus, numStims)%, sigma, numcurvpts)
        % [, distanceBetweenPoints] = findCurvature(skeleton);%,CURVATURE_FILTERING_SIGMA,NUMCURVPTS);
         
         %Create structures to hold data:
-        curvature = zeros(NUMCURVPTS,length(skeleton));
         curvature_smooth = zeros(NUMCURVPTS,length(skeleton));
         distanceBetweenPoints = zeros(1,NUMCURVPTS);
         %for each skeleton spline, do the following:
         for frame = 1:length(skeleton)
 
             %Calculate the curvature based on the delta Theta method:
-            [curvature(:,frame), distanceBetweenPoints(1,frame) ] = calculateCurvatureDeltaTheta([skeleton(frame).x skeleton(frame).y]);
+            [curvature, distanceBetweenPoints(1,frame) ] = calculateCurvatureDeltaTheta([skeleton(frame).x skeleton(frame).y]);
             %Use filter again to smooth the curvature:
-            curvature_smooth(:,frame) = lowpass1D(curvature(:,frame), 1.5);
-
+            if (sign(Stimulus(stim).SkeletonSmooth(frame).cutoff) == 1)
+                zeroPad = NaN(1,NUMCURVPTS - length(curvature));
+                curvature_smooth(:,frame) = [zeroPad lowpass1D(curvature, 1.5)];
+            elseif (sign(Stimulus(stim).SkeletonSmooth(frame).cutoff) == -1);
+                zeroPad = NaN(1,NUMCURVPTS - length(curvature));
+                curvature_smooth(:,frame) = [lowpass1D(curvature, 1.5) zeroPad];
+            else
+                curvature_smooth(:,frame) = lowpass1D(curvature, 1.5);
+            end
         end
        
        Stimulus(stim).CurvatureAnalysis.curvature = curvature_smooth;

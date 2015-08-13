@@ -51,6 +51,7 @@ function Stimulus = getWormIndentation(Stimulus, TrackingData, StimulusData, num
             actuatorZeroPositionIndices = 19;
         end
         actuatorZeroPosition = actuatorPosition(actuatorZeroPositionIndices(end)-1);
+%         actuatorZeroPosition =  Stimulus(stim).FPGAData.ActuatorPosition(stimStartIndex-1) .* ACTUATOR_SENSITIVITY; %V * um/V
         %Indentation: 
         %change in actuator position (in downwards direction): x0-xa
         %change in cantilever tip position (upwards direction): +xc
@@ -63,15 +64,16 @@ function Stimulus = getWormIndentation(Stimulus, TrackingData, StimulusData, num
         Stimulus(stim).AppliedStimulus.indentation = mean(wormIndentation(20+risePoints:20+numStimOnPoints)); %unit: um
         Stimulus(stim).AppliedStimulus.cantileverDeflection = mean(cantileverDeflection(20+risePoints:20+numStimOnPoints)); %unit: um
         Stimulus(stim).AppliedStimulus.forceApplied = mean(cantileverForce(20+risePoints:20+numStimOnPoints))*10^9; %unit: nN
-        
+       
+        subplot(311),plot([0:1/pointsPerSecond:duration],cantileverDeflection);
+        subplot(312),plot([0:1/pointsPerSecond:duration],actuatorPosition-actuatorZeroPosition);
+        subplot(313),plot([0:1/pointsPerSecond:duration],wormIndentation,'b', 0.001.*[20+risePoints:20+numStimOnPoints], wormIndentation(20+risePoints:20+numStimOnPoints),'r.');
+
         % F = kx
        % wormStiffness = cantileverForce./wormIndentation .*1e6 ; % N / um * um/m = N/m
     end
 
 
 
-%     subplot(311),plot([0:1/pointsPerSecond:duration],cantileverDeflection);
-%     subplot(312),plot([0:1/pointsPerSecond:duration],actuatorPosition-actuatorZeroPosition);
-%     subplot(313),plot([0:1/pointsPerSecond:duration],wormIndentation,'b', 0.001.*[20+risePoints:20+numStimOnPoints], wormIndentation(20+risePoints:20+numStimOnPoints),'r.');
 
 end

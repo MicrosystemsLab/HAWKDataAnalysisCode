@@ -68,7 +68,7 @@ for dir = 1:length(directories)
             StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
             if TrackingData.NumberOfStimulus > 0
                 load(mat_file);
-                disp(strcat('Starting file: ',directory)); 
+                
                 %Deal with old analysis:
                 if dealWithOldData == 1
                     moveOldData(directory,TrackingData.NumberOfStimulus);

@@ -37,6 +37,9 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         
         %Get time the stimulus started:
         stimOnFrame =  find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime,1)-1;
+        postStimFrame = find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime+POST_STIM_TIME,1);
+        postStimFrame2 = find(Stimulus(stim).timeData(:,8)>Stimulus(stim).StimulusTiming.stimOnStartTime+POST_STIM_TIME2,1);
+        
         %Grab frames of intered: 15 frames before stimulus (~1.5s), during stim
         %frames and 34 frames after stimulus (~3s)
         numPreStimFrames = length(Stimulus(stim).FramesByStimulus.PreStimFrames);
@@ -45,28 +48,24 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         else
             cutoff = 15;
         end
-        frames = [Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount),...
-            Stimulus(stim).FramesByStimulus.DuringStimFrames, ...
-            Stimulus(stim).FramesByStimulus.PostStimFrames(1:POST_STIM_FRAMES2)];
-          
+         
         %determine speed delta
-        preStimAveSpeed = nanmean(speed(frames(1)-1 + find(frames<=stimOnFrame-1)) ); 
-        postStimAveSpeed1_5sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES)) );
-        postStimAveSpeed2_5sec = nanmean(speed(frames(1)-1 + find(frames>=stimOnFrame,POST_STIM_FRAMES2)) );
-        
-        postStimAcceleration = diff(speed(find(frames>=stimOnFrame+1,POST_STIM_FRAMES)));
+        preStimAveSpeed = nanmean(speed(Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount)));
+        postStimAveSpeed1 = nanmean(speed(stimOnFrame:postStimFrame));
+        postStimAveSpeed2 = nanmean(speed(stimOnFrame:postStimFrame2));     
+        postStimAcceleration = diff(speed(stimOnFrame:postStimFrame2));
         
         %Compare before and after movement directions to determine delta:
-        if sign(preStimAveSpeed) ~= sign(postStimAveSpeed2_5sec)
+        if sign(preStimAveSpeed) ~= sign(postStimAveSpeed2)
             deltaDirection = true;
         else
             deltaDirection = false;
         end
         
         %Compare before and after average speeds to determine delta speed:
-        if ( abs(postStimAveSpeed1_5sec) < abs(preStimAveSpeed)*(SPEED_THRESHOLD_PAUSE))
+        if ( abs(postStimAveSpeed1) < abs(preStimAveSpeed)*(SPEED_THRESHOLD_PAUSE))
             deltaSpeed = -1;
-        elseif  (abs(postStimAveSpeed1_5sec) > abs(preStimAveSpeed)*(SPEED_THRESHOLD_SPEEDUP))
+        elseif  (abs(postStimAveSpeed1) > abs(preStimAveSpeed)*(SPEED_THRESHOLD_SPEEDUP))
             deltaSpeed = 1;
         else
             deltaSpeed = 0;
@@ -78,8 +77,8 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         if (deltaDirection == 1)
             responseType = 'reversal';
             %Measure latency of reversal:
-            ind = find(diff(direction_smoothed(frames))~=0)+1+frames(1);
-            reversalFrame = find(diff(direction(ind(1)-5:ind(1)+5))~=0,1)-5+ind(1)+1;
+            ind = find(diff(sign(direction_smoothed(stimOnFrame-cutoff:postStimFrame2)))==2,1,'first');
+            reversalFrame = stimOnFrame-cutoff+ind+1;
             latency = Stimulus(stim).timeData(reversalFrame,8)-Stimulus(stim).StimulusTiming.stimOnStartTime;
         %If there is no significant change in speed, classify as "none"
         elseif (deltaSpeed == 0)
@@ -103,8 +102,8 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         Stimulus(stim).Response.Type = responseType;
         Stimulus(stim).Response.Latency = latency;
         Stimulus(stim).Response.preStimSpeed = preStimAveSpeed;
-        Stimulus(stim).Response.postStimSpeed1_5 = postStimAveSpeed1_5sec;
-        Stimulus(stim).Response.postStimSpeed4 = postStimAveSpeed2_5sec;
+        Stimulus(stim).Response.postStimSpeed1_5 = postStimAveSpeed1;
+        Stimulus(stim).Response.postStimSpeed4 = postStimAveSpeed2;
         Stimulus(stim).Response.postStimAcceleration = postStimAcceleration;
         
                 %Plotting for debug:

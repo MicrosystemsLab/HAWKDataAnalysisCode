@@ -21,8 +21,8 @@ function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim, badFr
 
    
     %omit head and tail portion of the worm to discount foraging behavior:
-    headCrop = 0.2;
-    tailCrop = 0.1;
+    headCrop = 0.15;
+    tailCrop = 0.15;
     alpha_accum = 0.5;
     %Create vector of indices:
     xs = 1:size(curvature,1);
@@ -54,7 +54,10 @@ function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim, badFr
             nextCurve = curvature(cinds,i+1)';
             %We find the "x" that will minimize the least squares error between
             %the next curve and shiftfn when evaulated at x and the current curve 
-            try [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve, -length(xs)*headCrop, length(xs)*tailCrop, op);
+            try 
+                shiftfn = @(x, xdata) interp1(xs, xdata, cinds(~isnan(nextCurve)) + x, 'linear');
+                [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve(~isnan(nextCurve)), -length(xs)*headCrop, length(xs)*tailCrop, op);
+                
             catch
                 x = 0; 
                 residual=NaN; 
@@ -62,11 +65,23 @@ function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim, badFr
             end
             %Adjust for next curve evaluation by moving next curve to current curve:
     %         curveAccumulated = curvature(:,i+1)';
-            curveAccumulated = alpha_accum * interp1(xs,curveAccumulated,xs+x,'linear','extrap') + (1-alpha_accum) * curvature(:,i+1)';
-        
+ 
+    
+ 
             %Save phase shift value:
             ps(i) = x;
             ps_residual(i) = residual;
+            
+%               %FOR DEBUG: DELETE ME
+%             figure(1), plot(cinds+sum(ps),nextCurve)
+%             hold on
+%             figure(2), plot(xs, curveAccumulated, cinds + x, nextCurve)
+%            
+            
+            curveAccumulated = nansum(...
+                [alpha_accum * interp1(xs,curveAccumulated,xs+x,'linear','extrap'); ...
+                (1-alpha_accum) * curvature(:,i+1)']);
+
         end
     end
 

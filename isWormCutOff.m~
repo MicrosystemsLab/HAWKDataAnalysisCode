@@ -16,18 +16,22 @@ function cutoff = isWormCutOff(skeleton)
     %Check head
     if (head.x < xBounds(1) || ...
             head.x > xBounds(2) )
-        cutoff = find(diff(skeleton.x)~=00,1,'first');
+        cutoff = find(diff(head.x)>0,1);
 
     elseif (head.y < yBounds(1) || ...
-            head.y > yBounds(2) )        
-        cutoff = find(diff(skeleton.y)~=00,1,'first');
+            head.y > yBounds(2) )
+        
+        
+        diffY = diff(head.y);
+        
+        cutoff = 1;
     %Check tail
     elseif (tail.x < xBounds(1) || ...
             tail.x > xBounds(2))
-        cutoff = -find(diff(fliplr(skeleton.x))~=00,1,'first');
     elseif (tail.y < yBounds(1) || ...
             tail.y > yBounds(2) )
-        cutoff = -find(diff(fliplr(skeleton.y))~=00,1,'first');
+
+        cutoff = -1;
     %Else return 0
     else
        cutoff = 0; 

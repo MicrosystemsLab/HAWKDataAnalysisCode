@@ -19,7 +19,7 @@
 
 function Stimulus = calculateSmoothFitSkeleton(Stimulus, numStims)
 HAWKProcessingConstants;
-
+HAWKSystemConstants;
 
     for stim = 1:numStims
         skeleton = Stimulus(stim).Skeleton;
@@ -27,13 +27,39 @@ HAWKProcessingConstants;
         for frame = 1:length(skeleton)
             x = skeleton(frame).x;
             y = skeleton(frame).y;
-
-            %Smooth the spline via a guassian filter:
+            skeletonPointsCount = length(skeleton(frame).x);
+            
+            %determine number of points 
+            %if the worm cut off and how many points are on the edge of the
+            %frame:
+            Stimulus(stim).SkeletonSmooth(frame).cutoff = isWormCutOff(skeleton(frame));
+            
+            if (Stimulus(stim).SkeletonSmooth(frame).cutoff == 0)
+                numPoints = NUMCURVPTS;
+            elseif (sign(Stimulus(stim).SkeletonSmooth(frame).cutoff) == 1)
+                %if head cut off, truncate front of skeleton
+                x = x(Stimulus(stim).SkeletonSmooth(frame).cutoff: skeletonPointsCount);
+                y = y(Stimulus(stim).SkeletonSmooth(frame).cutoff: skeletonPointsCount);
+                bodyLength = calculateBodyLength(x, y)*UM_PER_PIXEL; 
+                numPoints = min(round(bodyLength/Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames * NUMCURVPTS), NUMCURVPTS);
+            elseif (sign(Stimulus(stim).SkeletonSmooth(frame).cutoff) == -1)
+                % if tail cut off, truncate end of skeleton
+                x = x(1:skeletonPointsCount-abs(Stimulus(stim).SkeletonSmooth(frame).cutoff)+1);
+                y = y(1:skeletonPointsCount-abs(Stimulus(stim).SkeletonSmooth(frame).cutoff)+1); 
+                bodyLength = calculateBodyLength(x, y)*UM_PER_PIXEL; 
+                numPoints = min(round(bodyLength/Stimulus(stim).BodyMorphology.averageBodyLengthGoodFrames * NUMCURVPTS), NUMCURVPTS);
+            end
+            
+           %Smooth the spline via a guassian filter:
             x_filtered =  lowpass1D(x,CURVATURE_FILTERING_SIGMA);
             y_filtered =  lowpass1D(y,CURVATURE_FILTERING_SIGMA);
-            %create a smooth spline of equally spaced points:
-            xy_smoothSpline = generateSmoothSpline([x_filtered; y_filtered],NUMCURVPTS);
             
+            %create a smooth spline of equally spaced points:
+            xy_smoothSpline = generateSmoothSpline([x_filtered; y_filtered],numPoints);
+            
+            %save the truncated skeleton, smoothed skeleton
+            Stimulus(stim).SkeletonTruncate(frame).x = x;
+            Stimulus(stim).SkeletonTruncate(frame).y = y;
             Stimulus(stim).SkeletonSmooth(frame).x = xy_smoothSpline(:,1);
             Stimulus(stim).SkeletonSmooth(frame).y = xy_smoothSpline(:,2);
         end

@@ -24,7 +24,11 @@ for i=1:size(curvature,1)
     curvaturetoPlot(i,:) = curvature(i,round(1+(size(curvature,2)-1)...
         /(numberoflocation-1)*(0:(numberoflocation-1))));
     for j=1:numberoflocation
-        if (curvaturetoPlot(i,j)>0)
+        if (isnan(curvaturetoPlot(i,j)))
+            imageR(j, i) = uint8(200);
+            imageG(j, i) = uint8(200);
+            imageB(j, i) = uint8(200);
+        elseif (curvaturetoPlot(i,j)>0)
             
             imageR(j, i) = uint8(255-255/(upperlimit)*(curvaturetoPlot(i,j)));
             imageG(j, i) = uint8(255-255/(upperlimit)*(curvaturetoPlot(i,j)));

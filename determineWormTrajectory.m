@@ -8,6 +8,7 @@
 %
 %  reutns {Stimulus} struct,  contains experiment data organized by
 %  stimulus, includes trajectory information determined by this function.
+%  The unit in the trajectory is always micron.
 % 
 %  Copyright 2015 Eileen Mazzochette, et al <emazz86@stanford.edu>
 %  This file is part of HAWK_AnalysisMethods.
@@ -20,9 +21,8 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
     
     for stim = 1:numStims
     
-        directionSmoothing = 4; %frames.
-
-        for frame = 1:Stimulus(stim).numFrames
+          for frame = 1:Stimulus(stim).numFrames
+            %Convert all points from pixel space to real (or stage) space (unit = micron):
             headRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.head.x(frame)).*UM_PER_PIXEL;
             headRealSpace.y(frame) = Stimulus(stim).PixelPositions.head.y(frame).*UM_PER_PIXEL;
             tailRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.tail.x(frame)).*UM_PER_PIXEL;
@@ -31,7 +31,9 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
             centroidRealSpace.y(frame) = Stimulus(stim).PixelPositions.centroid.y(frame).*UM_PER_PIXEL;
             meanRealSpace.x(frame) = (IMAGE_WIDTH_PIXELS - Stimulus(stim).PixelPositions.mean.x(frame)).*UM_PER_PIXEL;
             meanRealSpace.y(frame) = Stimulus(stim).PixelPositions.mean.y(frame).*UM_PER_PIXEL;
-
+    
+            %In first frame, initialize the stage position to zero and the
+            %points of interest relative to zero:
             if frame == 1
                 Stimulus(stim).Trajectory.stagePosition.x(1) = 0;
                 Stimulus(stim).Trajectory.stagePosition.y(1) = 0;
@@ -44,7 +46,8 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
                 Stimulus(stim).Trajectory.meanPosition.x(1) = Stimulus(stim).Trajectory.stagePosition.x(1) - meanRealSpace.x(1);
                 Stimulus(stim).Trajectory.meanPosition.y(1) = Stimulus(stim).Trajectory.stagePosition.y(1) - meanRealSpace.y(1);
                 Stimulus(stim).Trajectory.speed(1) = 0;
-
+            %In the next frames, move each point from the previous point by
+            %the stage position:
             else
                 Stimulus(stim).Trajectory.stagePosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame-1) + Stimulus(stim).stageMovement.x(frame-1);
                 Stimulus(stim).Trajectory.stagePosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame-1) + Stimulus(stim).stageMovement.y(frame-1);
@@ -57,7 +60,7 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
                 Stimulus(stim).Trajectory.meanPosition.x(frame) = Stimulus(stim).Trajectory.stagePosition.x(frame) - meanRealSpace.x(frame);
                 Stimulus(stim).Trajectory.meanPosition.y(frame) = Stimulus(stim).Trajectory.stagePosition.y(frame) - meanRealSpace.y(frame);
                 
-                %Find Velocity:
+                %Find Velocity of mean point: get both speed and direction.:
                 deltaX = Stimulus(stim).Trajectory.meanPosition.x(frame)-Stimulus(stim).Trajectory.meanPosition.x(frame-1);
                 deltaY = Stimulus(stim).Trajectory.meanPosition.y(frame)-Stimulus(stim).Trajectory.meanPosition.y(frame-1);
                 Stimulus(stim).Trajectory.movementDirection(frame) = atan2(deltaY,deltaX) * 180/pi;
@@ -71,18 +74,25 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
            
           %Get body rotation, amplitude, wavelength:
           Stimulus(stim).Trajectory.bodyRotation(frame) = findRotationAngle(Stimulus(stim).SkeletonSmooth(frame))*180/pi;
-          [Stimulus(stim).Trajectory.amplitude(frame), Stimulus(stim).Trajectory.RotatedSkeleton(frame), Stimulus(stim).Trajectory.wavelength(frame)] = getTrackData(Stimulus(stim).SkeletonSmooth(frame).x, Stimulus(stim).SkeletonSmooth(frame).y, Stimulus(stim).Trajectory.bodyRotation(frame)*pi/180);
+          [Stimulus(stim).Trajectory.amplitude(frame), Stimulus(stim).Trajectory.RotatedSkeleton(frame), Stimulus(stim).Trajectory.wavelength(frame)] = ...
+              getTrackData(Stimulus(stim).SkeletonSmooth(frame).x, Stimulus(stim).SkeletonSmooth(frame).y, Stimulus(stim).Trajectory.bodyRotation(frame)*pi/180);
 
             
-        end
+          end
 
+        
+        %For this stimulus, set statistics on the track amplitude and wavelength before and
+        %after the stimulus is applied:
         stimOnFrame = find(Stimulus(stim).StimulusActivity == 1, 1);
         numPreStimFrames = length(Stimulus(stim).FramesByStimulus.PreStimFrames);
+        %Want at least 15 frames pre stimulus. If there are less than 15
+        %frames, get as many as you can:
         if numPreStimFrames < 15
             cutoff = numPreStimFrames - 1;
         else
             cutoff = 15;
         end
+        %Get stats:
        Stimulus(stim).Trajectory.amplitudePreStimAve = nanmean(Stimulus(stim).Trajectory.amplitude(stimOnFrame - cutoff:stimOnFrame));       
        Stimulus(stim).Trajectory.wavelengthPreStimAve = nanmean(Stimulus(stim).Trajectory.wavelength(stimOnFrame - cutoff:stimOnFrame));
        Stimulus(stim).Trajectory.amplitudePostStimAve = nanmean(Stimulus(stim).Trajectory.amplitude(stimOnFrame:stimOnFrame+55));

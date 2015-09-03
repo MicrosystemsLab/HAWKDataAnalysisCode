@@ -49,7 +49,7 @@ end
 %directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
 fileID = fopen('/Users/emazzochette/Desktop/ErrorList.txt','a');
-dealWithOldData = false;
+dealWithOldData = true;
 
 for dir = 1:length(directories)
     %Select next directory:
@@ -62,7 +62,7 @@ for dir = 1:length(directories)
     %Save Stimulus file:
     mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
     if (exist(mat_file, 'file')==2)
-%         try
+        try
             TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
             FPGAData = getFPGADataFromYAML(directory, experimentTitle);
             StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
@@ -71,8 +71,8 @@ for dir = 1:length(directories)
                 disp(strcat('Starting file: ',directory)); 
                 %Deal with old analysis:
                 if dealWithOldData == 1
-                    moveOldData(directory,TrackingData.NumberOfStimulus);
-                    try  Stimulus = rmfield(Stimulus, 'StimulusTiming'); end 
+%                     moveOldData(directory,TrackingData.NumberOfStimulus);
+%                     try  Stimulus = rmfield(Stimulus, 'StimulusTiming'); end 
                     try  Stimulus = rmfield(Stimulus, 'BodyMorphology'); end
                     try  Stimulus = rmfield(Stimulus, 'FramesByStimulus'); end
                     try  Stimulus = rmfield(Stimulus, 'computerScoredBadFrames'); end
@@ -128,10 +128,10 @@ for dir = 1:length(directories)
                 save(mat_file, 'Stimulus');
                 close all;
             end
-%         catch
-%             disp(strcat('Error with: ',experimentTitle));
-%             fprintf(fileID,'%s\n',experimentTitle);
-%         end
+        catch
+            disp(strcat('Error with: ',experimentTitle));
+            fprintf(fileID,'%s\n',experimentTitle);
+        end
     end
 end
 fclose(fileID);

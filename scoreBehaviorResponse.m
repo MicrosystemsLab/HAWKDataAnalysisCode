@@ -43,16 +43,20 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
         %Grab frames of intered: 15 frames before stimulus (~1.5s), during stim
         %frames and 34 frames after stimulus (~3s)
         numPreStimFrames = length(Stimulus(stim).FramesByStimulus.PreStimFrames);
-        if numPreStimFrames < 15
+        if numPreStimFrames < 22
             cutoff = numPreStimFrames - 1;
         else
-            cutoff = 15;
+            cutoff = 22;
         end
          
         %determine speed delta
-        preStimAveSpeed = nanmean(speed(Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount)));
-        postStimAveSpeed1 = nanmean(speed(stimOnFrame:postStimFrame));
-        postStimAveSpeed2 = nanmean(speed(stimOnFrame:postStimFrame2));     
+        time = Stimulus(stim).timeData(:,8);
+        preStimAveSpeed = findAverageSpeed(time(Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount))',...
+            speed(Stimulus(stim).FramesByStimulus.PreStimFrames(preStimCount-cutoff:preStimCount)));
+        postStimAveSpeed1 = findAverageSpeed(time(stimOnFrame:postStimFrame)',...
+            speed(stimOnFrame:postStimFrame));
+        postStimAveSpeed2 = findAverageSpeed(time(stimOnFrame:postStimFrame2)',...
+            speed(stimOnFrame:postStimFrame2));     
         postStimAcceleration = diff(speed(stimOnFrame:postStimFrame2));
         
         %Compare before and after movement directions to determine delta:

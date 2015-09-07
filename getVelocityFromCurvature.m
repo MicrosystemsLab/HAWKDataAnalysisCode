@@ -23,18 +23,29 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
         numFrames = length(skeleton);
          
         [Stimulus(stim).CurvatureAnalysis.phaseShift.ps, Stimulus(stim).CurvatureAnalysis.phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).CurvatureAnalysis.curvature, stim, Stimulus(stim).FrameScoring.BadFrames);
-        cumulativeTime = 0;                 
         Stimulus(stim).CurvatureAnalysis.velocity(1) =  0;
+        counter = 1;
+        counter2 = 1;
+        skippedFrames = [];
         for(frame = 2:numFrames)
             if (isnan(Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1)))
-                 Stimulus(stim).CurvatureAnalysis.velocity(frame) =  NaN;
+                 Stimulus(stim).CurvatureAnalysis.velocity(frame) =  0;
+                 skippedFrames(counter) = frame;
+                 counter = counter+1;
             else
                 deltaX = Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1) .* (1/NUMCURVPTS) .* Stimulus(stim).BodyMorphology.bodyLength(frame);
-                deltaT = Stimulus(stim).timeData(frame,8)-cumulativeTime;
+                deltaT = Stimulus(stim).timeData(frame,8)-Stimulus(stim).timeData(frame-1,8);
                 Stimulus(stim).CurvatureAnalysis.velocity(frame) =  deltaX./deltaT';
-                cumulativeTime = Stimulus(stim).timeData(frame,8);
+                velocity(counter2) = deltaX./deltaT';
+                time(counter2) = Stimulus(stim).timeData(frame,8);
+                counter2 = counter2+1;
             end
         end
+        
+        %Go back and fix skipped frames by linearly interpolating across them.
+        Stimulus(stim).CurvatureAnalysis.velocity(skippedFrames) = interp1(time, velocity,Stimulus(stim).timeData(skippedFrames,8));
+                    
+        %Smooth the velocity with a 1D filter. 
         Stimulus(stim).CurvatureAnalysis.velocitySmoothed = lowpass1D( Stimulus(stim).CurvatureAnalysis.velocity,2);
 
     end

@@ -59,9 +59,16 @@ function [ps, ps_residual] = calculateCurvaturePhaseShift(curvature, stim, badFr
                 [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve(~isnan(nextCurve)), -length(xs)*headCrop, length(xs)*tailCrop, op);
                 
             catch
-                x = 0; 
-                residual=NaN; 
-                disp([' Stimulus:  ' num2str(stim) ' Frame:  ' num2str(i) ': least squares curve fit failed!']);
+                try 
+                    nextCurve = fliplr(nextCurve).*-1;
+                    shiftfn = @(x, xdata) interp1(xs, xdata, cinds(~isnan(nextCurve)) + x, 'linear');
+                    [x, residual] = lsqcurvefit(shiftfn, x, curveAccumulated, nextCurve(~isnan(nextCurve)), -length(xs)*headCrop, length(xs)*tailCrop, op);
+                
+                catch
+                    x = 0; 
+                    residual=NaN; 
+                    disp([' Stimulus:  ' num2str(stim) ' Frame:  ' num2str(i) ': least squares curve fit failed!']);
+                end
             end
             %Adjust for next curve evaluation by moving next curve to current curve:
     %         curveAccumulated = curvature(:,i+1)';

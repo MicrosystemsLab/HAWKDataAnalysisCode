@@ -25,7 +25,9 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
         [Stimulus(stim).CurvatureAnalysis.phaseShift.ps, Stimulus(stim).CurvatureAnalysis.phaseShift.residual] = calculateCurvaturePhaseShift( Stimulus(stim).CurvatureAnalysis.curvature, stim, Stimulus(stim).FrameScoring.BadFrames);
         Stimulus(stim).CurvatureAnalysis.velocity(1) =  0;
         counter = 1;
-        counter2 = 1;
+        counter2 = 2;
+        time = [];
+        velocity = [];
         skippedFrames = [];
         for(frame = 2:numFrames)
             if (isnan(Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1)))

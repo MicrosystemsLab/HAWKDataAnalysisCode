@@ -27,7 +27,7 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Volumes/home/HAWK Data/';
+    DestinationFolder = '/Volumes/Backup Disc Celegans/HAWKData/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
     excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
@@ -48,7 +48,7 @@ end
 %asks user for the directory where all the files are:
 %directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
-fileID = fopen('/Users/emazzochette/Desktop/ErrorList.txt','a');
+fileID = fopen('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/ErrorList.txt','a');
 dealWithOldData = true;
 
 for dir = 1:length(directories)
@@ -89,10 +89,12 @@ for dir = 1:length(directories)
 
 
                 Stimulus = calculateBodyMorphology(Stimulus,TrackingData.NumberOfStimulus);
+                Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
                 Stimulus = calculateWormCentroidMean(Stimulus,TrackingData.NumberOfStimulus);
+               
                 Stimulus = calculateSmoothFitSkeleton(Stimulus, TrackingData.NumberOfStimulus);
 %                 try  Stimulus = rmfield(Stimulus, 'BodyMorpholoy'); end
-                Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
+               
                 
                 Stimulus = sortFramesBasedOnStimulus(Stimulus, TrackingData.NumberOfStimulus);
                 

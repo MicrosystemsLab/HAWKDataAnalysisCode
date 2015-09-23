@@ -17,7 +17,8 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
+%     DestinationFolder = '/Volumes/home/HAWK Data/Force Response Data/';
+    DestinationFolder = '/Volumes/Backup Disc Celegans/HAWKData/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
 %     excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
     excelFile = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/Force Position Response Assay/DataDrop.xls';
@@ -71,7 +72,7 @@ for dir = 1:length(directories)
                 for stim = 1:TrackingData.NumberOfStimulus
                     xlwrite(excelFile, experimentData, 'Sheet1', strcat('A',num2str(experimentRow+stim-1)));
                 end
-                xlwrite(excelFile, stimulusData, 'Sheet1', strcat('AA',num2str(experimentRow)));
+                xlwrite(excelFile, stimulusData, 'Sheet1', strcat('AB',num2str(experimentRow)));
             end
         catch
                 disp(strcat('Error with: ',experimentTitle));

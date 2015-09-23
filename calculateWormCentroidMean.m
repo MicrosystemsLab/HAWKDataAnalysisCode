@@ -24,11 +24,13 @@ function [Stimulus] = calculateWormCentroidMean(Stimulus,numStims)
             numSkeletonPoints = length(Stimulus(stim).Skeleton(frame).x);
             antTrunc = 0.25;
             postTrunc = 0.1;
-            anteriorPointsToEliminate = floor(antTrunc*numSkeletonPoints);
+            anteriorPointsToEliminate = max([floor(antTrunc*numSkeletonPoints) 1]);
             posteriorPointsToEliminate = floor(postTrunc*numSkeletonPoints);
+            
             
             Stimulus(stim).PixelPositions.mean.x(frame) = mean(Stimulus(stim).Skeleton(frame).x([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
             Stimulus(stim).PixelPositions.mean.y(frame) = mean(Stimulus(stim).Skeleton(frame).y([anteriorPointsToEliminate:numSkeletonPoints-posteriorPointsToEliminate]));
+            
         end
     end         
 end

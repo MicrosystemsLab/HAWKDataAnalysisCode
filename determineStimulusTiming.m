@@ -22,11 +22,13 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
     numContactPoints = StimulusData.ContactTime/acquisitionInterval;
     for stim = 1:numStims
         %First get time references in tracking clock:
-        %Get frame time when stimulus button was hit:
-        ind = find(Stimulus(stim).StimulusActivity==1,1,'first');
+        %Get frame time when stimulus button was hit (first frame before stimulus is "off"):
+        ind = find(Stimulus(stim).StimulusActivity==1,1,'first')-1;
+        Stimulus(stim).StimulusTiming.stimOnFrame = ind;
         Stimulus(stim).StimulusTiming.stimAppliedTime = Stimulus(stim).timeData(ind,8);
-        %Get frame time when stimulus was over:
+        %Get frame time when stimulus was over (first frame when stimulus is "off"):
         ind = find(diff(Stimulus(stim).StimulusActivity) == -1, 1, 'first');
+        Stimulus(stim).StimulusTiming.stimOffFrame = ind;
         Stimulus(stim).StimulusTiming.stimEndTime = Stimulus(stim).timeData(ind,8);    
 
         %Evaluate FPGA timing:
@@ -37,7 +39,7 @@ function Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus
         approachOnIndex = find(Stimulus(stim).FPGAData.DesiredSignal>0,1,'first');
         approachOnTime = timeFPGA(approachOnIndex);
 %         stimOnIndex =  find(diff(diff(Stimulus(stim).FPGAData.DesiredSignal(approachOnIndex:approachOnIndex+numContactPoints)))>0.0001,3,'first')+approachOnIndex;
-        stimOnIndex = find(diff(Stimulus(stim).FPGAData.DesiredSignal(approachOnIndex:approachOnIndex+2*numContactPoints)) == 0,1,'first')+approachOnIndex-1;
+        stimOnIndex = find(diff(Stimulus(stim).FPGAData.DesiredSignal(approachOnIndex:approachOnIndex+4*numContactPoints)) == 0,1,'first')+approachOnIndex-1;
 %         stimOnIndex = stimOnIndex(end)+1;
         stimOnTime = timeFPGA(stimOnIndex);
         %Save those indices in case we need to reference later:

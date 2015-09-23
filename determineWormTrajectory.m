@@ -6,7 +6,7 @@
 %  stimulus
 %  param {numStims} int, the number of stimulus in this experiment.
 %
-%  reutns {Stimulus} struct,  contains experiment data organized by
+%  returns {Stimulus} struct,  contains experiment data organized by
 %  stimulus, includes trajectory information determined by this function.
 %  The unit in the trajectory is always micron.
 % 
@@ -81,22 +81,6 @@ function [Stimulus] = determineWormTrajectory(Stimulus, numStims)
           end
 
         
-        %For this stimulus, set statistics on the track amplitude and wavelength before and
-        %after the stimulus is applied:
-        stimOnFrame = find(Stimulus(stim).StimulusActivity == 1, 1);
-        numPreStimFrames = length(Stimulus(stim).FramesByStimulus.PreStimFrames);
-        %Want at least 15 frames pre stimulus. If there are less than 15
-        %frames, get as many as you can:
-        if numPreStimFrames < 15
-            cutoff = numPreStimFrames - 1;
-        else
-            cutoff = 15;
-        end
-        %Get stats:
-       Stimulus(stim).Trajectory.amplitudePreStimAve = nanmean(Stimulus(stim).Trajectory.amplitude(stimOnFrame - cutoff:stimOnFrame));       
-       Stimulus(stim).Trajectory.wavelengthPreStimAve = nanmean(Stimulus(stim).Trajectory.wavelength(stimOnFrame - cutoff:stimOnFrame));
-       Stimulus(stim).Trajectory.amplitudePostStimAve = nanmean(Stimulus(stim).Trajectory.amplitude(stimOnFrame:stimOnFrame+55));
-       Stimulus(stim).Trajectory.wavelengthPostStimAve = nanmean(Stimulus(stim).Trajectory.wavelength(stimOnFrame:stimOnFrame+55));
     end
 end
 

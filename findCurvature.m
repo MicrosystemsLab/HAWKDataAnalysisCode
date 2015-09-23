@@ -34,12 +34,22 @@ function [Stimulus]= findCurvature(Stimulus, numStims)%, sigma, numcurvpts)
             %Calculate the curvature based on the delta Theta method:
             [curvature, distanceBetweenPoints(1,frame) ] = calculateCurvatureDeltaTheta([skeleton(frame).x skeleton(frame).y]);
             %Use filter again to smooth the curvature:
+            
             if (sign(Stimulus(stim).SkeletonSmooth(frame).cutoff) == 1)
                 zeroPad = NaN(1,NUMCURVPTS - length(curvature));
-                curvature_smooth(:,frame) = [zeroPad lowpass1D(curvature, 1.5)];
+                try
+                    curvature_smooth(:,frame) = [zeroPad lowpass1D(curvature, 1.5)];
+                catch
+                    curvature_smooth(:,frame) = [zeroPad curvature];
+                end
+                
             elseif (sign(Stimulus(stim).SkeletonSmooth(frame).cutoff) == -1);
                 zeroPad = NaN(1,NUMCURVPTS - length(curvature));
-                curvature_smooth(:,frame) = [lowpass1D(curvature, 1.5) zeroPad];
+                try
+                    curvature_smooth(:,frame) = [lowpass1D(curvature, 1.5) zeroPad];
+                catch
+                     curvature_smooth(:,frame) = [curvature zeroPad];
+                end
             else
                 curvature_smooth(:,frame) = lowpass1D(curvature, 1.5);
             end

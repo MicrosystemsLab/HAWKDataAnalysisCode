@@ -51,9 +51,13 @@ HAWKSystemConstants;
             end
             
            %Smooth the spline via a guassian filter:
-            x_filtered =  lowpass1D(x,CURVATURE_FILTERING_SIGMA);
-            y_filtered =  lowpass1D(y,CURVATURE_FILTERING_SIGMA);
-            
+           try
+               x_filtered =  lowpass1D(x,CURVATURE_FILTERING_SIGMA);
+               y_filtered =  lowpass1D(y,CURVATURE_FILTERING_SIGMA);
+           catch  % If the skeleton is too short, don't bother filtering:
+               x_filtered = x;
+               y_filtered = y;
+           end
             %create a smooth spline of equally spaced points:
             xy_smoothSpline = generateSmoothSpline([x_filtered; y_filtered],numPoints);
             

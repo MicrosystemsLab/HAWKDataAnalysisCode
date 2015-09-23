@@ -36,10 +36,15 @@ function Stimulus = scoreFrames(Stimulus, numStims)
         % Find frames where the skeleton intersects itself:
         skeleton = Stimulus(stim).SkeletonTruncate;
         clear numberOfIntersections;
+        
         for i = 1:length(skeleton)
             lengthOfSkeleton = length(skeleton(i).x);
-            [x0, y0] = intersections(skeleton(i).x(1:floor(0.9*lengthOfSkeleton)), skeleton(i).y(1:floor(0.9*lengthOfSkeleton)));
-            numberOfIntersections(i) = length(x0);
+            if lengthOfSkeleton >= 3
+                [x0, y0] = intersections(skeleton(i).x(1:floor(0.9*lengthOfSkeleton)), skeleton(i).y(1:floor(0.9*lengthOfSkeleton)));
+                numberOfIntersections(i) = length(x0);
+            else 
+                numberOfIntersections(i) = 1;
+            end
         end
         metrics(find(numberOfIntersections>0),1) = 1;
 

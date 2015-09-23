@@ -1,9 +1,27 @@
 function plotData(Stimulus, TrackingData, numStims, directory)
+    HAWKProcessingConstants;
     acquisitionInterval = 0.001;
     transmitInterval = 0.001;
-    timeBounds = [-1.5 5]; %want to look at just 1.5 second before stim to 5 second after stim
+    
     vertBounds = [-Inf Inf];
     for stim = 1:numStims
+        
+        stimOnFrame = Stimulus(stim).StimulusTiming.stimOnFrame;
+        stimOnTime = Stimulus(stim).timeData(stimOnFrame,8);
+        stimOffFrame = Stimulus(stim).StimulusTiming.stimOffFrame;
+        stimOffTime = Stimulus(stim).timeData(stimOffFrame,8);
+        
+        if length(Stimulus(stim).FramesByStimulus.PreStimFrames) < PRE_STIM_FRAMES
+            cutoff = length(Stimulus(stim).FramesByStimulus.PreStimFrames) - 1;
+        else
+            cutoff = PRE_STIM_FRAMES-1;
+        end
+         
+        preStimTime = stimOnTime - Stimulus(stim).timeData(stimOnFrame-cutoff,8);
+        postStimTime = stimOffTime - stimOnTime;
+        timeBounds = [-preStimTime 5]; %want to look at just 1.5 second before stim to 5 second after stim
+        
+        
         figHandle = figure(stim);
         set(figHandle, 'Position', [100, 100, 1500, 895]);
 
@@ -78,6 +96,8 @@ function plotData(Stimulus, TrackingData, numStims, directory)
         hold on
         plot(timeTracking(framesTracking), mult.*Stimulus(stim).CurvatureAnalysis.velocitySmoothed(framesTracking), 'LineWidth', 2,'Color', 'k','LineStyle', '-','Marker','none');
 %              title('Velocity', 'FontSize', 18);
+        plot([-preStimTime 0], mult.*[Stimulus(stim).Response.preStimSpeed Stimulus(stim).Response.preStimSpeed],'b:');
+        plot([0 postStimTime], mult.*[Stimulus(stim).Response.postStimSpeed Stimulus(stim).Response.postStimSpeed],'b:');
         xlabel('Time (s)', 'FontSize', 16);
         ylabel('Velocity (um/s)', 'FontSize', 16);
         legend('Raw Velocity','Smoothed Velocity','Location','NorthWest');

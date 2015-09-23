@@ -1,3 +1,5 @@
+%Determine if the function crosses zero, determining the wavelength
+
 function guessPre = getZeroCrossings(x, y)
 
     Hzerocross = dsp.ZeroCrossingDetector;

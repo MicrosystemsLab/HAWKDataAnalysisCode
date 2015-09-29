@@ -61,7 +61,7 @@ for dir = 1:length(directories)
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
         load(mat_file);
         
-        try
+%         try
             if TrackingData.NumberOfStimulus>0
             
             
@@ -74,9 +74,9 @@ for dir = 1:length(directories)
                 end
                 xlwrite(excelFile, stimulusData, 'Sheet1', strcat('AB',num2str(experimentRow)));
             end
-        catch
-                disp(strcat('Error with: ',experimentTitle));
-%                 fprintf(fileID,'%s\n',experimentTitle);
-        end
+%         catch
+%                 disp(strcat('Error with: ',experimentTitle));
+% %                 fprintf(fileID,'%s\n',experimentTitle);
+%         end
     end
 end

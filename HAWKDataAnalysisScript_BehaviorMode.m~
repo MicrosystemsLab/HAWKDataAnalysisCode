@@ -56,7 +56,7 @@ for dir = 1:length(directories)
     
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
-%     try
+    try
         TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
 %         load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')));
@@ -79,10 +79,10 @@ for dir = 1:length(directories)
             plotDataBehavior(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory)
             save(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')),'Stimulus');
         end
-%     catch
-%         disp(strcat('Error with: ',experimentTitle));
-%         fprintf(fileID,'%s\n',experimentTitle);
-%     end
+    catch
+        disp(strcat('Error with: ',experimentTitle));
+        fprintf(fileID,'%s\n',experimentTitle);
+    end
 end
 fclose(fileID);
 

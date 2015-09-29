@@ -8,11 +8,8 @@ function plotDataBehavior(Stimulus, TrackingData, numStims, directory)
         set(figHandle, 'Position', [100, 100, 1500, 895]);
 
         timeTracking = Stimulus(stim).timeData(:,8) - Stimulus(stim).StimulusTiming.stimAppliedTime;
-        if  isempty(find(timeTracking>timeBounds(2), 1))
-            framesTracking = [find(timeTracking>timeBounds(1),1) : length(timeTracking)];
-        else
-            framesTracking = [find(timeTracking>timeBounds(1),1) :  find(timeTracking>timeBounds(2), 1)];
-        end
+        framesTracking = [find(timeTracking>timeBounds(1),1) : min(timetracking(end), find(timeTracking>timeBounds(2), 1))];
+
         %Trajectory plot:
         subplot('position',[0.1 0.1 0.4 0.8])  
         goodFrames = Stimulus(stim).FrameScoring.GoodFrames;

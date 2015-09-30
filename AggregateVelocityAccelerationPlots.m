@@ -6,7 +6,8 @@ if (ispc) %if on PC workstation in MERL 223
     DestinationFolder = 'C:\Users\HAWK\Documents\HAWKData';
     addpath(genpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\YAMLMatlab_0.4.3'));
     excelFile = 'C:\Users\HAWK\Dropbox\HAWK\HAWKExperimentLog.xls';
-    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');s
+    addpath('C:\Users\HAWK\Documents\HAWKDataAnalysisCode\20130227_xlwrite');
+    slash = '\';
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -17,11 +18,11 @@ if (ispc) %if on PC workstation in MERL 223
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\dom4j-1.6.1.jar');
     javaaddpath('20130227_xlwrite\20130227_xlwrite\poi_library\stax-api-1.0.1.jar');
 elseif (ismac) % if on Eileen's personal computer
-    DestinationFolder = '/Volumes/';
+    DestinationFolder = '/Volumes/home/HAWK Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-%     excelFile = '/Users/emazzochette/Box Sync/HAWK/HAWKExperimentLog.xls';
-     excelFile = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/Force Position Response Assay/DataDrop.xls';
+    excelFile = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/Force Position Response Assay/DataDrop.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
+    slash = '/';
     % For excel writing, need these files linked:
     % Initialisation of POI Libs
     % Add Java POI Libs to matlab javapath
@@ -33,48 +34,49 @@ elseif (ismac) % if on Eileen's personal computer
     javaaddpath('20130227_xlwrite/20130227_xlwrite/poi_library/stax-api-1.0.1.jar');
 end
 
-
-
 %asks user for the directory where all the files are:
 %directory = uigetdir(DestinationFolder,'Choose the folder where the data if located');
 directories = uipickfiles( 'FilterSpec',DestinationFolder);
+fileID = fopen('/Users/emazzochette/Desktop/ErrorList.txt','a');
+
+Forces = [50 100 500 1000 5000 10000];
 
 for dir = 1:length(directories)
     %Select next directory:
     directoryCell = directories(:,dir);
     directory = directoryCell{1};
-        
+    
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
-   
-    %Extract General Properties:
+    
+    
     % mat file name for the per stimulus data structure.
-    mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'));
-    %if the data has already been read from the .yaml file, just load the mat
-    %file created last time:
+    mat_file = fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')); 
+   
+    %Check that the mat file exists:
     if (exist(mat_file, 'file')==2)
-
-        %Extract tracking, FPGA, stimulus data from YAML files: 
+        load(mat_file);
         TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
-        load(mat_file);
+        force = find(Forces == StimulusData.Magnitude,1);
         
-        try
-            if TrackingData.NumberOfStimulus>0
-            
-            
-                [NUM,TXT,RAW]=xlsread(excelFile,'Sheet1');
-                [rowCount, columnCount] = size(RAW);
-                experimentRow = rowCount+1;
-                [experimentData, stimulusData ]= getBehaviorDataForExcel(TrackingData, StimulusData, Stimulus,TrackingData.NumberOfStimulus, experimentTitle);
-                for stim = 1:TrackingData.NumberOfStimulus
-                    xlwrite(excelFile, experimentData, 'Sheet1', strcat('A',num2str(experimentRow+stim-1)));
-                end
-                xlwrite(excelFile, stimulusData, 'Sheet1', strcat('T',num2str(experimentRow)));
+        for stim = 1:TrackingData.NumberOfStimulus
+            if (Stimulus(stim).TrialScoring.trialSuccess ==1)
+                time = Stimulus(stim).timeData(:,8)-Stimulus(stim).StimulusTiming.stimAppliedTime;
+                frames = (find(time>-2,1):find(time>5,1));
+                speed = Stimulus(stim).CurvatureAnalysis.velocitySmoothed(frames);
+                acceleration = Stimulus(stim).Response.postStimAcceleration(frames);
+                timePlot = time(frames);
+                subplot(2,6,force)
+                plot(timePlot,speed,'LineWidth',2)
+                hold on
+                subplot(2,6,force+6)
+                plot(timePlot,acceleration,'LineWidth',2,'Color','Red')
+                hold on
             end
-        catch
-                disp(strcat('Error with: ',experimentTitle));
-%                 fprintf(fileID,'%s\n',experimentTitle);
         end
+        
+        
+        
     end
 end

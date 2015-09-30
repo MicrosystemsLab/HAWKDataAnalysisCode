@@ -28,7 +28,7 @@ if (ispc) %if on PC workstation in MERL 223
 elseif (ismac) % if on Eileen's personal computer
     DestinationFolder = '/Volumes/home/HAWK Data/';
     addpath(genpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/YAMLMatlab_0.4.3'));
-    excelFile = '/Users/emazzochette/Dropbox/HAWK/HAWKExperimentLog.xls';
+    excelFile = '/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/Experiments/Force Position Response Assay/DataDrop.xls';
     addpath('/Users/emazzochette/Documents/MicrosystemsResearch/HAWK/HAWKDataAnalysisCode/HAWKDataAnalysisCode/20130227_xlwrite');
     slash = '/';
     % For excel writing, need these files linked:
@@ -56,12 +56,12 @@ for dir = 1:length(directories)
     
     %determine experiment title based on file name:
     experimentTitle = getExperimentTitle(directory);
-%     try
+     try
         TrackingData = getTrackingDataFromYAML(directory,experimentTitle);
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
-%         load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')));
-        [Stimulus, numStims, TrackingData] = extractBehaviorDataFromTracking(TrackingData);
-        save(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')),'TrackingData');
+         load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')));
+%        [Stimulus, numStims, TrackingData] = extractBehaviorDataFromTracking(TrackingData);
+%        save(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')),'TrackingData');
         if TrackingData.NumberOfStimulus > 0
             Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
             Stimulus = determineStimulusTimingBehavior(Stimulus,TrackingData.NumberOfStimulus);
@@ -76,13 +76,15 @@ for dir = 1:length(directories)
             Stimulus = determineWormTrajectory(Stimulus, TrackingData.NumberOfStimulus);
             Stimulus = getVelocityFromCurvature(Stimulus, TrackingData.NumberOfStimulus);   
             Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, TrackingData, TrackingData.NumberOfStimulus, true);
-            plotDataBehavior(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory)
+            Stimulus = getBehaviorVelocityStatistics(Stimulus, TrackingData.NumberOfStimulus);
+            plotDataBehavior(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory);
+            plotTrackData(Stimulus, TrackingData.NumberOfStimulus, directory);
             save(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')),'Stimulus');
         end
-%     catch
-%         disp(strcat('Error with: ',experimentTitle));
-%         fprintf(fileID,'%s\n',experimentTitle);
-%     end
+    catch
+        disp(strcat('Error with: ',experimentTitle));
+        fprintf(fileID,'%s\n',experimentTitle);
+    end
 end
 fclose(fileID);
 

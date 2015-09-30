@@ -39,6 +39,7 @@ titles = getBehaviorTitles();
         try Row(stim, strmatch('Stimulus First Frame Time',titles,'exact')-firstColumn+1) = Stimulus(stim).firstFrameTime; end	
         try Row(stim, strmatch('Stimulus Start Time',titles,'exact')-firstColumn+1) =	Stimulus(stim).StimulusTiming.stimAppliedTime; end
         try Row(stim, strmatch('Stimulus End Time',titles,'exact')-firstColumn+1) = Stimulus(stim).StimulusTiming.stimEndTime; end
+        %Body Morphology
         try Row(stim, strmatch('Average Body length (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).BodyMorphology.averageBodyLength; end
         try Row(stim, strmatch('STD Body Length (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).BodyMorphology.stdBodyLength; end
         try Row(stim, strmatch('Average Body Width (um)',titles,'exact')-firstColumn+1) =	Stimulus(stim).BodyMorphology.averageBodyWidth; end
@@ -47,25 +48,21 @@ titles = getBehaviorTitles();
         try Row(stim, strmatch('Filtered STD Body Length (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).BodyMorphology.stdBodyLengthGoodFrames; end
         try Row(stim, strmatch('Filtered Average Body Width (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).BodyMorphology.averageBodyWidthGoodFrames; end
         try Row(stim, strmatch('Filtered STD Body Width (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).BodyMorphology.stdBodyWidthGoodFrames; end
-        try Row(stim, strmatch('Target Location (%)',titles,'exact')-firstColumn+1) =	TrackingData.TargetLocation; end
+        %try Row(stim, strmatch('Target Location (%)',titles,'exact')-firstColumn+1) =	TrackingData.TargetLocation; end
+        %Targeting
         try Row(stim, strmatch('Distance from Target (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).SpatialResolution.distanceFromTargetMean; end
         try Row(stim, strmatch('Percent Down Body Hit (%)',titles,'exact')-firstColumn+1) = Stimulus(stim).SpatialResolution.percentDownBodyHitMean; end
         try Row(stim, strmatch('Distance from Skeleton (um)',titles,'exact')-firstColumn+1) =	Stimulus(stim).SpatialResolution.distanceFromSkeletonMean; end
         try Row(stim, strmatch('Percent Across Body Hit (%)',titles,'exact')-firstColumn+1) =	Stimulus(stim).SpatialResolution.percentAcrossBodyHitMean; end
-        try Row(stim, strmatch('Stimulus Duration (t)',titles,'exact')-firstColumn+1) = StimulusData.ContactTime; end
+        
         try Row(stim, strmatch('Number of Bad Frames',titles,'exact')-firstColumn+1) = length(Stimulus(stim).FrameScoring.BadFrames); end
-        try Row(stim, strmatch('Pre Stim Fit a',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.a; end
-        try Row(stim, strmatch('Pre Stim Fit b',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.b; end
-        try Row(stim, strmatch('Pre Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.c; end
-        try Row(stim, strmatch('Pre Stim Fit d',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.d; end
-        try Row(stim, strmatch('Pre Stim Fit goodness (rmse)',titles,'exact')-firstColumn+1) = Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.goodness.rmse; end
-        try Row(stim, strmatch('Post Stim Fit a',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.a; end
-        try Row(stim, strmatch('Post Stim Fit b',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.b; end
-        try Row(stim, strmatch('Post Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.c; end
-        try Row(stim, strmatch('Post Stim Fit d',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.d; end
-        try Row(stim, strmatch('Post Stim Fit goodness (rmse)',titles,'exact')-firstColumn+1) = Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.goodness.rmse;  end
-        try Row(stim, strmatch('Average Track Velocity', titles,'exact') -firstColumn+1) = nanmean(Stimulus(stim).CurvatureAnalysis.velocitySmoothed(Stimulus(stim).FramesByStimulus.DuringStimFrames)); end
+        
+        try Row(stim, strmatch('Average Track Velocity', titles,'exact') -firstColumn+1) = Stimulus(stim).CurvatureAnalysis.velocityAverage; end
+        try Row(stim, strmatch('STD Track Velocity', titles,'exact') -firstColumn+1) = Stimulus(stim).CurvatureAnalysis.velocitySTD; end
+        try Row(stim, strmatch('Average Track Acceleration', titles,'exact') -firstColumn+1) = Stimulus(stim).CurvatureAnalysis.accelerationAverage; end
+        try Row(stim, strmatch('STD Track Acceleration', titles,'exact') -firstColumn+1) = Stimulus(stim).CurvatureAnalysis.accelerationSTD; end
         try Row(stim, strmatch('Average Mean Position Velocity', titles,'exact') -firstColumn+1) = nanmean(Stimulus(stim).Trajectory.speed(Stimulus(stim).FramesByStimulus.DuringStimFrames)); end
+        
         try Row(stim, strmatch('Average Amplitude (um)',titles,'exact')-firstColumn+1)	= nanmean(Stimulus(stim).Trajectory.amplitude(Stimulus(stim).FramesByStimulus.DuringStimFrames)); end
         try Row(stim, strmatch('Average Wavelength (um/cycle)',titles,'exact')-firstColumn+1)	= nanmean(Stimulus(stim).Trajectory.wavelength(Stimulus(stim).FramesByStimulus.DuringStimFrames)); end
     

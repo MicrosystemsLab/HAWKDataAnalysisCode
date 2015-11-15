@@ -66,6 +66,8 @@ for dir = 1:length(directories)
     Stimulus = extractFPGADataFromFPGAData(FPGAData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);
     save(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')),'TrackingData');
     
+%     load(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat'))); 
+
     if TrackingData.NumberOfStimulus > 0
         Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
         Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);

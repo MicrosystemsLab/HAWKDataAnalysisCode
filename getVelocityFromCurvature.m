@@ -1,4 +1,3 @@
-
 %%%%% Function: Get Velocity From Curvature 
 %  This function calculates the curvature, the phase shift for each
 %  curvature from frame to frame, and then extracts the velocity based on
@@ -26,6 +25,7 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
         Stimulus(stim).CurvatureAnalysis.velocity(1) =  0;
         counter = 1;
         counter2 = 2;
+        lastGoodFrame = 1;
         time = [];
         velocity = [];
         skippedFrames = [];
@@ -36,11 +36,12 @@ function [Stimulus] = getVelocityFromCurvature(Stimulus, numStims)
                  counter = counter+1;
             else
                 deltaX = Stimulus(stim).CurvatureAnalysis.phaseShift.ps(frame-1) .* (1/NUMCURVPTS) .* Stimulus(stim).BodyMorphology.bodyLength(frame);
-                deltaT = Stimulus(stim).timeData(frame,8)-Stimulus(stim).timeData(frame-1,8);
+                deltaT = Stimulus(stim).timeData(frame,8)-Stimulus(stim).timeData(lastGoodFrame,8);
                 Stimulus(stim).CurvatureAnalysis.velocity(frame) =  deltaX./deltaT';
                 velocity(counter2) = deltaX./deltaT';
                 time(counter2) = Stimulus(stim).timeData(frame,8);
                 counter2 = counter2+1;
+                lastGoodFrame = frame;
             end
         end
         

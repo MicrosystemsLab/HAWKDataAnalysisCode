@@ -65,9 +65,9 @@ function Stimulus = getWormIndentation(Stimulus, TrackingData, StimulusData, num
         Stimulus(stim).AppliedStimulus.cantileverDeflection = mean(cantileverDeflection(20+risePoints:20+numStimOnPoints)); %unit: um
         Stimulus(stim).AppliedStimulus.forceApplied = mean(cantileverForce(20+risePoints:20+numStimOnPoints))*10^9; %unit: nN
        
-        subplot(311),plot([0:1/pointsPerSecond:duration],cantileverDeflection);
-        subplot(312),plot([0:1/pointsPerSecond:duration],actuatorPosition-actuatorZeroPosition);
-        subplot(313),plot([0:1/pointsPerSecond:duration],wormIndentation,'b', 0.001.*[20+risePoints:20+numStimOnPoints], wormIndentation(20+risePoints:20+numStimOnPoints),'r.');
+%         subplot(311),plot([0:1/pointsPerSecond:duration],cantileverDeflection);
+%         subplot(312),plot([0:1/pointsPerSecond:duration],actuatorPosition-actuatorZeroPosition);
+%         subplot(313),plot([0:1/pointsPerSecond:duration],wormIndentation,'b', 0.001.*[20+risePoints:20+numStimOnPoints], wormIndentation(20+risePoints:20+numStimOnPoints),'r.');
 
         % F = kx
        % wormStiffness = cantileverForce./wormIndentation .*1e6 ; % N / um * um/m = N/m

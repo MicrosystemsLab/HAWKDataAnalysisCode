@@ -44,7 +44,7 @@ Forces = [50 100 500 1000 5000 10000];
 numForces = length(Forces);
 
 interval = 0.001;
-time = -0.2:interval:1;
+time = -0.1:interval:0.250;
 prePoints = length(find(time<0));
 count = zeros(numForces,1);
 sum = zeros(numForces,length(time));
@@ -74,7 +74,10 @@ for dir = 1:length(directories)
         FPGAData = getFPGADataFromYAML(directory, experimentTitle);
         StimulusData = getStimulusDataFromYAML(directory,experimentTitle);
         
-        force = find(Forces == StimulusData.Magnitude,1);
+         force = find(Forces == StimulusData.Magnitude,1);
+        if isempty(force)
+            break;
+        end
 
         %Also need to extract the number of stimulus 
         if (ismember('NumberOfStimulus',fieldnames(TrackingData)))
@@ -90,13 +93,28 @@ for dir = 1:length(directories)
                     startIndex = Stimulus(stim).StimulusTiming.stimOnFPGAIndex;
                     endIndex = startIndex + length(time);
                     stimulus = Stimulus(stim).FPGAData.PiezoSignal;
-                    biasValue = Stimulus(stim).StimulusTiming.stimulusAnalysis.preApproachPoints.average;
+                    softBalanceValue = Stimulus(stim).StimulusTiming.stimulusAnalysis.preApproachPoints.average;
 
-                    stimulus = stimulus-biasValue;
-                    figure(force)
+%                     stimulus = stimulus-biasValue;
+                    
+                    
+                    cantileverSensitivity = TrackingData.CantileverProperties.Sensitivity;
+                    if strcmp(TrackingData.CantileverProperties.SerialNumber,'EM10A1306')
+                        cantileverSensitivity = 8.9781;
+                    end
+                    % Cantilever Stiffness = N/m
+                    cantileverStiffness = TrackingData.CantileverProperties.Stiffness;
+                    
+                    %Cantilever deflection = sensitivity * piezo signal = um
+                    cantileverDeflection = (Stimulus(stim).FPGAData.PiezoSignal-softBalanceValue) .* cantileverSensitivity;
+                    cantileverForce = cantileverDeflection .* cantileverStiffness ./ 1e6; %um .* N/m * m/um = N
+                    
+                    
+%                     figure(force)
+                    subplot(3,2,force);
                     hold on
-                    plot(time,stimulus(startIndex-prePoints:endIndex-prePoints-1),'Color',[ 0 0.6 1],'LineWidth',1);
-                    sum(force,:) = sum(force,:)+stimulus(startIndex-prePoints:endIndex-prePoints-1);
+                    plot(time,cantileverForce(startIndex-prePoints:endIndex-prePoints-1).*1e9,'Color',[ 0 0.6 1],'LineWidth',1);
+                    sum(force,:) = sum(force,:)+cantileverForce(startIndex-prePoints:endIndex-prePoints-1);
                 end
             end
            
@@ -111,11 +129,17 @@ for dir = 1:length(directories)
 end
 %%
 for force = 1:numForces
-    figure(force)
+%     figure(force)
+    subplot(3,2,force);
     hold on
-    plot(time,sum(force,:)./count(force),'Color',[ 0 0 0.75 ],'LineWidth',3)
-    xlabel('Time (s)','FontSize',16,'FontWeight','bold');
-    ylabel('Voltage (V)','FontSize',16,'FontWeight','bold');
-    title(strcat('Stimulus Profile, ', num2str(Forces(force)),' nN'),'FontSize',20,'FontWeight','bold');
+    plot(time,sum(force,:).*1e9./count(force),'Color',[ 0 0 0.75 ],'LineWidth',3)
+    if force >4
+     xlabel('Time (s)','FontSize',16,'FontWeight','bold');
+    end
+    if mod(force,2)
+        ylabel('Force (nN)','FontSize',16,'FontWeight','bold');
+    end
+    axis([-0.1 .250 -10 Forces(force)*1.5])
+    title(strcat( num2str(Forces(force)),' nN'),'FontSize',20,'FontWeight','bold');
     axis([min(time) max(time) -Inf Inf])
 end

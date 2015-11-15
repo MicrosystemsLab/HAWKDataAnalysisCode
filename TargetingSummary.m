@@ -189,3 +189,18 @@ title('Skeleton Movement vs. Targeting Error','FontSize',16)
 legend('25%','35%','45%','Location','SouthWest')
 set(gca, 'FontSize',16)
 axis('equal')
+
+%% 
+figure(1)
+plot(TrackingNormalization.Target_25.x_percent+25, TrackingNormalization.Target_25.y,'b.','MarkerSize',15)
+hold on
+plot(TrackingNormalization.Target_35.x_percent+35, TrackingNormalization.Target_35.y,'r.','MarkerSize',15)
+plot(TrackingNormalization.Target_45.x_percent+45, TrackingNormalization.Target_45.y,'g.','MarkerSize',15)
+% xlabel('% Body Length along skeleton (um)','FontSize',16)
+% ylabel('Distance from skeleton (um)','FontSize',16)
+set(gca, 'FontSize',16)
+axis([0 60 0 25]);
+aspectRatio = 5; %width/height
+width = 10;
+set(gcf, 'PaperUnits', 'centimeters');
+set(gcf, 'PaperPosition', [1 1 width width/aspectRatio]); %x_width=10cm y_width=15cm

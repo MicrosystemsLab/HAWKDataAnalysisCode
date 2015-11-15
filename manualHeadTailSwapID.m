@@ -1,7 +1,7 @@
 
 function Stimulus = manualHeadTailSwapID(Stimulus,numStims, directory)
     disp(strcat('Starting file: ',directory));   
-    try
+%     try
         obj = importVideoFile(directory);
 
 
@@ -42,8 +42,8 @@ function Stimulus = manualHeadTailSwapID(Stimulus,numStims, directory)
         
         end
 
-    catch
-        disp('No video');
-    end
+%     catch
+%         disp('No video');
+%     end
     disp('End file');
 end

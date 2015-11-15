@@ -72,6 +72,7 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
         try Row(stim, strmatch('Stimulus Zero Pulse Length (t)', titles,'exact')-firstColumn+1) = StimulusData.ZeroPulseDuration; end
         try Row(stim, strmatch('Soft Balance Value (V)',titles,'exact')-firstColumn+1) = Stimulus(stim).StimulusTiming.stimulusAnalysis.preApproachPoints.average; end
         try Row(stim, strmatch('Approach Duration (s)',titles,'exact')-firstColumn+1) = Stimulus(stim).StimulusTiming.stimulusAnalysis.approachPoints.duration;	end
+        try Row(stim, strmatch('Stimulus FPGA Start Time (s)',titles,'exact')-firstColumn+1) = 0.001 * Stimulus(stim).StimulusTiming.stimOnFPGAIndex; end
         try Row(stim, strmatch('Stimulus RMS Error',titles,'exact')-firstColumn+1) =	Stimulus(stim).StimulusTiming.stimulusAnalysis.stimulusPoints.rmsError; end
         try Row(stim, strmatch('Stimulus Rise Time (s)',titles,'exact')-firstColumn+1) =	Stimulus(stim).StimulusTiming.stimulusAnalysis.stimulusPoints.response.RiseTime; end
         try Row(stim, strmatch('Stimulus Settling Time (s)',titles,'exact')-firstColumn+1) =	Stimulus(stim).StimulusTiming.stimulusAnalysis.stimulusPoints.response.SettlingTime; end
@@ -79,7 +80,13 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
         try Row(stim, strmatch('Zero Pulse Duration (s)',titles,'exact')-firstColumn+1) =	 Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.duration; end
         try Row(stim, strmatch('Zero Pulse Average (V)',titles,'exact')-firstColumn+1) =	Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.average; end
         try Row(stim, strmatch('Zero Pulse RMS Error',titles,'exact')-firstColumn+1) =  Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.rmsError; end	
+        try Row(stim, strmatch('Zero Pulse Min',titles,'exact')-firstColumn+1) =  Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.min; end
+        try Row(stim, strmatch('Zero Pulse Min Time',titles,'exact')-firstColumn+1) =  Stimulus(stim).StimulusTiming.stimulusAnalysis.zeroPulsePoints.minTime; end
         try Row(stim, strmatch('Pull off Voltage (V)',titles,'exact')-firstColumn+1) = Stimulus(stim).StimulusTiming.stimulusAnalysis.postPulsePoints.min; end
+        
+        try Row(stim, strmatch('Reported Force (nN)',titles,'exact')-firstColumn+1)= Stimulus(stim).AppliedStimulus.forceApplied; end	
+        try Row(stim, strmatch('Reported Cantilever Deflection (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).AppliedStimulus.cantileverDeflection;end	
+        try Row(stim, strmatch('Reported Indentation (um)',titles,'exact')-firstColumn+1) = Stimulus(stim).AppliedStimulus.indentation;end	
         
         %Frame, Trial, Response Scoring:
         try Row(stim, strmatch('Number of Bad Frames',titles,'exact')-firstColumn+1) = length(Stimulus(stim).FrameScoring.BadFrames); end
@@ -88,11 +95,11 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
         try 
             if strcmp(Stimulus(stim).Response.Type, 'reversal')
                 Row(stim, strmatch('Response Type',titles,'exact')-firstColumn+1) = 1;
-            elseif strcmp(Stimulus(stim).Response.Type , 'speedup')
+            elseif (strcmp(Stimulus(stim).Response.Type , 'speedup'))
                 Row(stim, strmatch('Response Type',titles,'exact')-firstColumn+1) = 2;
-            elseif strcmp(Stimulus(stim).Response.Type ,'pause')
+            elseif (strcmp(Stimulus(stim).Response.Type ,'pause'))
                 Row(stim, strmatch('Response Type',titles,'exact')-firstColumn+1) = 3;
-            else strcmp(Stimulus(stim).Response.Type , 'none')
+            else    
                 Row(stim, strmatch('Response Type',titles,'exact')-firstColumn+1) = 4;  
             end
         end          
@@ -112,8 +119,25 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
             try Row(stim, strmatch('Response Type 2',titles,'exact')-firstColumn+1) = 4;end
         end
         try Row(stim, strmatch('Max Response Acceleration 2 (um/s^2)',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.maxAcceleration2;end
+         if strcmp(Stimulus(stim).Response.Type3 , 'speedup')
+             try Row(stim, strmatch('Response Type 3',titles,'exact')-firstColumn+1) = 2;end
+        else
+            try Row(stim, strmatch('Response Type 3',titles,'exact')-firstColumn+1) = 4;end
+         end
+         if strcmp(Stimulus(stim).Response.Type4 , 'speedup')
+             try Row(stim, strmatch('Response Type 4',titles,'exact')-firstColumn+1) = 2;end
+        else
+            try Row(stim, strmatch('Response Type 4',titles,'exact')-firstColumn+1) = 4;end
+         end
+        try Row(stim, strmatch('Reversal Acceleration',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.reversalAcceleration;end
         
-
+        try Row(stim, strmatch('Reversal Duration Flag',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.durationEndFlag; end
+        try Row(stim, strmatch('Reversal Duration',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.duration; end
+        try Row(stim, strmatch('Pre Reversal Speed',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.reversalSpeed.before; end
+        try Row(stim, strmatch('Post Reversal Speed',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.reversalSpeed.after; end
+        try Row(stim, strmatch('Reversal On Frame',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.ReversalOnFrame; end
+        try Row(stim, strmatch('Reversal Off Frame',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.ReversalOffFrame; end
+        
 %         try Row(stim, strmatch('Pre Stim Fit a',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.a; end
 %         try Row(stim, strmatch('Pre Stim Fit b',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.b; end
 %         try Row(stim, strmatch('Pre Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.c; end

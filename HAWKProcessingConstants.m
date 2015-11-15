@@ -16,15 +16,16 @@ PERCENT_ACROSS_BODY_DIFFERENCE = 25;
 
 %Number of points to use for spline in curvature determination:
 NUMCURVPTS = 50;
+% NUMCURVPTS = 75;
 %How much to filter the skeleton before fitting the smooth spline:
 CURVATURE_FILTERING_SIGMA = 1;
 
 %The different in speed to determine changes in response.
 SPEED_THRESHOLD_PAUSE = 0.4;
 SPEED_THRESHOLD_SPEEDUP = 1.2;
-PRE_STIM_FRAMES = 17;
-POST_STIM_FRAMES = 16;
+PRE_STIM_FRAMES = 15;
+POST_STIM_FRAMES = ceil(11*2.5);
 POST_STIM_FRAMES2 = ceil(11*2.5);
 POST_STIM_TIME = 2.1; %seconds
 POST_STIM_TIME2 = 1.5; %seconds
-ACCELERATION_THRESHOLD = -200; % um/s^2
+ACCELERATION_THRESHOLD = 400; % um/s^2

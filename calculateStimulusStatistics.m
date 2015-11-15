@@ -66,7 +66,9 @@ function stats = calculateStimulusStatistics(Stimulus, StimulusData)
         numberOfZeroPulsePoints = StimulusData.ZeroPulseDuration/interval;
         stats(stim).zeroPulsePoints.data = Stimulus(stim).FPGAData.PiezoSignal([Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints:Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints+numberOfZeroPulsePoints-1]);
         % for zero pulse, calculate: rms error
-        stats(stim).zeroPulsePoints.min = min(stats(stim).zeroPulsePoints.data);
+        [Y, ind] = min(stats(stim).zeroPulsePoints.data);
+        stats(stim).zeroPulsePoints.min = Y;
+        stats(stim).zeroPulsePoints.minTime = interval * (Stimulus(stim).StimulusTiming.stimOnFPGAIndex+numberOfStimulusPoints + ind - 1);
         stats(stim).zeroPulsePoints.max = max(stats(stim).zeroPulsePoints.data);
         stats(stim).zeroPulsePoints.average = mean(stats(stim).zeroPulsePoints.data);
         stats(stim).zeroPulsePoints.std = std(stats(stim).zeroPulsePoints.data);

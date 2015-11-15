@@ -63,23 +63,23 @@ for dir = 1:length(directories)
 %        [Stimulus, numStims, TrackingData] = extractBehaviorDataFromTracking(TrackingData);
 %        save(fullfile(directory,strcat(experimentTitle,'_tracking_parsedData.mat')),'TrackingData');
         if TrackingData.NumberOfStimulus > 0
-            Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
-            Stimulus = determineStimulusTimingBehavior(Stimulus,TrackingData.NumberOfStimulus);
-            Stimulus = calculateBodyMorphology(Stimulus,TrackingData.NumberOfStimulus);
-            Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
-            Stimulus = calculateWormCentroidMean(Stimulus,TrackingData.NumberOfStimulus);
-            Stimulus = calculateSmoothFitSkeleton(Stimulus, TrackingData.NumberOfStimulus);
-            Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
-            Stimulus = sortFramesBasedOnStimulus(Stimulus, TrackingData.NumberOfStimulus);
-            Stimulus = findCurvature(Stimulus, TrackingData.NumberOfStimulus);
-            Stimulus = scoreFrames(Stimulus, TrackingData.NumberOfStimulus);
-            Stimulus = determineWormTrajectory(Stimulus, TrackingData.NumberOfStimulus);
-            Stimulus = getVelocityFromCurvature(Stimulus, TrackingData.NumberOfStimulus);   
-            Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, TrackingData, TrackingData.NumberOfStimulus, true);
-            Stimulus = getBehaviorVelocityStatistics(Stimulus, TrackingData.NumberOfStimulus);
-            plotDataBehavior(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory);
+%             Stimulus = getTimingData(Stimulus,TrackingData.NumberOfStimulus, TrackingData);
+%             Stimulus = determineStimulusTimingBehavior(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = calculateBodyMorphology(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = calculateWormCentroidMean(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = calculateSmoothFitSkeleton(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = filterFramesByBodyLength(Stimulus,TrackingData.NumberOfStimulus);
+%             Stimulus = sortFramesBasedOnStimulus(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = findCurvature(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = scoreFrames(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = determineWormTrajectory(Stimulus, TrackingData.NumberOfStimulus);
+%             Stimulus = getVelocityFromCurvature(Stimulus, TrackingData.NumberOfStimulus);   
+%             Stimulus = spatialResolutionBehaviorExperiment(directory, Stimulus, TrackingData, TrackingData.NumberOfStimulus, true);
+%             Stimulus = getBehaviorVelocityStatistics(Stimulus, TrackingData.NumberOfStimulus);
+%             plotDataBehavior(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory);
             plotTrackData(Stimulus, TrackingData.NumberOfStimulus, directory);
-            save(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')),'Stimulus');
+%             save(fullfile(directory,strcat(experimentTitle,'_DataByStimulus.mat')),'Stimulus');
         end
     catch
         disp(strcat('Error with: ',experimentTitle));

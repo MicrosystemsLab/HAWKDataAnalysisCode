@@ -37,7 +37,7 @@ function plotData(Stimulus, TrackingData, numStims, directory)
         framesTracking = [find(timeTracking>timeBounds(1),1) : find(timeTracking>timeBounds(2), 1)];
 
         %Trajectory plot:
-        subplot('position',[0.1 0.5 0.4 0.4])  
+        subplot('position',[0.1 0.5 0.3 0.38])  
         goodFrames = Stimulus(stim).FrameScoring.GoodFrames;
         numGoodFrames = length(goodFrames);
         %pre stim:
@@ -58,7 +58,7 @@ function plotData(Stimulus, TrackingData, numStims, directory)
         %last position:
         hold on
         plot(Stimulus(stim).Trajectory.centroidPosition.x(goodFrames( numGoodFrames)), Stimulus(stim).Trajectory.centroidPosition.y(goodFrames( numGoodFrames)), 'kx', 'MarkerSize',14);
-
+        
         title(['Mid-Skeleton Position'], 'FontSize' , 18)
         axis equal;
         xlabel('x position (um)', 'FontSize' , 16)
@@ -91,16 +91,17 @@ function plotData(Stimulus, TrackingData, numStims, directory)
 %             axis([timeBounds vertBounds])
 
         subplot('position',[0.1 0.1 0.4 0.2])
-        mult = sign(Stimulus(stim).CurvatureAnalysis.velocity(framesTracking(1)));
+%         mult = sign(Stimulus(stim).CurvatureAnalysis.velocity(framesTracking(1)));
+        mult = -1;
         plot(timeTracking(framesTracking), mult.*Stimulus(stim).CurvatureAnalysis.velocity(framesTracking),'LineWidth', 2,'Color', 'm','LineStyle', ':','Marker','none');
         hold on
         plot(timeTracking(framesTracking), mult.*Stimulus(stim).CurvatureAnalysis.velocitySmoothed(framesTracking), 'LineWidth', 2,'Color', 'k','LineStyle', '-','Marker','none');
 %              title('Velocity', 'FontSize', 18);
         plot([-preStimTime 0], mult.*[Stimulus(stim).Response.preStimSpeed Stimulus(stim).Response.preStimSpeed],'b:');
-        plot([0 postStimTime], mult.*[Stimulus(stim).Response.postStimSpeed Stimulus(stim).Response.postStimSpeed],'b:');
+        plot([Stimulus(stim).timeData(stimOnFrame+1,9) postStimTime], mult.*[Stimulus(stim).Response.postStimSpeed Stimulus(stim).Response.postStimSpeed],'b:');
         xlabel('Time (s)', 'FontSize', 16);
         ylabel('Velocity (um/s)', 'FontSize', 16);
-        legend('Raw Velocity','Smoothed Velocity','Location','NorthWest');
+        legend('Raw Velocity','Smoothed Velocity','Location','SouthEast');
         set(gca, 'FontSize',14)
         axis([timeBounds vertBounds])
 

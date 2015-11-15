@@ -61,7 +61,7 @@ for dir = 1:length(directories)
         force = find(Forces == StimulusData.Magnitude,1);
         
         for stim = 1:TrackingData.NumberOfStimulus
-            if (Stimulus(stim).TrialScoring.trialSuccess ==1)
+            if (Stimulus(stim).TrialScoring.trialSuccess == 1)
                 time = Stimulus(stim).timeData(:,8)-Stimulus(stim).StimulusTiming.stimAppliedTime;
                 frames = (find(time>-2,1):find(time>5,1));
                 speed = Stimulus(stim).CurvatureAnalysis.velocitySmoothed(frames);
@@ -80,3 +80,24 @@ for dir = 1:length(directories)
         
     end
 end
+
+%%
+
+for i = 1:6
+    subplot(2,6,i)
+    title(['Force = ' num2str(Forces(i)), 'nN'],'FontSize',16);
+    if i == 1
+        ylabel('Velocity (um/s)','FontSize',14)
+    end
+    axis([-1.5 2.5 -1200 1200])
+    set(gca,'FontSize',14)
+    subplot(2,6,i+6)
+    if i == 1
+        ylabel('Acceleration (um/s^2)','FontSize',14)
+    end
+    xlabel('Time (s)','FontSize',14)
+    axis([-1.5 2.5 -3500 3500])
+    set(gca,'FontSize',14)
+    
+end
+    

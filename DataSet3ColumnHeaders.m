@@ -104,6 +104,8 @@ titles = {
     'Post Reversal Speed'
     'Reversal On Frame'
     'Reversal Off Frame'
+    'Reversal On Orientation'
+    'Reversal Off Orientation'
     'Pre Stim Amplitude (% Body Length)'	
     'Pre Stim Wavelength (%Body Length/cycle)'	
     'Post Stim Amplitude (%Body Length)'	

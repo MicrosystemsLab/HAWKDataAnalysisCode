@@ -70,21 +70,21 @@ for dir = 1:length(directories)
                 load(mat_file);
                 disp(strcat('Starting file: ',directory)); 
                 %Deal with old analysis:
-                if dealWithOldData == 1
-%                     moveOldData(directory,TrackingData.NumberOfStimulus);
-%                     try  Stimulus = rmfield(Stimulus, 'StimulusTiming'); end 
-%                     try  Stimulus = rmfield(Stimulus, 'BodyMorphology'); end
-%                     try  Stimulus = rmfield(Stimulus, 'FramesByStimulus'); end
-%                     try  Stimulus = rmfield(Stimulus, 'computerScoredBadFrames'); end
-%                     try  Stimulus = rmfield(Stimulus, 'Trajectory'); end
-%                     try  Stimulus = rmfield(Stimulus, 'SpatialResolution'); end
-%                     try  Stimulus = rmfield(Stimulus, 'TrialScoring'); end
-%                     try  Stimulus = rmfield(Stimulus, 'CurvatureAnalysis'); end
-%                     try  Stimulus = rmfield(Stimulus, 'FrameScoring'); end
-%                     try  Stimulus = rmfield(Stimulus, 'AppliedStimulus'); end
-                    try  Stimulus = rmfield(Stimulus, 'Response'); end
-                end
-                
+%                 if dealWithOldData == 1
+% %                     moveOldData(directory,TrackingData.NumberOfStimulus);
+% %                     try  Stimulus = rmfield(Stimulus, 'StimulusTiming'); end 
+% %                     try  Stimulus = rmfield(Stimulus, 'BodyMorphology'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'FramesByStimulus'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'computerScoredBadFrames'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'Trajectory'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'SpatialResolution'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'TrialScoring'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'CurvatureAnalysis'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'FrameScoring'); end
+% %                     try  Stimulus = rmfield(Stimulus, 'AppliedStimulus'); end
+%                     try  Stimulus = rmfield(Stimulus, 'Response'); end
+%                 end
+%                 
                 Stimulus = determineStimulusTiming(TrackingData, StimulusData, Stimulus, TrackingData.NumberOfStimulus);
 
 
@@ -93,8 +93,6 @@ for dir = 1:length(directories)
                 Stimulus = calculateWormCentroidMean(Stimulus,TrackingData.NumberOfStimulus);
                
                 Stimulus = calculateSmoothFitSkeleton(Stimulus, TrackingData.NumberOfStimulus);
-              
-               
                 
                 Stimulus = sortFramesBasedOnStimulus(Stimulus, TrackingData.NumberOfStimulus);
                 
@@ -114,11 +112,11 @@ for dir = 1:length(directories)
                 Stimulus = scoreTrials(TrackingData,Stimulus,TrackingData.NumberOfStimulus);
 
                 Stimulus = getVelocityFromCurvature(Stimulus, TrackingData.NumberOfStimulus);
-%                 Stimulus = calculateCurvatureParameters(Stimulus,TrackingData.NumberOfStimulus);
+                Stimulus = calculateCurvatureParameters(Stimulus,TrackingData.NumberOfStimulus);
 
                 Stimulus = scoreBehaviorResponse(Stimulus, TrackingData.NumberOfStimulus);
 
-%                 plotData(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory)
+                plotData(Stimulus, TrackingData, TrackingData.NumberOfStimulus, directory)
 %                 [NUM,TXT,RAW]=xlsread(excelFile,'ForceTouchAssay DataSet 3');
 %                 [rowCount, columnCount] = size(RAW);
 %                 experimentRow = rowCount+1;

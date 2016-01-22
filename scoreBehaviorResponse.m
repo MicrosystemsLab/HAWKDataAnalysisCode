@@ -112,7 +112,7 @@ function Stimulus = scoreBehaviorResponse(Stimulus, numStims)
             %Measure latency of reversal:
             ind = find(diff(sign(direction_smoothed(stimOnFrame-3:stimOffFrame)))==2,1,'first');
             reversalOnFrame = stimOnFrame-3+ind;
-            reversalAcceleration = postStimAcceleration(reversalOnFrame+1);
+            reversalAcceleration = postStimAcceleration(reversalOnFrame);
             reversalTime = Stimulus(stim).timeData(reversalOnFrame,8);
             latency = reversalTime-Stimulus(stim).StimulusTiming.stimOnStartTime;
             

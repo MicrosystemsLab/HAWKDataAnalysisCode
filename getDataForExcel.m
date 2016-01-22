@@ -137,7 +137,8 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
         try Row(stim, strmatch('Post Reversal Speed',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.reversalSpeed.after; end
         try Row(stim, strmatch('Reversal On Frame',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.ReversalOnFrame; end
         try Row(stim, strmatch('Reversal Off Frame',titles,'exact')-firstColumn+1) = Stimulus(stim).Response.ReversalOffFrame; end
-        
+        try Row(stim, strmatch('Reversal On Orientation',titles,'exact')-firstColumn+1) = Stimulus(stim).Trajectory.bodyRotation(Stimulus(stim).Response.ReversalOnFrame); end
+        try Row(stim, strmatch('Reversal Off Orientation',titles,'exact')-firstColumn+1) = Stimulus(stim).Trajectory.bodyRotation(Stimulus(stim).Response.ReversalOffFrame); end
 %         try Row(stim, strmatch('Pre Stim Fit a',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.a; end
 %         try Row(stim, strmatch('Pre Stim Fit b',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.b; end
 %         try Row(stim, strmatch('Pre Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PreStimulusCurvatureFit.fit.c; end
@@ -148,10 +149,7 @@ function [experimentData, stimulusData] = getDataForExcel(TrackingData, Stimulus
 %         try Row(stim, strmatch('Post Stim Fit c',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.c; end
 %         try Row(stim, strmatch('Post Stim Fit d',titles,'exact')-firstColumn+1) =	Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.fit.d; end
 %         try Row(stim, strmatch('Post Stim Fit goodness (rmse)',titles,'exact')-firstColumn+1) = Stimulus(stim).CurvatureAnalysis.PostStimulusCurvatureFit.goodness.rmse;  end
-%         try Row(stim, strmatch('Reported Force (nN)',titles,'exact')-firstColumn+1)	= Stimulus(stim).AppliedStimulus.forceApplied; end
-%         try Row(stim, strmatch('Reported Cantilever Deflection (um)',titles,'exact')-firstColumn+1)	= Stimulus(stim).AppliedStimulus.cantileverDeflection;end
-%         try Row(stim, strmatch('Reported Indentation (um)'	,titles,'exact')-firstColumn+1)  = Stimulus(stim).AppliedStimulus.indentation;end
-        
+       
     end
     stimulusData = Row;
 end

@@ -8,6 +8,7 @@ function [ deltaVNorm ] = calculateDeltaVTrace( velocity, time, stimOnFrame )
     else
         startFrame = 1;
     end
+    
     avePreVelocity = findAverageSpeed(time(startFrame:stimOnFrame-1)', -1.*velocity(startFrame: stimOnFrame-1));
     deltaV = (avePreVelocity-(-1.*velocity));
     deltaVNorm = deltaV./avePreVelocity;

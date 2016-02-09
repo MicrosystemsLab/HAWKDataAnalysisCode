@@ -29,7 +29,7 @@ totalTrials_spc1 = length(expNames_spc1{1,1});
 directoryN2 = '/Volumes/Backup Disc Celegans/HAWKData/Force Clamp/DataSet3/N2';
 directoryspc1 = '/Volumes/Backup Disc Celegans/HAWKData/Force Clamp/DataSet3/spc1';
 
-load('/Users/emazzochette/Desktop/DeltaVTraces.mat')
+load('/Users/emazzochette/Desktop/DeltaVTraces2.mat')
 %% Initialize Vectors:
 
 n2_50_25 = [];
@@ -224,6 +224,14 @@ save(fullfile(directoryDesktop,'n2_35_data.mat'),'data_35');
 save(fullfile(directoryDesktop,'spc1_25_data.mat'),'data_spc1');
 
 %% Make Plots
+
+means_25 = nanmean(data_25,1);
+means_35 = nanmean(data_35,1);
+means_spc1 = nanmean(data_spc1,1);
+samples_25 = sum(~isnan(data_25),1);
+samples_35 = sum(~isnan(data_35),1);
+samples_spc1 = sum(~isnan(data_spc1),1);
+
 forceLabels = {'50 nN', '100 nN', '500 nN', '1000 nN', '5000 nN', '10,000 nN'};
 close all
 figure(1)
@@ -232,21 +240,29 @@ set(bp_25_deltaV,'LineWidth',2.5)
 set(gca,'FontSize',16);
 ylim([0 6]);
 [xNew yNew] = MiriamAxes(gca,'xy');
-set(xNew,'XTickLabel',{num2str(sum(~isnan(data_25(:,1)))),...
-    num2str(sum(~isnan(data_25(:,2)))), num2str(sum(~isnan(data_25(:,3)))),...
-    num2str(sum(~isnan(data_25(:,4)))), num2str(sum(~isnan(data_25(:,5)))),...
-    num2str(sum(~isnan(data_25(:,6))))})
+set(xNew,'XTickLabel','');
+for n = 1:6
+    text(n-0.2, 90, sprintf('(%d)', samples_25(n)), 'FontSize',16);
+end
+% set(xNew,'XTickLabel',{num2str(sum(~isnan(data_25(:,1)))),...
+%     num2str(sum(~isnan(data_25(:,2)))), num2str(sum(~isnan(data_25(:,3)))),...
+%     num2str(sum(~isnan(data_25(:,4)))), num2str(sum(~isnan(data_25(:,5)))),...
+%     num2str(sum(~isnan(data_25(:,6))))})
 
 figure(2)
 bp_25_revAcc = boxplot_pwhisker(data_25(:,7:12),{'labels',forceLabels,'colors','k'},10,90);
 set(bp_25_revAcc,'LineWidth',2.5)
 set(gca,'FontSize',16);
-ylim([ 0 2000]);
+ylim([ 0 1100]);
 [xNew yNew] = MiriamAxes(gca,'xy');
-set(xNew,'XTickLabel',{num2str(sum(~isnan(data_25(:,7)))),...
-    num2str(sum(~isnan(data_25(:,8)))), num2str(sum(~isnan(data_25(:,9)))),...
-    num2str(sum(~isnan(data_25(:,10)))), num2str(sum(~isnan(data_25(:,11)))),...
-    num2str(sum(~isnan(data_25(:,12))))});
+set(xNew,'XTickLabel','');
+for n = 7:12
+    text(n-6.2, 90, sprintf('(%d)', samples_25(n)), 'FontSize',16);
+end
+% set(xNew,'XTickLabel',{num2str(sum(~isnan(data_25(:,7)))),...
+%     num2str(sum(~isnan(data_25(:,8)))), num2str(sum(~isnan(data_25(:,9)))),...
+%     num2str(sum(~isnan(data_25(:,10)))), num2str(sum(~isnan(data_25(:,11)))),...
+%     num2str(sum(~isnan(data_25(:,12))))});
 
 figure(3)
 bp_35_deltaV = boxplot_pwhisker(data_35(:,1:6),{'labels',forceLabels,'colors','k'},10,90);
@@ -254,43 +270,64 @@ set(bp_35_deltaV,'LineWidth',2.5)
 set(gca,'FontSize',16);
 ylim([ 0 6]);
 [xNew yNew] = MiriamAxes(gca,'xy');
-set(xNew,'XTickLabel',{num2str(sum(~isnan(data_35(:,1)))),...
-    num2str(sum(~isnan(data_35(:,2)))), num2str(sum(~isnan(data_35(:,3)))),...
-    num2str(sum(~isnan(data_35(:,4)))), num2str(sum(~isnan(data_35(:,5)))),...
-    num2str(sum(~isnan(data_35(:,6))))})
+set(xNew,'XTickLabel','');
+for n = 1:6
+    text(n-0.2, 90, sprintf('(%d)', samples_35(n)), 'FontSize',16);
+end
+% set(xNew,'XTickLabel',{num2str(sum(~isnan(data_35(:,1)))),...
+%     num2str(sum(~isnan(data_35(:,2)))), num2str(sum(~isnan(data_35(:,3)))),...
+%     num2str(sum(~isnan(data_35(:,4)))), num2str(sum(~isnan(data_35(:,5)))),...
+%     num2str(sum(~isnan(data_35(:,6))))})
 
 figure(4)
 bp_35_revAcc = boxplot_pwhisker(data_35(:,7:12),{'labels',forceLabels,'colors','k'},10,90);
 set(bp_35_revAcc,'LineWidth',2.5)
 set(gca,'FontSize',16);
-ylim([ 0 2000]);
+ylim([ 0 1100]);
 [xNew yNew] = MiriamAxes(gca,'xy');
-set(xNew,'XTickLabel',{num2str(sum(~isnan(data_35(:,7)))),...
-    num2str(sum(~isnan(data_35(:,8)))), num2str(sum(~isnan(data_35(:,9)))),...
-    num2str(sum(~isnan(data_35(:,10)))), num2str(sum(~isnan(data_35(:,11)))),...
-    num2str(sum(~isnan(data_35(:,12))))});
+set(xNew,'XTickLabel','');
+for n = 7:12
+    text(n-6.2, 90, sprintf('(%d)', samples_35(n)), 'FontSize',16);
+end
+% set(xNew,'XTickLabel',{num2str(sum(~isnan(data_35(:,7)))),...
+%     num2str(sum(~isnan(data_35(:,8)))), num2str(sum(~isnan(data_35(:,9)))),...
+%     num2str(sum(~isnan(data_35(:,10)))), num2str(sum(~isnan(data_35(:,11)))),...
+%     num2str(sum(~isnan(data_35(:,12))))});
+
 
 figure(5)
 bp_spc1_deltaV = boxplot_pwhisker(data_spc1(:,1:6),{'labels',forceLabels,'colors','k'},10,90);
+hold on
+plot([1:6],means_25(1:6),'Color',[225/225 0 0 ],'LineStyle','none','Marker','*','MarkerSize',10)
 set(bp_spc1_deltaV,'LineWidth',2.5)
 set(gca,'FontSize',16);
 ylim([ 0 6]);
 [xNew yNew] = MiriamAxes(gca,'xy');
-set(xNew,'XTickLabel',{num2str(sum(~isnan(data_spc1(:,1)))),...
-    num2str(sum(~isnan(data_spc1(:,2)))), num2str(sum(~isnan(data_spc1(:,3)))),...
-    num2str(sum(~isnan(data_spc1(:,4)))), num2str(sum(~isnan(data_spc1(:,5)))),...
-    num2str(sum(~isnan(data_spc1(:,6))))})
+set(xNew,'XTickLabel','');
+for n = 1:6
+    text(n-0.2, 90, sprintf('(%d)', samples_spc1(n)), 'FontSize',16);
+end
+% set(xNew,'XTickLabel',{num2str(sum(~isnan(data_spc1(:,1)))),...
+%     num2str(sum(~isnan(data_spc1(:,2)))), num2str(sum(~isnan(data_spc1(:,3)))),...
+%     num2str(sum(~isnan(data_spc1(:,4)))), num2str(sum(~isnan(data_spc1(:,5)))),...
+%     num2str(sum(~isnan(data_spc1(:,6))))})
 
 figure(6)
 bp_spc1_revAcc = boxplot_pwhisker(data_spc1(:,7:12),{'labels',forceLabels,'colors','k'},10,90);
+hold on
+plot([1:6],means_25(7:12),'Color',[225/225 0 0 ],'LineStyle','none','Marker','*','MarkerSize',10)
 set(bp_spc1_revAcc,'LineWidth',2.5)
 set(gca,'FontSize',16);
 ylim([ 0 2000]);
 [xNew yNew] = MiriamAxes(gca,'xy');
-set(xNew,'XTickLabel',{num2str(sum(~isnan(data_spc1(:,7)))),...
-    num2str(sum(~isnan(data_spc1(:,8)))), num2str(sum(~isnan(data_spc1(:,9)))),...
-    num2str(sum(~isnan(data_spc1(:,10)))), num2str(sum(~isnan(data_spc1(:,11)))),...
-    num2str(sum(~isnan(data_spc1(:,12))))});
+set(xNew,'XTickLabel','');
+for n = 7:12
+    text(n-6.2, 90, sprintf('(%d)', samples_spc1(n)), 'FontSize',16);
+end
+% set(xNew,'XTickLabel',{num2str(sum(~isnan(data_spc1(:,7)))),...
+%     num2str(sum(~isnan(data_spc1(:,8)))), num2str(sum(~isnan(data_spc1(:,9)))),...
+%     num2str(sum(~isnan(data_spc1(:,10)))), num2str(sum(~isnan(data_spc1(:,11)))),...
+%     num2str(sum(~isnan(data_spc1(:,12))))});
 
 %% Anova analysis
 
